@@ -1,0 +1,27 @@
+# Build outputs
+**/Debug/
+**/Release/
+**/*.o
+**/*.d
+**/*.elf
+**/*.map
+**/*.list
+
+# STM32CubeIDE/Eclipse metadata
+**/.settings/
+**/.metadata/
+**/*.launch
+**/*.log
+
+# CubeMX generated extra IDE folders (nếu không dùng)
+/datn/EWARM/
+
+# Drivers/HAL packs (rất nặng) - ignore theo yêu cầu
+/datn/Drivers/
+
+# FreeRTOS kernel sources (copy local, không commit)
+/datn/Middlewares/Third_Party/FreeRTOS/Source/**
+!/datn/Middlewares/Third_Party/FreeRTOS/Source/.gitkeep
+
+# Optional: ignore CubeMX backup
+**/MX/
