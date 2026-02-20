@@ -1,0 +1,17 @@
+Change Component Footprint: Designator=R1 Old Footprint=tro smd 0805 New Footprint=tro vach 1/4w
+Change Component Footprint: Designator=R2 Old Footprint=tro smd 0805 New Footprint=tro vach 1/4w
+Change component parameters: Designator = "R1" ("R1"); Footprint = "tro smd 0805"; UniqueID = "\WIAVIXKY" ("\WIAVIXKY")
+Change component parameters (AddParameter): Name = "Chung_Loai"; Value = "Cắm"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Don_Vi"; Value = "Con"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Kieu_Chan"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Ma_Hang"; Value = "MH007322"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "So_Chan"; Value = "2"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Ten_Linh_Kien"; Value = "Trở Vạch 1/4w 5% 5.1k"; VariantName = "[No Variations]"
+Change component parameters: Designator = "R2" ("R2"); Footprint = "tro smd 0805"; UniqueID = "\LPZGHCDS" ("\LPZGHCDS")
+Change component parameters (AddParameter): Name = "Chung_Loai"; Value = "Cắm"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Don_Vi"; Value = "Con"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Kieu_Chan"; Value = ""; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Ma_Hang"; Value = "MH007322"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "So_Chan"; Value = "2"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Ten_Linh_Kien"; Value = "Trở Vạch 1/4w 5% 5.1k"; VariantName = "[No Variations]"
+Added Room: Name=Sheet2

@@ -1,0 +1,67 @@
+Added Component: Designator=JP?(JP 2x10 CT)
+Add component (AddParameter): Name = "Chung_Loai"; Value = "Cắm"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Don_Vi"; Value = "Con"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Ghi_Chu"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Kieu_Chan"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Ma_Hang"; Value = "MH008647"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Ten_Linh_Kien"; Value = "Jump Đôi Cái 2.54MM 2x20P Thẳng"; VariantName = "[No Variations]"
+Added Component: Designator=JP?(JP 1x10 DT)
+Add component (AddParameter): Name = "Chung_Loai"; Value = "Cắm"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Don_Vi"; Value = "Con"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Ghi_Chu"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Kieu_Chan"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Ma_Hang"; Value = "MH000903"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Ten_Linh_Kien"; Value = "Jump Đơn Đực 2.54MM 1x40P Thẳng 11MM"; VariantName = "[No Variations]"
+Added Pin To Net: NetName=+5 Pin=JP?-1
+Added Pin To Net: NetName=+5 Pin=JP?-2
+Added Pin To Net: NetName=+5 Pin=JP?-3
+Added Pin To Net: NetName=+5 Pin=JP?-4
+Added Pin To Net: NetName=+5 Pin=JP?-5
+Added Pin To Net: NetName=+5 Pin=JP?-6
+Added Pin To Net: NetName=+5 Pin=JP?-7
+Added Pin To Net: NetName=+5 Pin=JP?-8
+Added Pin To Net: NetName=+5 Pin=JP?-9
+Added Pin To Net: NetName=+5 Pin=JP?-10
+Added Pin To Net: NetName=GND Pin=JP?-11
+Added Pin To Net: NetName=GND Pin=JP?-12
+Added Pin To Net: NetName=GND Pin=JP?-13
+Added Pin To Net: NetName=GND Pin=JP?-14
+Added Pin To Net: NetName=GND Pin=JP?-15
+Added Pin To Net: NetName=GND Pin=JP?-16
+Added Pin To Net: NetName=GND Pin=JP?-17
+Added Pin To Net: NetName=GND Pin=JP?-18
+Added Pin To Net: NetName=GND Pin=JP?-19
+Added Pin To Net: NetName=GND Pin=JP?-20
+Added Pin To Net: NetName=A0 Pin=JP?-10
+Added Pin To Net: NetName=A0 Pin=STM1-25
+Added Net: Name=A0
+Added Pin To Net: NetName=A1 Pin=JP?-9
+Added Pin To Net: NetName=A1 Pin=STM1-26
+Added Net: Name=A1
+Added Pin To Net: NetName=A4 Pin=JP?-8
+Added Pin To Net: NetName=A4 Pin=STM1-29
+Added Net: Name=A4
+Added Pin To Net: NetName=A5 Pin=JP?-7
+Added Pin To Net: NetName=A5 Pin=STM1-30
+Added Net: Name=A5
+Added Pin To Net: NetName=A8 Pin=JP?-5
+Added Pin To Net: NetName=A8 Pin=STM1-5
+Added Net: Name=A8
+Added Pin To Net: NetName=A9 Pin=JP?-6
+Added Pin To Net: NetName=A9 Pin=STM1-6
+Added Net: Name=A9
+Added Pin To Net: NetName=B12 Pin=JP?-1
+Added Pin To Net: NetName=B12 Pin=STM1-1
+Added Net: Name=B12
+Added Pin To Net: NetName=B13 Pin=JP?-2
+Added Pin To Net: NetName=B13 Pin=STM1-2
+Added Net: Name=B13
+Added Pin To Net: NetName=B14 Pin=JP?-3
+Added Pin To Net: NetName=B14 Pin=STM1-3
+Added Net: Name=B14
+Added Pin To Net: NetName=B15 Pin=JP?-4
+Added Pin To Net: NetName=B15 Pin=STM1-4
+Added Net: Name=B15
+Added Member To Class: ClassName=Sheet2 Member=Component JP? JP 2x10 2.54
+Added Member To Class: ClassName=Sheet2 Member=Component JP? JP 1x10 2.54
+Added Room: Name=Sheet2

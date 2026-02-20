@@ -1,0 +1,5 @@
+Change Component Designator: OldDesignator=H1 NewDesignator=MPU6050
+Change Component Designator: OldDesignator=H2 NewDesignator=DC2
+Change Component Designator: OldDesignator=H3 NewDesignator=DC1
+Change Component Designator: OldDesignator=H4 NewDesignator=OLed
+Added Room: Name=Sheet2

@@ -1,0 +1,3 @@
+Change Component Designator: OldDesignator=JP1 NewDesignator=MPU6050
+Change Component Designator: OldDesignator=MPU6050 NewDesignator=UART
+Added Room: Name=Sheet2
