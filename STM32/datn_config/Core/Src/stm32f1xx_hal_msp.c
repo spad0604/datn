@@ -341,7 +341,6 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     /* USER CODE BEGIN USART2_MspDeInit 1 */
     HAL_NVIC_DisableIRQ(USART2_IRQn);
     /* USER CODE END USART2_MspDeInit 1 */
-
   }
 
 }

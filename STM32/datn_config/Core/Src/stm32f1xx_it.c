@@ -56,7 +56,6 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
-extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN EV */
 
@@ -172,14 +171,6 @@ void TIM1_UP_IRQHandler(void)
   /* USER CODE BEGIN TIM1_UP_IRQn 1 */
 
   /* USER CODE END TIM1_UP_IRQn 1 */
-}
-
-/**
-  * @brief This function handles USART2 global interrupt.
-  */
-void USART2_IRQHandler(void)
-{
-  HAL_UART_IRQHandler(&huart2);
 }
 
 /* USER CODE BEGIN 1 */
