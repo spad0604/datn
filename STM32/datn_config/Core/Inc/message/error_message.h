@@ -7,6 +7,8 @@ typedef enum
     E_NOT_PROCESSED,
     E_FAILED,
     E_INIT_ERROR,
+	E_UART_FAILED,
+	E_MAX
 } ErrorMessage;
 
 #endif

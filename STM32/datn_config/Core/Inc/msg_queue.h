@@ -21,6 +21,10 @@ typedef enum {
     MSG_QUE_LED = 0,
     MSG_QUE_MOTOR,
     MSG_QUE_MPU,
+    /* TX/commands sent to UART task */
+    MSG_QUE_UART,
+    /* RX lines received from UART task */
+    MSG_QUE_UART_RX,
     MSG_QUE_COUNT
 } msg_queue_id_t;
 
