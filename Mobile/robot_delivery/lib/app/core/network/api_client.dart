@@ -2,10 +2,19 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../constants/app_config.dart';
+import '../storage/secure_token_storage.dart';
+import '../../data/repositories/auth_repository.dart';
+import 'auth_interceptor.dart';
 import 'network_exceptions.dart';
 
 class ApiClient {
-  ApiClient({Dio? dio}) : _dio = dio ?? Dio() {
+  ApiClient({
+    Dio? dio,
+    SecureTokenStorage? tokenStorage,
+    AuthRepository? authRepository,
+  })  : _dio = dio ?? Dio(),
+        _tokenStorage = tokenStorage,
+        _authRepository = authRepository {
     _dio.options = BaseOptions(
       baseUrl: AppConfig.baseUrl,
       connectTimeout: AppConfig.connectTimeout,
@@ -16,6 +25,18 @@ class ApiClient {
         'Accept': 'application/json',
       },
     );
+
+    final tokenStorage = _tokenStorage;
+    final authRepository = _authRepository;
+    if (tokenStorage != null && authRepository != null) {
+      _dio.interceptors.add(
+        AuthInterceptor(
+          dio: _dio,
+          tokenStorage: tokenStorage,
+          authRepository: authRepository,
+        ),
+      );
+    }
 
     if (kDebugMode) {
       _dio.interceptors.add(
@@ -31,6 +52,8 @@ class ApiClient {
   }
 
   final Dio _dio;
+  final SecureTokenStorage? _tokenStorage;
+  final AuthRepository? _authRepository;
 
   Future<T> get<T>(
     String path, {
