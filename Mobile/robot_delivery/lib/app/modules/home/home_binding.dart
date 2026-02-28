@@ -13,12 +13,12 @@ class HomeBinding extends Bindings {
     Get.lazyPut<AuthRepository>(() => AuthRepository(), fenix: true);
     Get.lazyPut<ApiClient>(
       () => ApiClient(
-        tokenStorage: Get.find(),
-        authRepository: Get.find(),
+        tokenStorage: Get.find<SecureTokenStorage>(),
+        authRepository: Get.find<AuthRepository>(),
       ),
       fenix: true,
     );
-    Get.lazyPut<SampleRepository>(() => SampleRepository(Get.find()), fenix: true);
-    Get.lazyPut<HomeController>(() => HomeController(Get.find()));
+    Get.lazyPut<SampleRepository>(() => SampleRepository(Get.find<ApiClient>()), fenix: true);
+    Get.lazyPut<HomeController>(() => HomeController(Get.find<SampleRepository>()));
   }
 }
