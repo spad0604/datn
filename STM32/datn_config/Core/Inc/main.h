@@ -59,6 +59,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Lock_Pin GPIO_PIN_1
+#define Lock_GPIO_Port GPIOA
+#define Led_Pin GPIO_PIN_10
+#define Led_GPIO_Port GPIOA
+#define LedA11_Pin GPIO_PIN_11
+#define LedA11_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 

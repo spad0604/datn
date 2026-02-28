@@ -25,6 +25,7 @@ typedef enum {
     MSG_QUE_UART,
     /* RX lines received from UART task */
     MSG_QUE_UART_RX,
+    MSG_QUE_KEYPAD,
     MSG_QUE_COUNT
 } msg_queue_id_t;
 
