@@ -27,7 +27,7 @@ class LoginView extends GetView<LoginController> {
                 Center(
                   child: CustomIconButton(
                     backGroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    icon: Icons.fire_truck,
+                    icon: Icons.local_shipping_outlined,
                     iconColor: AppColors.primary,
                     onPressed: () {},
                   ),

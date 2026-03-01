@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:robot_delivery/app/common/widget/app_bottom_nav_bar.dart';
 import 'package:robot_delivery/app/common/widget/custom_icon_button.dart';
 import 'package:robot_delivery/app/core/i18n/app_translation_keys.dart';
 import 'package:robot_delivery/app/core/theme/app_colors.dart';

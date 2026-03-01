@@ -13,25 +13,25 @@ class UpcomingOrders extends StatelessWidget {
   final void Function(UpcomingOrderItem order)? onOrderTap;
 
   List<UpcomingOrderItem> get _defaultOrders => const [
-        UpcomingOrderItem(
-          icon: Icons.inventory_2_outlined,
-          title: 'Grocery Run #4829',
-          trackingId: 'STE-8823-XJ9',
-          status: UpcomingOrderStatus.moving,
-        ),
-        UpcomingOrderItem(
-          icon: Icons.shopping_bag_outlined,
-          title: 'Electronics Bundle',
-          trackingId: 'STE-1204-BB2',
-          status: UpcomingOrderStatus.inTransit,
-        ),
-        UpcomingOrderItem(
-          icon: Icons.all_inbox_outlined,
-          title: 'Monthly Refill',
-          trackingId: null,
-          status: UpcomingOrderStatus.scheduled,
-        ),
-      ];
+    UpcomingOrderItem(
+      icon: Icons.inventory_2_outlined,
+      title: 'Grocery Run #4829',
+      trackingId: 'STE-8823-XJ9',
+      status: UpcomingOrderStatus.moving,
+    ),
+    UpcomingOrderItem(
+      icon: Icons.shopping_bag_outlined,
+      title: 'Electronics Bundle',
+      trackingId: 'STE-1204-BB2',
+      status: UpcomingOrderStatus.inTransit,
+    ),
+    UpcomingOrderItem(
+      icon: Icons.all_inbox_outlined,
+      title: 'Monthly Refill',
+      trackingId: null,
+      status: UpcomingOrderStatus.scheduled,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class UpcomingOrders extends StatelessWidget {
                 AppTranslationKeys.seeAll.tr,
                 style: const TextStyle(color: AppColors.primary),
               ),
-            )
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -62,7 +62,7 @@ class UpcomingOrders extends StatelessWidget {
           itemCount: items.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final order = items[index];
             return UpcomingOrderCard(
@@ -76,11 +76,7 @@ class UpcomingOrders extends StatelessWidget {
   }
 }
 
-enum UpcomingOrderStatus {
-  moving,
-  inTransit,
-  scheduled,
-}
+enum UpcomingOrderStatus { moving, inTransit, scheduled }
 
 class UpcomingOrderItem {
   const UpcomingOrderItem({
@@ -97,11 +93,7 @@ class UpcomingOrderItem {
 }
 
 class UpcomingOrderCard extends StatelessWidget {
-  const UpcomingOrderCard({
-    super.key,
-    required this.order,
-    this.onTap,
-  });
+  const UpcomingOrderCard({super.key, required this.order, this.onTap});
 
   final UpcomingOrderItem order;
   final VoidCallback? onTap;
@@ -186,20 +178,20 @@ class OrderStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg, label) = switch (status) {
       UpcomingOrderStatus.moving => (
-          AppColors.primary10,
-          AppColors.primary,
-          AppTranslationKeys.moving.tr,
-        ),
+        AppColors.primary10,
+        AppColors.primary,
+        AppTranslationKeys.moving.tr,
+      ),
       UpcomingOrderStatus.inTransit => (
-          AppColors.indigoSoft,
-          AppColors.info,
-          AppTranslationKeys.inTransit.tr,
-        ),
+        AppColors.indigoSoft,
+        AppColors.info,
+        AppTranslationKeys.inTransit.tr,
+      ),
       UpcomingOrderStatus.scheduled => (
-          AppColors.slate100,
-          AppColors.slate600,
-          AppTranslationKeys.scheduled.tr,
-        ),
+        AppColors.slate100,
+        AppColors.slate600,
+        AppTranslationKeys.scheduled.tr,
+      ),
     };
 
     return Container(
@@ -210,11 +202,7 @@ class OrderStatusChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: fg,
-        ),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: fg),
       ),
     );
   }

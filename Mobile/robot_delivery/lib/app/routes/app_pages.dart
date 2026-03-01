@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:robot_delivery/app/common/widget/app_bottom_nav_bar.dart';
 import 'package:robot_delivery/app/modules/home/create_order.dart';
 import 'package:robot_delivery/app/modules/home/home_binding.dart';
+import 'package:robot_delivery/app/modules/notifications/bindings/notifications_binding.dart';
+import 'package:robot_delivery/app/modules/notifications/views/notifications_view.dart';
 
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
@@ -43,6 +45,11 @@ abstract class AppPages {
       name: Routes.CREATE_ORDER,
       page: () => CreateNewOrder(),
       binding: HomeBinding(),
+    ),
+    GetPage(
+      name: Routes.NOTIFICATIONS,
+      page: () => const NotificationsView(),
+      binding: NotificationsBinding(),
     ),
   ];
 }

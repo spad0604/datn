@@ -25,7 +25,7 @@ class HomeHeaderWidget extends StatelessWidget {
               CustomIconButton(
                 icon: Icons.car_crash,
                 backGroundColor: AppColors.primary.withValues(alpha: 0.1),
-                iconColor: AppColors.primary, 
+                iconColor: AppColors.primary,
                 iconSize: 18,
                 borderRadius: BorderRadius.circular(9999),
                 padding: const EdgeInsets.all(9),
@@ -33,26 +33,28 @@ class HomeHeaderWidget extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'Robot Delivery',
+                AppTranslationKeys.homeTitle.tr,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
-                  color: Colors.black
-                )
-              )
-            ]
+                  color: Colors.black,
+                ),
+              ),
+            ],
           ),
           CustomIconButton(
             icon: Icons.notifications_none,
             backGroundColor: AppColors.primary.withValues(alpha: 0.1),
-            iconColor: AppColors.primary, 
+            iconColor: AppColors.primary,
             iconSize: 18,
             borderRadius: BorderRadius.circular(9999),
             padding: const EdgeInsets.all(9),
-            onPressed: () {},
-          )
+            onPressed: () {
+              Get.toNamed(Routes.NOTIFICATIONS);
+            },
+          ),
         ],
-      )
+      ),
     );
   }
 }

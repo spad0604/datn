@@ -11,6 +11,9 @@ class CustomTextfield extends StatelessWidget {
   final bool isRequired;
   final String? Function(String?)? validator;
   final Function()? onSuffixIconPressed;
+  final ValueChanged<String>? onChanged;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   const CustomTextfield({
     super.key,
@@ -22,7 +25,10 @@ class CustomTextfield extends StatelessWidget {
     required this.title,
     this.isRequired = false,
     this.validator,
-    this.onSuffixIconPressed
+    this.onSuffixIconPressed,
+    this.onChanged,
+    this.readOnly = false,
+    this.onTap,
   });
 
   @override
@@ -56,15 +62,18 @@ class CustomTextfield extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: Colors.red
+                  color: Colors.red,
                 ),
-              )
+              ),
           ],
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           obscureText: isPassword,
+          onChanged: onChanged,
+          readOnly: readOnly,
+          onTap: onTap,
           validator: validator,
           decoration: InputDecoration(
             filled: true,
@@ -75,17 +84,11 @@ class CustomTextfield extends StatelessWidget {
               fontWeight: FontWeight.w400,
             ),
             prefixIcon: prefixIcon != null
-                ? Icon(
-                    prefixIcon,
-                    color: AppColors.slate400,
-                  )
+                ? Icon(prefixIcon, color: AppColors.slate400)
                 : null,
             suffixIcon: suffixIcon != null
                 ? IconButton(
-                    icon: Icon(
-                      suffixIcon,
-                      color: AppColors.slate400,
-                    ),
+                    icon: Icon(suffixIcon, color: AppColors.slate400),
                     onPressed: onSuffixIconPressed,
                   )
                 : null,
@@ -98,9 +101,12 @@ class CustomTextfield extends StatelessWidget {
               borderSide: const BorderSide(color: AppColors.errorAlt, width: 1),
             ),
             border: border,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
           ),
-        )
+        ),
       ],
     );
   }

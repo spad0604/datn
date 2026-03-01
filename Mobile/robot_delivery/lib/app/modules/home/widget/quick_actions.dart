@@ -1,9 +1,7 @@
 part of '../home_view.dart';
 
 class QuickActions extends StatelessWidget {
-  QuickActions({super.key});
-
-  final mainController = Get.find<MainController>();
+  const QuickActions({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,34 +20,40 @@ class QuickActions extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             CustomIconButton(
+              hasShadow: true,
               icon: Icons.add,
               iconColor: AppColors.primary,
               backGroundColor: AppColors.white,
-              onPressed: (){
+              onPressed: () {
                 Get.toNamed(Routes.CREATE_ORDER);
               },
-              tooltip: 'New Order',
+              tooltip: AppTranslationKeys.newOrder.tr,
             ),
             CustomIconButton(
+              hasShadow: true,
               icon: Icons.add_location,
               iconColor: AppColors.primary,
               backGroundColor: AppColors.white,
-              onPressed: (){},
-              tooltip: 'Address',
+              onPressed: () {},
+              tooltip: AppTranslationKeys.address.tr,
             ),
             CustomIconButton(
+              hasShadow: true,
               icon: Icons.history,
               iconColor: AppColors.primary,
               backGroundColor: AppColors.white,
-              onPressed: (){},
-              tooltip: 'History',
+              onPressed: () {
+                Get.find<MainController>().setTabIndex(AppNavTab.orders.index);
+              },
+              tooltip: AppTranslationKeys.history.tr,
             ),
             CustomIconButton(
+              hasShadow: true,
               icon: Icons.contact_support,
               iconColor: AppColors.primary,
               backGroundColor: AppColors.white,
-              onPressed: (){},
-              tooltip: 'Support',
+              onPressed: () {},
+              tooltip: AppTranslationKeys.support.tr,
             ),
           ],
         ),

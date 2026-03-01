@@ -70,7 +70,8 @@ abstract class AppTranslationKeys {
   static const String currentDelivery = 'current_delivery';
   static const String arrivingSoon = 'arriving_soon';
   static const String currentDeliveryHeadline = 'current_delivery_headline';
-  static const String currentDeliveryDescription = 'current_delivery_description';
+  static const String currentDeliveryDescription =
+      'current_delivery_description';
   static const String trackLive = 'track_live';
   static const String trackingId = 'tracking_id';
 
@@ -78,4 +79,40 @@ abstract class AppTranslationKeys {
   static const String moving = 'moving';
   static const String inTransit = 'in_transit';
   static const String scheduled = 'scheduled';
+
+  // Quick Actions
+  static const String newOrder = 'new_order';
+  static const String address = 'address';
+  static const String history = 'history';
+  static const String support = 'support';
+
+  // Profile
+  static const String profileView = 'profile_view';
+  static const String userOrShopName = 'user_or_shop_name';
+  static const String phoneNumber = 'phone_number';
+  static const String addressField = 'address_field';
+  static const String updateProfile = 'update_profile';
+
+  // Notifications
+  static const String notifications = 'notifications';
+  static const String markAllRead = 'mark_all_read';
+  static const String alerts = 'alerts';
+  static const String updates = 'updates';
+  static const String promos = 'promos';
+  static const String newLabel = 'new_label';
+  static const String earlierLabel = 'earlier_label';
+  static const String noNotifications = 'no_notifications';
+
+  // Map
+  static const String mapTitle = 'map_title';
+  static const String robot = 'robot';
+  static const String pickup = 'pickup';
+  static const String dropoff = 'dropoff';
+
+  static const String recipientName = 'recipient_name';
+  static const String recipientAddress = 'recipient_address';
+  static const String packageWeight = 'package_weight';
+  static const String createNewOrder = 'create_new_order';
+  static const String shippingLocation = 'shipping_location';
+  static const String submitOrder = 'submit_order';
 }
