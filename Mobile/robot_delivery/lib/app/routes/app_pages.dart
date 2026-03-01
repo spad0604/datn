@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:robot_delivery/app/common/widget/app_bottom_nav_bar.dart';
-import 'package:robot_delivery/app/common/widget/app_bottom_nav_bar.dart';
+import 'package:robot_delivery/app/modules/home/create_order.dart';
+import 'package:robot_delivery/app/modules/home/home_binding.dart';
 
-import '../modules/home/home_binding.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/main/bindings/main_binding.dart';
@@ -38,6 +38,11 @@ abstract class AppPages {
       name: Routes.PROFILE,
       page: () => MainView(initialTab: AppNavTab.profile),
       binding: MainBinding(),
+    ),
+    GetPage(
+      name: Routes.CREATE_ORDER,
+      page: () => CreateNewOrder(),
+      binding: HomeBinding(),
     ),
   ];
 }

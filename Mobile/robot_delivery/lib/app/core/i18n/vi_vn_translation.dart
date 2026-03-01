@@ -28,6 +28,17 @@ class ViVNTranslation extends Translations {
           AppTranslationKeys.dontHaveAccount: "Bạn chưa có tài khoản?",
           AppTranslationKeys.createAccount: 'Tạo tài khoản',
           AppTranslationKeys.orContinueWith: 'HOẶC TIẾP TỤC VỚI',
+          AppTranslationKeys.quickActions: 'Hành động nhanh',
+          AppTranslationKeys.pending: 'Đang chờ',
+
+          // History
+          AppTranslationKeys.deliveryHistory: 'Lịch sử giao hàng',
+          AppTranslationKeys.all: 'Tất cả',
+          AppTranslationKeys.deliveredStatus: 'Đã giao',
+          AppTranslationKeys.cancelledStatus: 'Đã hủy',
+          AppTranslationKeys.thisWeek: 'TUẦN NÀY',
+          AppTranslationKeys.lastWeek: 'TUẦN TRƯỚC',
+          AppTranslationKeys.sender: 'Người gửi:',
 
           // Roles
           AppTranslationKeys.buyer: 'Người mua',
@@ -62,6 +73,20 @@ class ViVNTranslation extends Translations {
           // Home
           AppTranslationKeys.home: 'Trang chủ',
           AppTranslationKeys.homeTitle: 'Robot Delivery',
+          AppTranslationKeys.upcomingOrders: 'Đơn hàng sắp tới',
+          AppTranslationKeys.seeAll: 'Xem tất cả',
+          AppTranslationKeys.currentDelivery: 'Đơn hàng hiện tại',
+          AppTranslationKeys.arrivingSoon: 'Sắp tới nơi',
+            AppTranslationKeys.currentDeliveryHeadline: 'Robot còn khoảng 5 phút',
+            AppTranslationKeys.currentDeliveryDescription:
+              'Đơn hàng của bạn đang rẽ vào đường Main St.',
+          AppTranslationKeys.trackLive: 'Theo dõi trực tiếp',
+          AppTranslationKeys.trackingId: 'Mã theo dõi:',
+
+          // Order status
+          AppTranslationKeys.moving: 'Đang di chuyển',
+          AppTranslationKeys.inTransit: 'Đang vận chuyển',
+          AppTranslationKeys.scheduled: 'Đã lên lịch',
         },
       };
 }

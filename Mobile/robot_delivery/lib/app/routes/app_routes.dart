@@ -10,6 +10,7 @@ abstract class Routes {
   static const ORDERS = _Paths.ORDERS;
   static const MAP = _Paths.MAP;
   static const PROFILE = _Paths.PROFILE;
+  static const CREATE_ORDER = _Paths.CREATE_ORDER;
 }
 
 abstract class _Paths {
@@ -20,4 +21,5 @@ abstract class _Paths {
   static const ORDERS = '/orders';
   static const MAP = '/map';
   static const PROFILE = '/profile';
+  static const CREATE_ORDER = '/create-order';
 }

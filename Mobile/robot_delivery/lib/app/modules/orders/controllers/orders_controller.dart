@@ -1,7 +1,10 @@
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class OrdersController extends GetxController {
-  final count = 0.obs;
+  final TextEditingController recipientNameController = TextEditingController();
 
-  void increment() => count.value++;
+  final TextEditingController recipientAddressController = TextEditingController();
+
+  final TextEditingController weightController = TextEditingController();
 }

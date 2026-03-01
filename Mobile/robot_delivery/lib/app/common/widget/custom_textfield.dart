@@ -67,6 +67,8 @@ class CustomTextfield extends StatelessWidget {
           obscureText: isPassword,
           validator: validator,
           decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.white,
             hintText: hintText,
             hintStyle: const TextStyle(
               color: AppColors.slate400,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:robot_delivery/app/core/i18n/app_translation_keys.dart';
 import 'package:robot_delivery/app/core/theme/app_colors.dart';
 
 enum ItemEnum {
@@ -9,11 +11,11 @@ enum ItemEnum {
   String get name {
     switch (this) {
       case ItemEnum.delivered:
-        return 'Delivered';
+        return AppTranslationKeys.deliveredStatus.tr;
       case ItemEnum.cancelled:
-        return 'Cancelled';
+        return AppTranslationKeys.cancelledStatus.tr;
       case ItemEnum.arriving:
-        return 'Arriving';
+        return AppTranslationKeys.pending.tr;
     }
   }
 }
@@ -32,11 +34,11 @@ IconData getItemIcon(ItemEnum item) {
 String getItemStatus(ItemEnum item) {
   switch (item) {
     case ItemEnum.delivered:
-      return 'Delivered';
+      return AppTranslationKeys.deliveredStatus.tr;
     case ItemEnum.cancelled:
-      return 'Cancelled';
+      return AppTranslationKeys.cancelledStatus.tr;
     case ItemEnum.arriving:
-      return 'Arriving';
+      return AppTranslationKeys.pending.tr;
   }
 }
 

@@ -8,6 +8,10 @@ class CustomButton extends StatelessWidget {
   final Color backgroundColor;
   final Color? borderColor;
   final VoidCallback onPressed;
+  final EdgeInsets padding;
+  final BorderRadius borderRadius;
+  final double fontSize;
+  final FontWeight fontWeight;
 
   const CustomButton({
     super.key,
@@ -18,6 +22,10 @@ class CustomButton extends StatelessWidget {
     required this.backgroundColor,
     this.borderColor,
     required this.onPressed,
+    this.padding = const EdgeInsets.symmetric(vertical: 16),
+    this.borderRadius = const BorderRadius.all(Radius.circular(24)),
+    this.fontSize = 16,
+    this.fontWeight = FontWeight.w500,
   });
 
   @override
@@ -26,11 +34,11 @@ class CustomButton extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(24)),
+          borderRadius: borderRadius,
           color: backgroundColor,
           border: borderColor != null ? Border.all(color: borderColor!, width: 1) : null,
         ),
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: padding,
         child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -46,8 +54,8 @@ class CustomButton extends StatelessWidget {
                 text,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontSize: fontSize,
+                  fontWeight: fontWeight,
                 ),
               ),
               if (suffixIcon != null) const SizedBox(width: 8),

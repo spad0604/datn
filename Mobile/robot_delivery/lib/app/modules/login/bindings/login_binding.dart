@@ -20,7 +20,6 @@ class LoginBinding extends Bindings {
       fenix: true,
     );
     Get.lazyPut<SampleRepository>(() => SampleRepository(Get.find<ApiClient>()), fenix: true);
-    Get.lazyPut<HomeController>(() => HomeController(Get.find<SampleRepository>()));
     Get.lazyPut<LoginController>(
       () => LoginController(),
     );

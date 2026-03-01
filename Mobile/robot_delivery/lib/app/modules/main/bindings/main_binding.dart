@@ -5,6 +5,7 @@ import 'package:robot_delivery/app/data/repositories/auth_repository.dart';
 import 'package:robot_delivery/app/data/repositories/sample_repository.dart';
 import 'package:robot_delivery/app/modules/home/home_controller.dart';
 import 'package:robot_delivery/app/modules/map/controllers/map_controller.dart';
+import 'package:robot_delivery/app/modules/orders/bindings/orders_binding.dart';
 import 'package:robot_delivery/app/modules/orders/controllers/orders_controller.dart';
 import 'package:robot_delivery/app/modules/profile/controllers/profile_controller.dart';
 
@@ -36,14 +37,10 @@ class MainBinding extends Bindings {
     if (!Get.isRegistered<SampleRepository>()) {
       Get.lazyPut<SampleRepository>(() => SampleRepository(Get.find<ApiClient>()), fenix: true);
     }
-    if (!Get.isRegistered<HomeController>()) {
-      Get.lazyPut<HomeController>(() => HomeController(Get.find<SampleRepository>()));
-    }
 
     // Other tabs.
-    if (!Get.isRegistered<OrdersController>()) {
-      Get.lazyPut<OrdersController>(() => OrdersController());
-    }
+    Get.lazyPut(OrdersBinding().dependencies);
+    
     if (!Get.isRegistered<MapController>()) {
       Get.lazyPut<MapController>(() => MapController());
     }

@@ -6,6 +6,9 @@ class CustomIconButton extends StatelessWidget {
   final Color backGroundColor;
   final double iconSize;
   final VoidCallback onPressed;
+  final BorderRadius? borderRadius;
+  final String? tooltip;
+  final EdgeInsets? padding;
 
   const CustomIconButton({
     super.key,
@@ -13,26 +16,42 @@ class CustomIconButton extends StatelessWidget {
     required this.iconColor,
     required this.backGroundColor,
     this.iconSize = 24,
+    this.borderRadius,
+    this.tooltip,
+    this.padding,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: backGroundColor,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: iconSize,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: onPressed,
+          child: Container(
+            decoration: BoxDecoration(
+              color: backGroundColor,
+              borderRadius: borderRadius ?? BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: padding ?? const EdgeInsets.all(18),
+              child: Icon(icon, color: iconColor, size: iconSize),
+            ),
           ),
         ),
-      ),
+        tooltip != null ? const SizedBox(height: 4) : const SizedBox.shrink(),
+        tooltip != null
+            ? Text(
+                tooltip!,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+              )
+            : const SizedBox.shrink(),
+      ],
     );
   }
 }

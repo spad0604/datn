@@ -27,6 +27,17 @@ class EnUSTranslation extends Translations {
           AppTranslationKeys.dontHaveAccount: "Don't have an account?",
           AppTranslationKeys.createAccount: 'Create account',
           AppTranslationKeys.orContinueWith: 'OR CONTINUE WITH',
+          AppTranslationKeys.quickActions: 'Quick Actions',
+          AppTranslationKeys.pending: 'Pending',
+
+          // History
+          AppTranslationKeys.deliveryHistory: 'Delivery History',
+          AppTranslationKeys.all: 'All',
+          AppTranslationKeys.deliveredStatus: 'Delivered',
+          AppTranslationKeys.cancelledStatus: 'Cancelled',
+          AppTranslationKeys.thisWeek: 'THIS WEEK',
+          AppTranslationKeys.lastWeek: 'LAST WEEK',
+          AppTranslationKeys.sender: 'Sender:',
 
           // Roles
           AppTranslationKeys.buyer: 'Buyer',
@@ -61,6 +72,20 @@ class EnUSTranslation extends Translations {
           // Home
           AppTranslationKeys.home: 'Home',
           AppTranslationKeys.homeTitle: 'Robot Delivery',
+          AppTranslationKeys.upcomingOrders: 'Upcoming Orders',
+          AppTranslationKeys.seeAll: 'See All',
+          AppTranslationKeys.currentDelivery: 'Current Delivery',
+          AppTranslationKeys.arrivingSoon: 'Arriving Soon',
+            AppTranslationKeys.currentDeliveryHeadline: 'Robot is 5 mins away',
+            AppTranslationKeys.currentDeliveryDescription:
+              'Your package is turning onto Main St.',
+          AppTranslationKeys.trackLive: 'Track Live',
+          AppTranslationKeys.trackingId: 'Tracking ID:',
+
+          // Order status
+          AppTranslationKeys.moving: 'Moving',
+          AppTranslationKeys.inTransit: 'In Transit',
+          AppTranslationKeys.scheduled: 'Scheduled',
         },
       };
 }

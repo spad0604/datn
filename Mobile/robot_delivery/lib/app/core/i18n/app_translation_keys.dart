@@ -20,6 +20,17 @@ abstract class AppTranslationKeys {
   static const String dontHaveAccount = 'dont_have_account';
   static const String createAccount = 'create_account';
   static const String orContinueWith = 'or_continue_with';
+  static const String quickActions = 'quick_actions';
+  static const String pending = 'pending';
+
+  // History
+  static const String deliveryHistory = 'delivery_history';
+  static const String all = 'all';
+  static const String deliveredStatus = 'delivered_status';
+  static const String cancelledStatus = 'cancelled_status';
+  static const String thisWeek = 'this_week';
+  static const String lastWeek = 'last_week';
+  static const String sender = 'sender';
 
   // Roles
   static const String buyer = 'buyer';
@@ -54,4 +65,17 @@ abstract class AppTranslationKeys {
   // Home
   static const String home = 'home';
   static const String homeTitle = 'home_title';
+  static const String upcomingOrders = 'upcoming_orders';
+  static const String seeAll = 'see_all';
+  static const String currentDelivery = 'current_delivery';
+  static const String arrivingSoon = 'arriving_soon';
+  static const String currentDeliveryHeadline = 'current_delivery_headline';
+  static const String currentDeliveryDescription = 'current_delivery_description';
+  static const String trackLive = 'track_live';
+  static const String trackingId = 'tracking_id';
+
+  // Order status
+  static const String moving = 'moving';
+  static const String inTransit = 'in_transit';
+  static const String scheduled = 'scheduled';
 }
