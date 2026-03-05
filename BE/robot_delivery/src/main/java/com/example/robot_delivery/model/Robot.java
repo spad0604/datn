@@ -1,5 +1,6 @@
 package com.example.robot_delivery.model;
 
+import com.example.robot_delivery.model.enums.RobotStatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,5 +20,6 @@ public class Robot {
 
     private double longitude;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private RobotStatusEnum status;
 }

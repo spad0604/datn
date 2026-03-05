@@ -42,6 +42,10 @@ public class Order {
 
     private String pinCode;
 
+    @ManyToOne
+    @JoinColumn(name = "robot_id", referencedColumnName = "id")
+    private Robot robot;
+
     @Enumerated(EnumType.STRING)
     private OrderStatusEnum status;
 
