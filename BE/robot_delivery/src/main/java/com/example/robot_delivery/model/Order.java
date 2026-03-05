@@ -1,0 +1,50 @@
+package com.example.robot_delivery.model;
+
+import com.example.robot_delivery.model.enums.OrderStatusEnum;
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "orders")
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@Builder
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String orderId;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    private User customerId;
+
+    @ManyToOne
+    @JoinColumn(name = "recipient_id", referencedColumnName = "id")
+    private User recipientId;
+
+    private String recipientPhone;
+
+    private String shippingId;
+
+    private String deliveryId;
+
+    private Double streamLat;
+
+    private Double streamLng;
+
+    private Double deliveryLat;
+
+    private Double deliveryLng;
+
+    private String pinCode;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatusEnum status;
+
+    @Column(name = "created_at")
+    private java.time.LocalDateTime createdAt;
+}
