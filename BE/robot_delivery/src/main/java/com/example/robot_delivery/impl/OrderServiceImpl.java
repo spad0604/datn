@@ -5,6 +5,8 @@ import com.example.robot_delivery.model.Order;
 import com.example.robot_delivery.model.ResponseData;
 import com.example.robot_delivery.model.Robot;
 import com.example.robot_delivery.model.User;
+import com.example.robot_delivery.model.request.CreateOrderRequest;
+import com.example.robot_delivery.model.responses.OrderResponse;
 import com.example.robot_delivery.model.enums.OrderStatusEnum;
 import com.example.robot_delivery.model.enums.RobotStatusEnum;
 import com.example.robot_delivery.repositorys.OrderRepository;
@@ -14,8 +16,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,13 +31,59 @@ public class OrderServiceImpl implements IOrderService {
     private final RobotRepository robotRepository;
     private final UserRepository userRepository;
 
+    private OrderResponse.UserSummary mapToUserSummary(User user) {
+        if (user == null) return null;
+        return OrderResponse.UserSummary.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .fullName(user.getFirstName() + " " + user.getLastName())
+                .phoneNumber(user.getPhoneNumber())
+                .build();
+    }
+
+    private OrderResponse mapToOrderResponse(Order order) {
+        return OrderResponse.builder()
+                .id(order.getId())
+                .orderId(order.getOrderId())
+                .customer(mapToUserSummary(order.getCustomerId()))
+                .recipient(mapToUserSummary(order.getRecipientId()))
+                .recipientPhone(order.getRecipientPhone())
+                .streamLat(order.getStreamLat())
+                .streamLng(order.getStreamLng())
+                .deliveryLat(order.getDeliveryLat())
+                .deliveryLng(order.getDeliveryLng())
+                .pinCode(order.getPinCode())
+                .senderName(order.getSenderName())
+                .robotId(order.getRobot() != null ? order.getRobot().getId() : null)
+                .robotName(order.getRobot() != null ? order.getRobot().getRobotName() : null)
+                .status(order.getStatus())
+                .createdAt(order.getCreatedAt())
+                .build();
+    }
+
     @Override
     @Transactional
-    public ResponseData<Order> createOrder(Order order, String username) {
+    public ResponseData<OrderResponse> createOrder(CreateOrderRequest request, String username) {
         User customer = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        order.setCustomerId(customer);
-        order.setCreatedAt(java.time.LocalDateTime.now());
+
+        Order order = Order.builder()
+                .orderId("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
+                .customerId(customer)
+                .senderName(customer.getFirstName() + " " + customer.getLastName())
+                .recipientPhone(request.getRecipientPhone())
+                .streamLat(request.getStreamLat())
+                .streamLng(request.getStreamLng())
+                .deliveryLat(request.getDeliveryLat())
+                .deliveryLng(request.getDeliveryLng())
+                .pinCode(generatePinCode())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        // Tự động tìm recipientId theo số điện thoại
+        if (request.getRecipientPhone() != null) {
+            userRepository.findByPhoneNumber(request.getRecipientPhone()).ifPresent(order::setRecipientId);
+        }
 
         // Tìm robot rảnh gần nhất
         List<Robot> idleRobots = robotRepository.findByStatus(RobotStatusEnum.IDLE);
@@ -55,7 +107,6 @@ public class OrderServiceImpl implements IOrderService {
             order.setRobot(nearestRobot);
             order.setStatus(OrderStatusEnum.PENDING);
         } else {
-            // Không có robot rảnh, đơn hàng ở trạng thái đợi
             order.setRobot(null);
             order.setStatus(OrderStatusEnum.WAIT_ROBOT);
         }
@@ -63,26 +114,32 @@ public class OrderServiceImpl implements IOrderService {
         Order savedOrder = orderRepository.save(order);
         String message = (nearestRobot != null) ? "Order created and robot assigned" : "Order created. Waiting for an available robot.";
         
-        return ResponseData.<Order>builder()
+        return ResponseData.<OrderResponse>builder()
                 .message(message)
-                .data(savedOrder)
+                .data(mapToOrderResponse(savedOrder))
                 .build();
     }
 
     @Override
-    public ResponseData<Order> updateOrder(Long id, Order order, String username) {
+    public ResponseData<OrderResponse> updateOrder(Long id, CreateOrderRequest request, String username) {
         return orderRepository.findById(id).map(existing -> {
             if (!existing.getCustomerId().getUsername().equals(username)) {
-                return ResponseData.<Order>builder().message("Access denied").build();
+                return ResponseData.<OrderResponse>builder().message("Access denied").build();
             }
-            existing.setRecipientPhone(order.getRecipientPhone());
-            existing.setDeliveryLat(order.getDeliveryLat());
-            existing.setDeliveryLng(order.getDeliveryLng());
-            return ResponseData.<Order>builder()
+            existing.setRecipientPhone(request.getRecipientPhone());
+            existing.setDeliveryLat(request.getDeliveryLat());
+            existing.setDeliveryLng(request.getDeliveryLng());
+            
+            if (request.getRecipientPhone() != null) {
+                userRepository.findByPhoneNumber(request.getRecipientPhone())
+                    .ifPresentOrElse(existing::setRecipientId, () -> existing.setRecipientId(null));
+            }
+            
+            return ResponseData.<OrderResponse>builder()
                     .message("Order updated")
-                    .data(orderRepository.save(existing))
+                    .data(mapToOrderResponse(orderRepository.save(existing)))
                     .build();
-        }).orElse(ResponseData.<Order>builder().message("Order not found").build());
+        }).orElse(ResponseData.<OrderResponse>builder().message("Order not found").build());
     }
 
     @Override
@@ -97,38 +154,48 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseData<List<Order>> getMyCreatedOrders(String username) {
+    public ResponseData<List<OrderResponse>> getMyCreatedOrders(String username) {
         User user = userRepository.findByUsername(username).orElse(null);
-        if (user == null) return ResponseData.<List<Order>>builder().message("User not found").build();
+        if (user == null) return ResponseData.<List<OrderResponse>>builder().message("User not found").build();
         
         List<Order> orders = orderRepository.findByCustomerId(user);
-        return ResponseData.<List<Order>>builder().message("Success").data(orders).build();
+        List<OrderResponse> response = orders.stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
+        return ResponseData.<List<OrderResponse>>builder().message("Success").data(response).build();
     }
 
     @Override
-    public ResponseData<List<Order>> getMyReceivedOrders(String username) {
+    public ResponseData<List<OrderResponse>> getMyReceivedOrders(String username) {
         User user = userRepository.findByUsername(username).orElse(null);
-        if (user == null) return ResponseData.<List<Order>>builder().message("User not found").build();
+        if (user == null) return ResponseData.<List<OrderResponse>>builder().message("User not found").build();
 
         List<Order> orders = orderRepository.findByRecipientId(user);
-        return ResponseData.<List<Order>>builder().message("Success").data(orders).build();
+        List<OrderResponse> response = orders.stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
+        return ResponseData.<List<OrderResponse>>builder().message("Success").data(response).build();
     }
 
     @Override
-    public ResponseData<Order> getRobotCurrentOrder(Long robotId) {
+    public ResponseData<OrderResponse> getRobotCurrentOrder(Long robotId) {
         Robot robot = robotRepository.findById(robotId).orElse(null);
-        if (robot == null) return ResponseData.<Order>builder().message("Robot not found").build();
+        if (robot == null) return ResponseData.<OrderResponse>builder().message("Robot not found").build();
 
-        // Tìm đơn hàng mà robot này đang đi lấy (PENDING) hoặc đang giao (DELIVERING)
         Optional<Order> order = orderRepository.findByRobotAndStatus(robot, OrderStatusEnum.PENDING);
         if (order.isEmpty()) {
             order = orderRepository.findByRobotAndStatus(robot, OrderStatusEnum.DELIVERING);
         }
         
-        return order.map(value -> ResponseData.<Order>builder().message("Success").data(value).build())
-                .orElseGet(() -> ResponseData.<Order>builder().message("No active order found").build());
+        return order.map(value -> ResponseData.<OrderResponse>builder().message("Success").data(mapToOrderResponse(value)).build())
+                .orElse(ResponseData.<OrderResponse>builder().message("No active order for this robot").build());
     }
 
+    private String generatePinCode() {
+        Random random = new Random();
+        int pin = 100000 + random.nextInt(900000);
+        return String.valueOf(pin);
+    }
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         // Công thức Haversine đơn giản
         double earthRadius = 6371; // km

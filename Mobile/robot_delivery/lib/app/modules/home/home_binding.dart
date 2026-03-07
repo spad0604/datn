@@ -4,7 +4,6 @@ import '../../core/network/api_client.dart';
 import '../../core/storage/secure_token_storage.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/geocoding_repository.dart';
-import '../../data/repositories/sample_repository.dart';
 import 'home_controller.dart';
 
 class HomeBinding extends Bindings {
@@ -17,10 +16,6 @@ class HomeBinding extends Bindings {
         tokenStorage: Get.find<SecureTokenStorage>(),
         authRepository: Get.find<AuthRepository>(),
       ),
-      fenix: true,
-    );
-    Get.lazyPut<SampleRepository>(
-      () => SampleRepository(Get.find<ApiClient>()),
       fenix: true,
     );
     Get.lazyPut<GeocodingRepository>(() => GeocodingRepository(), fenix: true);

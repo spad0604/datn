@@ -1,7 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../data/models/auth_tokens.dart';
-
 class SecureTokenStorage {
   SecureTokenStorage({FlutterSecureStorage? storage})
       : _storage = storage ??
@@ -30,9 +28,6 @@ class SecureTokenStorage {
       await writeRefreshToken(refreshToken);
     }
   }
-
-  Future<void> writeAuthTokens(AuthTokens tokens) =>
-      writeTokens(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken);
 
   Future<void> clearTokens() async {
     await _storage.delete(key: _kAccessTokenKey);

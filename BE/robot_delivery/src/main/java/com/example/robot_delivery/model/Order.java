@@ -42,6 +42,8 @@ public class Order {
 
     private String pinCode;
 
+    private String senderName;
+
     @ManyToOne
     @JoinColumn(name = "robot_id", referencedColumnName = "id")
     private Robot robot;

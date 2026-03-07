@@ -1,9 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:robot_delivery/app/data/models/response_data.dart';
 
 import '../../core/constants/app_config.dart';
 import '../../core/constants/app_endpoints.dart';
 import '../../core/network/network_exceptions.dart';
-import '../models/auth_tokens.dart';
+import '../models/request/login_request.dart';
+import '../models/request/register_request.dart';
+import '../models/response/login_response.dart';
 
 class AuthRepository {
   AuthRepository({Dio? dio}) : _dio = dio ?? Dio() {
@@ -21,11 +24,45 @@ class AuthRepository {
 
   final Dio _dio;
 
+  Future<ResponseData<LoginResponse>> login(LoginRequest request) async {
+    try {
+      final response = await _dio.post<dynamic>(
+        AppEndpoints.login,
+        data: request.toJson(),
+      );
+
+      final data = response.data;
+      return data;
+    } on DioException catch (e) {
+      print('Login error: ${e.message}');
+      return ResponseData(message: 'Login failed: ${e.message}', data: null);
+    }
+  }
+
+  Future<ResponseData<LoginResponse>> register(RegisterRequest request) async {
+    try {
+      final response = await _dio.post<dynamic>(
+        AppEndpoints.register,
+        data: request.toJson(),
+      );
+
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        return ResponseData(message: 'Registration successful.', data: LoginResponse.fromJson(data));
+      }
+
+      print('Register error: Invalid response format.');
+      return ResponseData(message: 'Registration failed: Invalid response format.', data: null);
+    } on DioException catch (e) {
+      print('Register error: ${e.message}');
+      return ResponseData(message: 'Registration failed: ${e.message}', data: null);
+    }
+  }
+
   /// Calls refresh token endpoint.
-  /// Expected response json keys (configurable per backend):
-  /// - accessToken / access_token
-  /// - refreshToken / refresh_token
-  Future<AuthTokens> refreshToken({required String refreshToken}) async {
+  /// Input: refreshToken
+  /// Output: LoginRequest
+  Future<ResponseData<LoginResponse>> refreshToken({required String refreshToken}) async {
     try {
       final response = await _dio.post<dynamic>(
         AppEndpoints.refreshToken,
@@ -35,12 +72,8 @@ class AuthRepository {
       );
 
       final data = response.data;
-      if (data is Map) {
-        final access = (data['accessToken'] ?? data['access_token']) as String?;
-        final refresh = (data['refreshToken'] ?? data['refresh_token']) as String?;
-        if (access != null && access.isNotEmpty && refresh != null && refresh.isNotEmpty) {
-          return AuthTokens(accessToken: access, refreshToken: refresh);
-        }
+      if (data is Map<String, dynamic>) {
+        return ResponseData(message: 'Token refreshed successfully.', data: LoginResponse.fromJson(data));
       }
 
       throw NetworkException('Refresh token response không hợp lệ.',

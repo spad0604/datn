@@ -16,6 +16,8 @@ public class Robot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String robotName;
+
     private double latitude;
 
     private double longitude;

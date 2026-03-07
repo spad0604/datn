@@ -11,9 +11,9 @@ class AuthInterceptor extends Interceptor {
     required Dio dio,
     required SecureTokenStorage tokenStorage,
     required AuthRepository authRepository,
-  })  : _dio = dio,
-        _tokenStorage = tokenStorage,
-        _authRepository = authRepository;
+  }) : _dio = dio,
+       _tokenStorage = tokenStorage,
+       _authRepository = authRepository;
 
   final Dio _dio;
   final SecureTokenStorage _tokenStorage;
@@ -24,7 +24,10 @@ class AuthInterceptor extends Interceptor {
   static const _kRetriedKey = '__retried';
 
   @override
-  Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  Future<void> onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     final skipAuth = options.extra['skipAuth'] == true;
     if (skipAuth) {
       handler.next(options);
@@ -39,7 +42,10 @@ class AuthInterceptor extends Interceptor {
   }
 
   @override
-  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
     final statusCode = err.response?.statusCode;
     final requestOptions = err.requestOptions;
     final skipAuth = requestOptions.extra['skipAuth'] == true;
@@ -85,10 +91,13 @@ class AuthInterceptor extends Interceptor {
         throw StateError('Missing refresh token');
       }
 
-      final tokens = await _authRepository.refreshToken(refreshToken: refreshToken);
+      final loginResponse = await _authRepository.refreshToken(
+        refreshToken: refreshToken,
+      );
+
       await _tokenStorage.writeTokens(
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
+        accessToken: loginResponse.data?.token ?? '',
+        refreshToken: loginResponse.data?.refreshToken ?? '',
       );
 
       _refreshCompleter!.complete();
@@ -100,7 +109,10 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
-  Future<Response<dynamic>> _retryWithNewToken(RequestOptions requestOptions, String accessToken) {
+  Future<Response<dynamic>> _retryWithNewToken(
+    RequestOptions requestOptions,
+    String accessToken,
+  ) {
     final options = Options(
       method: requestOptions.method,
       headers: Map<String, dynamic>.from(requestOptions.headers)

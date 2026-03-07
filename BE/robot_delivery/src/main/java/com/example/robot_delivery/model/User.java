@@ -1,5 +1,6 @@
 package com.example.robot_delivery.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class User {
 
     private String username;
 
+    @JsonIgnore
     private String password;
 
     private String firstName;
