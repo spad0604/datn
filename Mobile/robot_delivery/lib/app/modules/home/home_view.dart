@@ -4,6 +4,7 @@ import 'package:robot_delivery/app/common/widget/app_bottom_nav_bar.dart';
 import 'package:robot_delivery/app/common/widget/custom_icon_button.dart';
 import 'package:robot_delivery/app/core/i18n/app_translation_keys.dart';
 import 'package:robot_delivery/app/core/theme/app_colors.dart';
+import 'package:robot_delivery/app/data/models/response/order_response.dart';
 import 'package:robot_delivery/app/modules/main/controllers/main_controller.dart';
 import 'package:robot_delivery/app/routes/app_pages.dart';
 
@@ -15,7 +16,9 @@ part 'widget/current_delivery.dart';
 part 'widget/upcoming_orders.dart';
 
 class HomeView extends GetView<HomeController> {
-  const HomeView({super.key});
+  HomeView({super.key});
+
+  final mainController = Get.find<MainController>();
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +39,7 @@ class HomeView extends GetView<HomeController> {
                     const SizedBox(height: 20),
                     QuickActions(),
                     const SizedBox(height: 20),
-                    const UpcomingOrders(),
+                    UpcomingOrders(onSeeAll: () { mainController.setTabIndex(1); }),
                     const SizedBox(height: 16),
                   ],
                 ),

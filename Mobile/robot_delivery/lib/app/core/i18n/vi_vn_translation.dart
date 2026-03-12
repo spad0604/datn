@@ -101,6 +101,7 @@ class ViVNTranslation extends Translations {
       AppTranslationKeys.newLabel: 'MỚI',
       AppTranslationKeys.earlierLabel: 'TRƯỚC ĐÓ',
       AppTranslationKeys.noNotifications: 'Chưa có thông báo',
+      AppTranslationKeys.noOrders: 'Không có đơn hàng nào',
 
       // Map
       AppTranslationKeys.mapTitle: 'Bản đồ',
@@ -123,6 +124,8 @@ class ViVNTranslation extends Translations {
       AppTranslationKeys.createNewOrder: 'Tạo đơn hàng mới',
       AppTranslationKeys.shippingLocation: 'Vị trí giao hàng',
       AppTranslationKeys.submitOrder: 'Gửi đơn hàng',
+
+      AppTranslationKeys.loggingIn: 'Đang đăng nhập...',
     },
   };
 }

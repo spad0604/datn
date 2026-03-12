@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:robot_delivery/app/common/enum/item_enum.dart';
 import 'package:robot_delivery/app/common/widget/custom_button.dart';
 import 'package:robot_delivery/app/core/i18n/app_translation_keys.dart';
 import 'package:robot_delivery/app/core/theme/app_colors.dart';
+import 'package:robot_delivery/app/data/models/response/order_response.dart';
 
 import '../controllers/orders_controller.dart';
 
 part 'delivery_history_card.dart';
 
-enum DeliveryHistoryFilter {
-  all,
-  delivered,
-  pending,
-  cancelled,
-}
+enum DeliveryHistoryFilter { all, delivered, pending, cancelled }
 
 class DeliveryHistoryItem {
   const DeliveryHistoryItem({
@@ -33,61 +30,77 @@ class DeliveryHistoryItem {
   final String sender;
   final String dateTimeText;
   final ItemEnum status;
-
   final IconData leadingIcon;
   final Color leadingBg;
   final Color leadingFg;
   final bool showMapPreview;
+
+  static DeliveryHistoryItem fromOrder(OrderResponse order) {
+    final status = _mapStatus(order.status);
+    return DeliveryHistoryItem(
+      title: 'Order #${order.orderId}',
+      sender: order.senderName,
+      dateTimeText: DateFormat('MMM d, yyyy • h:mm a').format(order.createdAt.toLocal()),
+      status: status,
+      leadingIcon: _leadingIcon(status),
+      leadingBg: _leadingBg(status),
+      leadingFg: _leadingFg(status),
+    );
+  }
+
+  static ItemEnum _mapStatus(String s) {
+    switch (s.toUpperCase()) {
+      case 'DELIVERED':
+        return ItemEnum.delivered;
+      case 'WAIT_ROBOT':
+      case 'PENDING':
+      case 'DELIVERING':
+        return ItemEnum.arriving;
+      default:
+        return ItemEnum.arriving;
+    }
+  }
+
+  static IconData _leadingIcon(ItemEnum status) {
+    switch (status) {
+      case ItemEnum.delivered:
+        return Icons.check_circle_outline;
+      case ItemEnum.cancelled:
+        return Icons.cancel_outlined;
+      case ItemEnum.arriving:
+        return Icons.local_shipping_outlined;
+    }
+  }
+
+  static Color _leadingBg(ItemEnum status) {
+    switch (status) {
+      case ItemEnum.delivered:
+        return AppColors.primary10;
+      case ItemEnum.cancelled:
+        return AppColors.redSoft;
+      case ItemEnum.arriving:
+        return AppColors.orangeSoft;
+    }
+  }
+
+  static Color _leadingFg(ItemEnum status) {
+    switch (status) {
+      case ItemEnum.delivered:
+        return AppColors.primary;
+      case ItemEnum.cancelled:
+        return AppColors.error;
+      case ItemEnum.arriving:
+        return AppColors.warning;
+    }
+  }
 }
 
 class OrdersView extends GetView<OrdersController> {
   const OrdersView({super.key});
+
   @override
   Widget build(BuildContext context) {
     final Rx<DeliveryHistoryFilter> filter = DeliveryHistoryFilter.all.obs;
-
-    final thisWeek = <DeliveryHistoryItem>[
-      DeliveryHistoryItem(
-        title: 'Stitch Fix Order #4922',
-        sender: 'Stitch Fix Inc.',
-        dateTimeText: 'Oct 24, 2023 • 2:30 PM',
-        status: ItemEnum.delivered,
-        leadingIcon: Icons.local_shipping_outlined,
-        leadingBg: AppColors.primary10,
-        leadingFg: AppColors.primary,
-        showMapPreview: true,
-      ),
-      DeliveryHistoryItem(
-        title: 'Nike Air Max',
-        sender: 'Nike Store',
-        dateTimeText: 'Oct 22, 2023 • 10:15 AM',
-        status: ItemEnum.delivered,
-        leadingIcon: Icons.inventory_2_outlined,
-        leadingBg: AppColors.orangeSoft,
-        leadingFg: AppColors.warning,
-      ),
-    ];
-
-    final lastWeek = <DeliveryHistoryItem>[
-      DeliveryHistoryItem(
-        title: 'Threadless Tees',
-        sender: 'Threadless',
-        dateTimeText: 'Oct 18, 2023 • 4:45 PM',
-        status: ItemEnum.delivered,
-        leadingIcon: Icons.receipt_long_outlined,
-        leadingBg: AppColors.purpleSoft,
-        leadingFg: AppColors.purple,
-      ),
-      DeliveryHistoryItem(
-        title: 'Books Bundle',
-        sender: 'Amazon',
-        dateTimeText: 'Oct 15, 2023 • 9:00 AM',
-        status: ItemEnum.cancelled,
-        leadingIcon: Icons.cancel_outlined,
-        leadingBg: AppColors.redSoft,
-        leadingFg: AppColors.error,
-      ),
-    ];
 
     return Scaffold(
       backgroundColor: AppColors.slate100,
@@ -113,6 +126,7 @@ class OrdersView extends GetView<OrdersController> {
       ),
       body: Column(
         children: [
+          // Filter chips
           Container(
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -139,79 +153,72 @@ class OrdersView extends GetView<OrdersController> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    buildFilterChip(
-                      value: DeliveryHistoryFilter.all,
-                      label: AppTranslationKeys.all.tr,
-                    ),
+                    buildFilterChip(value: DeliveryHistoryFilter.all, label: AppTranslationKeys.all.tr),
                     const SizedBox(width: 10),
-                    buildFilterChip(
-                      value: DeliveryHistoryFilter.delivered,
-                      label: AppTranslationKeys.deliveredStatus.tr,
-                    ),
+                    buildFilterChip(value: DeliveryHistoryFilter.delivered, label: AppTranslationKeys.deliveredStatus.tr),
                     const SizedBox(width: 10),
-                    buildFilterChip(
-                      value: DeliveryHistoryFilter.pending,
-                      label: AppTranslationKeys.pending.tr,
-                    ),
+                    buildFilterChip(value: DeliveryHistoryFilter.pending, label: AppTranslationKeys.pending.tr),
                     const SizedBox(width: 10),
-                    buildFilterChip(
-                      value: DeliveryHistoryFilter.cancelled,
-                      label: AppTranslationKeys.cancelledStatus.tr,
-                    ),
+                    buildFilterChip(value: DeliveryHistoryFilter.cancelled, label: AppTranslationKeys.cancelledStatus.tr),
                   ],
                 ),
               );
             }),
           ),
+
+          // Order list
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              child: Obx(() {
-                bool matchesFilter(DeliveryHistoryItem item) {
-                  return switch (filter.value) {
-                    DeliveryHistoryFilter.all => true,
-                    DeliveryHistoryFilter.delivered => item.status == ItemEnum.delivered,
-                    DeliveryHistoryFilter.cancelled => item.status == ItemEnum.cancelled,
-                    DeliveryHistoryFilter.pending => item.status == ItemEnum.arriving,
-                  };
-                }
+            child: Obx(() {
+              final allOrders = controller.myOrders;
 
-                final filteredThisWeek = thisWeek.where(matchesFilter).toList();
-                final filteredLastWeek = lastWeek.where(matchesFilter).toList();
+              bool matchesFilter(OrderResponse order) {
+                final mapped = DeliveryHistoryItem._mapStatus(order.status);
+                return switch (filter.value) {
+                  DeliveryHistoryFilter.all => true,
+                  DeliveryHistoryFilter.delivered => mapped == ItemEnum.delivered,
+                  DeliveryHistoryFilter.cancelled => mapped == ItemEnum.cancelled,
+                  DeliveryHistoryFilter.pending => mapped == ItemEnum.arriving,
+                };
+              }
 
-                Widget sectionTitle(String text) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      text,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.slate500,
-                        letterSpacing: 1.2,
+              final filtered = allOrders.where(matchesFilter).toList();
+
+              if (filtered.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.inbox_outlined, size: 72, color: AppColors.slate300),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppTranslationKeys.noOrders.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.slate400,
+                        ),
                       ),
-                    ),
-                  );
-                }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    sectionTitle(AppTranslationKeys.thisWeek.tr),
-                    ...filteredThisWeek.map((e) => Padding(
-                          padding: const EdgeInsets.only(bottom: 14),
-                          child: DeliveryHistoryCard(item: e),
-                        )),
-                    const SizedBox(height: 8),
-                    sectionTitle(AppTranslationKeys.lastWeek.tr),
-                    ...filteredLastWeek.map((e) => Padding(
-                          padding: const EdgeInsets.only(bottom: 14),
-                          child: DeliveryHistoryCard(item: e),
-                        )),
-                  ],
+                    ],
+                  ),
                 );
-              }),
-            ),
+              }
+
+              return RefreshIndicator(
+                onRefresh: controller.refresh,
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: DeliveryHistoryCard(
+                        item: DeliveryHistoryItem.fromOrder(filtered[index]),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }),
           ),
         ],
       ),

@@ -30,9 +30,16 @@ class AuthRepository {
         AppEndpoints.login,
         data: request.toJson(),
       );
-
       final data = response.data;
-      return data;
+      if (data is Map<String, dynamic>) {
+        return ResponseData.fromJson(
+          data,
+          (json) => LoginResponse.fromJson(json as Map<String, dynamic>),
+        );
+      }
+
+      print('Login error: Invalid response format.');
+      return ResponseData(message: 'Login failed: Invalid response format.', data: null);
     } on DioException catch (e) {
       print('Login error: ${e.message}');
       return ResponseData(message: 'Login failed: ${e.message}', data: null);

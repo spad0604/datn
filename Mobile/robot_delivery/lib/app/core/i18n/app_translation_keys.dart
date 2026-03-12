@@ -102,6 +102,7 @@ abstract class AppTranslationKeys {
   static const String newLabel = 'new_label';
   static const String earlierLabel = 'earlier_label';
   static const String noNotifications = 'no_notifications';
+  static const String noOrders = 'no_orders';
 
   // Map
   static const String mapTitle = 'map_title';
@@ -115,4 +116,6 @@ abstract class AppTranslationKeys {
   static const String createNewOrder = 'create_new_order';
   static const String shippingLocation = 'shipping_location';
   static const String submitOrder = 'submit_order';
+
+  static const String loggingIn = 'logging_in';
 }

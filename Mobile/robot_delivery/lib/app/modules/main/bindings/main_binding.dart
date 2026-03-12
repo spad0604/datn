@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:robot_delivery/app/core/network/api_client.dart';
 import 'package:robot_delivery/app/core/storage/secure_token_storage.dart';
 import 'package:robot_delivery/app/data/repositories/auth_repository.dart';
+import 'package:robot_delivery/app/data/repositories/order_repository.dart';
 import 'package:robot_delivery/app/modules/map/controllers/map_controller.dart';
 import 'package:robot_delivery/app/modules/map/controllers/tracking_robot_controller.dart';
 import 'package:robot_delivery/app/modules/orders/bindings/orders_binding.dart';
@@ -12,9 +13,7 @@ import '../controllers/main_controller.dart';
 class MainBinding extends Bindings {
   @override
   void dependencies() {
-    if (!Get.isRegistered<MainController>()) {
-      Get.put<MainController>(MainController(), permanent: true);
-    }
+    
 
     // Home module dependencies (also used by networking/auth scaffolding).
     if (!Get.isRegistered<SecureTokenStorage>()) {
@@ -34,15 +33,22 @@ class MainBinding extends Bindings {
     }
 
     // Other tabs.
-    Get.lazyPut(OrdersBinding().dependencies);
+    OrdersBinding().dependencies();
 
     Get.lazyPut(() => TrackingRobotController());
+
+    Get.lazyPut(() => OrderRepository(Get.find<ApiClient>()));
 
     if (!Get.isRegistered<MapController>()) {
       Get.lazyPut<MapController>(() => MapController());
     }
     if (!Get.isRegistered<ProfileController>()) {
       Get.put<ProfileController>(ProfileController(), permanent: true);
+    }
+
+    // Ensure repositories and other dependencies are registered before creating MainController
+    if (!Get.isRegistered<MainController>()) {
+      Get.put<MainController>(MainController(), permanent: true);
     }
   }
 }

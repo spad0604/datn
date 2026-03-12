@@ -101,6 +101,7 @@ class EnUSTranslation extends Translations {
       AppTranslationKeys.newLabel: 'NEW',
       AppTranslationKeys.earlierLabel: 'EARLIER',
       AppTranslationKeys.noNotifications: 'No notifications',
+      AppTranslationKeys.noOrders: 'No orders found',
 
       // Map
       AppTranslationKeys.mapTitle: 'Map',
@@ -123,6 +124,8 @@ class EnUSTranslation extends Translations {
       AppTranslationKeys.createNewOrder: 'Create New Order',
       AppTranslationKeys.shippingLocation: 'Shipping Location',
       AppTranslationKeys.submitOrder: 'Submit Order',
+
+      AppTranslationKeys.loggingIn: 'Logging in...',
     },
   };
 }

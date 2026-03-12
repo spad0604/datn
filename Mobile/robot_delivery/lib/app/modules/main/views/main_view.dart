@@ -25,7 +25,7 @@ class MainView extends GetView<MainController> {
           top: false,
           child: IndexedStack(
             index: controller.tabIndex.value,
-            children: const [
+            children: [
               HomeView(),
               OrdersView(),
               MapView(),

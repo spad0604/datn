@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import 'app/core/i18n/app_translations.dart';
 import 'app/routes/app_pages.dart';
-
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
       // Routes
       initialRoute: Routes.LOGIN,
       getPages: AppPages.pages,
+      builder: EasyLoading.init(),
     );
   }
 }
