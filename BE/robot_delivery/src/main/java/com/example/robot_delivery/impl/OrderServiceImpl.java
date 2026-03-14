@@ -30,6 +30,7 @@ public class OrderServiceImpl implements IOrderService {
     private final OrderRepository orderRepository;
     private final RobotRepository robotRepository;
     private final UserRepository userRepository;
+    private final com.example.robot_delivery.service.NotificationService notificationService;
 
     private OrderResponse.UserSummary mapToUserSummary(User user) {
         if (user == null) return null;
@@ -112,6 +113,29 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         Order savedOrder = orderRepository.save(order);
+
+        // --- GỬI THÔNG BÁO ---
+        // 1. Thông báo cho người nhận (nếu có tài khoản)
+        if (savedOrder.getRecipientId() != null) {
+            notificationService.sendAndSaveNotification(
+                savedOrder.getRecipientId(),
+                "Bạn có đơn hàng mới!",
+                "Người gửi " + savedOrder.getSenderName() + " vừa tạo một đơn hàng cho bạn. Mã PIN nhận hàng là: " + savedOrder.getPinCode(),
+                "ORDER_CREATED",
+                savedOrder.getId()
+            );
+        }
+
+        // 2. Thông báo cho người gửi nếu đã gán robot
+        if (nearestRobot != null) {
+            notificationService.sendAndSaveNotification(
+                savedOrder.getCustomerId(),
+                "Đơn hàng đã có robot!",
+                "Robot " + nearestRobot.getRobotName() + " đang di chuyển đến điểm lấy hàng của bạn.",
+                "ROBOT_ASSIGNED",
+                savedOrder.getId()
+            );
+        }
         String message = (nearestRobot != null) ? "Order created and robot assigned" : "Order created. Waiting for an available robot.";
         
         return ResponseData.<OrderResponse>builder()
@@ -158,6 +182,17 @@ public class OrderServiceImpl implements IOrderService {
                 Robot robot = existing.getRobot();
                 robot.setStatus(RobotStatusEnum.IDLE);
                 robotRepository.save(robot);
+            }
+
+            // Thông báo cho người nhận nếu đơn bị huỷ
+            if (existing.getRecipientId() != null) {
+                notificationService.sendAndSaveNotification(
+                    existing.getRecipientId(),
+                    "Đơn hàng bị huỷ",
+                    "Người gửi đã huỷ đơn hàng gửi cho bạn.",
+                    "ORDER_CANCELLED",
+                    existing.getId()
+                );
             }
 
             orderRepository.delete(existing);
@@ -259,6 +294,15 @@ public class OrderServiceImpl implements IOrderService {
             
             robotRepository.save(robot);
             Order savedOrder = orderRepository.save(order);
+            
+            // Thông báo cho người gửi khi người nhận đã nhận hàng thành công
+            notificationService.sendAndSaveNotification(
+                savedOrder.getCustomerId(),
+                "Giao hàng thành công!",
+                "Đơn hàng của bạn đã được người nhận xác nhận lấy hàng thành công.",
+                "ORDER_DELIVERED",
+                savedOrder.getId()
+            );
             
             return ResponseData.<OrderResponse>builder()
                     .message("Receiver confirmed successfully")

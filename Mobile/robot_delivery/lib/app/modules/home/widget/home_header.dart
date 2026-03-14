@@ -42,17 +42,41 @@ class HomeHeaderWidget extends StatelessWidget {
               ),
             ],
           ),
-          CustomIconButton(
-            icon: Icons.notifications_none,
-            backGroundColor: AppColors.primary.withValues(alpha: 0.1),
-            iconColor: AppColors.primary,
-            iconSize: 18,
-            borderRadius: BorderRadius.circular(9999),
-            padding: const EdgeInsets.all(9),
-            onPressed: () {
-              Get.toNamed(Routes.NOTIFICATIONS);
-            },
-          ),
+          Obx(() {
+            final hasUnread =
+                Get.find<MainController>().unreadNotificationCount.value > 0;
+            return Stack(
+              children: [
+                CustomIconButton(
+                  icon: Icons.notifications_none,
+                  backGroundColor: AppColors.primary.withValues(alpha: 0.1),
+                  iconColor: AppColors.primary,
+                  iconSize: 18,
+                  borderRadius: BorderRadius.circular(9999),
+                  padding: const EdgeInsets.all(9),
+                  onPressed: () {
+                    Get.toNamed(Routes.NOTIFICATIONS)?.then((_) {
+                      Get.find<MainController>()
+                          .fetchUnreadNotificationsCount();
+                    });
+                  },
+                ),
+                if (hasUnread)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
         ],
       ),
     );

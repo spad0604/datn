@@ -9,15 +9,13 @@ import 'package:robot_delivery/app/modules/orders/bindings/orders_binding.dart';
 import 'package:robot_delivery/app/modules/profile/controllers/profile_controller.dart';
 import 'package:robot_delivery/app/data/repositories/user_repository.dart';
 import 'package:robot_delivery/app/data/repositories/geocoding_repository.dart';
+import 'package:robot_delivery/app/data/repositories/notification_repository.dart';
 import 'package:robot_delivery/app/modules/home/home_controller.dart';
 import '../controllers/main_controller.dart';
 
 class MainBinding extends Bindings {
   @override
   void dependencies() {
-    
-
-    // Home module dependencies (also used by networking/auth scaffolding).
     if (!Get.isRegistered<SecureTokenStorage>()) {
       Get.lazyPut<SecureTokenStorage>(() => SecureTokenStorage(), fenix: true);
     }
@@ -34,7 +32,6 @@ class MainBinding extends Bindings {
       );
     }
 
-    // Other tabs.
     OrdersBinding().dependencies();
 
     Get.lazyPut(() => TrackingRobotController());
@@ -52,7 +49,8 @@ class MainBinding extends Bindings {
       Get.put<ProfileController>(ProfileController(), permanent: true);
     }
 
-    // Ensure repositories and other dependencies are registered before creating MainController
+    Get.lazyPut(() => NotificationRepository(Get.find<ApiClient>()));
+
     if (!Get.isRegistered<MainController>()) {
       Get.put<MainController>(MainController(), permanent: true);
     }

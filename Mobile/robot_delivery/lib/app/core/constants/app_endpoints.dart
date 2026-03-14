@@ -19,4 +19,7 @@ class AppEndpoints {
   static const String confirmReceiver = '/orders/{orderId}/confirm-receiver';
   static const String searchUser = '/users/search';
   static const String myInfo = '/users/my-info';
+
+  static const String myNotifications = '/notifications';
+  static const String markNotificationRead = '/notifications/{id}/read';
 }

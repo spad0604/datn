@@ -53,4 +53,10 @@ public class Order {
 
     @Column(name = "created_at")
     private java.time.LocalDateTime createdAt;
+
+    @Column(name = "is_pickup_notified")
+    private Boolean isPickupNotified;
+
+    @Column(name = "is_delivery_notified")
+    private Boolean isDeliveryNotified;
 }

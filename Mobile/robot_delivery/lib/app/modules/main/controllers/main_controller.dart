@@ -2,15 +2,19 @@ import 'package:get/get.dart';
 import 'package:robot_delivery/app/common/widget/app_bottom_nav_bar.dart';
 import 'package:robot_delivery/app/data/models/response/order_response.dart';
 import 'package:robot_delivery/app/data/repositories/order_repository.dart';
+import 'package:robot_delivery/app/data/repositories/notification_repository.dart';
 
 class MainController extends GetxController {
   final RxInt tabIndex = 0.obs;
 
   final OrderRepository orderRepository = Get.find<OrderRepository>();
+  final NotificationRepository notificationRepository = Get.find<NotificationRepository>();
 
   final RxList<OrderResponse> myOrders = <OrderResponse>[].obs;
 
   final RxList<OrderResponse> myReceivedOrders = <OrderResponse>[].obs;
+
+  final RxInt unreadNotificationCount = 0.obs;
 
   bool _didSetInitialTab = false;
 
@@ -19,6 +23,7 @@ class MainController extends GetxController {
     super.onInit();
     fetchMyReceivedOrders();
     fetchMyOrders();
+    fetchUnreadNotificationsCount();
   }
 
   Future<void> fetchMyReceivedOrders() async {
@@ -39,10 +44,18 @@ class MainController extends GetxController {
     }
   }
 
+  Future<void> fetchUnreadNotificationsCount() async {
+    final response = await notificationRepository.getMyNotifications();
+    if (response.data != null) {
+      unreadNotificationCount.value = response.data!.where((n) => !n.isRead).length;
+    }
+  }
+
   Future<void> refreshOrders() async {
     await Future.wait([
       fetchMyReceivedOrders(),
       fetchMyOrders(),
+      fetchUnreadNotificationsCount(),
     ]);
   }
 
