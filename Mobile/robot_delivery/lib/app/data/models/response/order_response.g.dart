@@ -13,8 +13,8 @@ _OrderResponse _$OrderResponseFromJson(Map<String, dynamic> json) =>
       customer: Customer.fromJson(json['customer'] as Map<String, dynamic>),
       recipient: Customer.fromJson(json['recipient'] as Map<String, dynamic>),
       recipientPhone: json['recipientPhone'] as String,
-      streamLat: (json['streamLat'] as num).toDouble(),
-      streamLng: (json['streamLng'] as num).toDouble(),
+      startLat: (json['startLat'] as num).toDouble(),
+      startLng: (json['startLng'] as num).toDouble(),
       deliveryLat: (json['deliveryLat'] as num).toDouble(),
       deliveryLng: (json['deliveryLng'] as num).toDouble(),
       pinCode: json['pinCode'] as String,
@@ -32,8 +32,8 @@ Map<String, dynamic> _$OrderResponseToJson(_OrderResponse instance) =>
       'customer': instance.customer,
       'recipient': instance.recipient,
       'recipientPhone': instance.recipientPhone,
-      'streamLat': instance.streamLat,
-      'streamLng': instance.streamLng,
+      'startLat': instance.startLat,
+      'startLng': instance.startLng,
       'deliveryLat': instance.deliveryLat,
       'deliveryLng': instance.deliveryLng,
       'pinCode': instance.pinCode,
@@ -46,14 +46,22 @@ Map<String, dynamic> _$OrderResponseToJson(_OrderResponse instance) =>
 
 _Customer _$CustomerFromJson(Map<String, dynamic> json) => _Customer(
   id: (json['id'] as num).toInt(),
-  username: json['username'] as String,
-  fullName: json['fullName'] as String,
-  phoneNumber: json['phoneNumber'] as String,
+  username: json['username'] as String?,
+  phone: json['phone'] as String?,
+  phoneNumber: json['phoneNumber'] as String?,
+  firstName: json['firstName'] as String?,
+  lastName: json['lastName'] as String?,
+  email: json['email'] as String?,
+  address: json['address'] as String?,
 );
 
 Map<String, dynamic> _$CustomerToJson(_Customer instance) => <String, dynamic>{
   'id': instance.id,
   'username': instance.username,
-  'fullName': instance.fullName,
+  'phone': instance.phone,
   'phoneNumber': instance.phoneNumber,
+  'firstName': instance.firstName,
+  'lastName': instance.lastName,
+  'email': instance.email,
+  'address': instance.address,
 };

@@ -39,7 +39,10 @@ class AuthRepository {
       }
 
       print('Login error: Invalid response format.');
-      return ResponseData(message: 'Login failed: Invalid response format.', data: null);
+      return ResponseData(
+        message: 'Login failed: Invalid response format.',
+        data: null,
+      );
     } on DioException catch (e) {
       print('Login error: ${e.message}');
       return ResponseData(message: 'Login failed: ${e.message}', data: null);
@@ -55,36 +58,47 @@ class AuthRepository {
 
       final data = response.data;
       if (data is Map<String, dynamic>) {
-        return ResponseData(message: 'Registration successful.', data: LoginResponse.fromJson(data));
+        return ResponseData(
+          message: 'Registration successful.',
+          data: LoginResponse.fromJson(data),
+        );
       }
 
       print('Register error: Invalid response format.');
-      return ResponseData(message: 'Registration failed: Invalid response format.', data: null);
+      return ResponseData(
+        message: 'Registration failed: Invalid response format.',
+        data: null,
+      );
     } on DioException catch (e) {
       print('Register error: ${e.message}');
-      return ResponseData(message: 'Registration failed: ${e.message}', data: null);
+      return ResponseData(
+        message: 'Registration failed: ${e.message}',
+        data: null,
+      );
     }
   }
 
-  /// Calls refresh token endpoint.
-  /// Input: refreshToken
-  /// Output: LoginRequest
-  Future<ResponseData<LoginResponse>> refreshToken({required String refreshToken}) async {
+  Future<ResponseData<LoginResponse>> refreshToken({
+    required String refreshToken,
+  }) async {
     try {
       final response = await _dio.post<dynamic>(
         AppEndpoints.refreshToken,
-        data: {
-          'refreshToken': refreshToken,
-        },
+        queryParameters: {'refreshToken': refreshToken},
       );
 
       final data = response.data;
       if (data is Map<String, dynamic>) {
-        return ResponseData(message: 'Token refreshed successfully.', data: LoginResponse.fromJson(data));
+        return ResponseData.fromJson(
+          data,
+          (json) => LoginResponse.fromJson(json as Map<String, dynamic>),
+        );
       }
 
-      throw NetworkException('Refresh token response không hợp lệ.',
-          statusCode: response.statusCode);
+      throw NetworkException(
+        'Refresh token response không hợp lệ.',
+        statusCode: response.statusCode,
+      );
     } on DioException catch (e) {
       throw NetworkException.fromDioException(e);
     }

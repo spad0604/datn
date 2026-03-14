@@ -12,6 +12,8 @@ abstract class Routes {
   static const PROFILE = _Paths.PROFILE;
   static const CREATE_ORDER = _Paths.CREATE_ORDER;
   static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
+  static const ORDER_DETAILS = _Paths.ORDER_DETAILS;
+  static const SPLASH = _Paths.SPLASH;
 }
 
 abstract class _Paths {
@@ -24,4 +26,6 @@ abstract class _Paths {
   static const PROFILE = '/profile';
   static const CREATE_ORDER = '/create-order';
   static const NOTIFICATIONS = '/notifications';
+  static const ORDER_DETAILS = '/order-details';
+  static const SPLASH = '/splash';
 }

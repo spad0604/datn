@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateOrderRequest {
 
- String get recipientPhone; String get streamLat; String get streamLng; String get deliveryLat; String get deliveryLng;
+ String get recipientPhone; String get startLat; String get startLng; String get deliveryLat; String get deliveryLng;
 /// Create a copy of CreateOrderRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $CreateOrderRequestCopyWith<CreateOrderRequest> get copyWith => _$CreateOrderReq
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateOrderRequest&&(identical(other.recipientPhone, recipientPhone) || other.recipientPhone == recipientPhone)&&(identical(other.streamLat, streamLat) || other.streamLat == streamLat)&&(identical(other.streamLng, streamLng) || other.streamLng == streamLng)&&(identical(other.deliveryLat, deliveryLat) || other.deliveryLat == deliveryLat)&&(identical(other.deliveryLng, deliveryLng) || other.deliveryLng == deliveryLng));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateOrderRequest&&(identical(other.recipientPhone, recipientPhone) || other.recipientPhone == recipientPhone)&&(identical(other.startLat, startLat) || other.startLat == startLat)&&(identical(other.startLng, startLng) || other.startLng == startLng)&&(identical(other.deliveryLat, deliveryLat) || other.deliveryLat == deliveryLat)&&(identical(other.deliveryLng, deliveryLng) || other.deliveryLng == deliveryLng));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,recipientPhone,streamLat,streamLng,deliveryLat,deliveryLng);
+int get hashCode => Object.hash(runtimeType,recipientPhone,startLat,startLng,deliveryLat,deliveryLng);
 
 @override
 String toString() {
-  return 'CreateOrderRequest(recipientPhone: $recipientPhone, streamLat: $streamLat, streamLng: $streamLng, deliveryLat: $deliveryLat, deliveryLng: $deliveryLng)';
+  return 'CreateOrderRequest(recipientPhone: $recipientPhone, startLat: $startLat, startLng: $startLng, deliveryLat: $deliveryLat, deliveryLng: $deliveryLng)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $CreateOrderRequestCopyWith<$Res>  {
   factory $CreateOrderRequestCopyWith(CreateOrderRequest value, $Res Function(CreateOrderRequest) _then) = _$CreateOrderRequestCopyWithImpl;
 @useResult
 $Res call({
- String recipientPhone, String streamLat, String streamLng, String deliveryLat, String deliveryLng
+ String recipientPhone, String startLat, String startLng, String deliveryLat, String deliveryLng
 });
 
 
@@ -65,11 +65,11 @@ class _$CreateOrderRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateOrderRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? recipientPhone = null,Object? streamLat = null,Object? streamLng = null,Object? deliveryLat = null,Object? deliveryLng = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,}) {
   return _then(_self.copyWith(
 recipientPhone: null == recipientPhone ? _self.recipientPhone : recipientPhone // ignore: cast_nullable_to_non_nullable
-as String,streamLat: null == streamLat ? _self.streamLat : streamLat // ignore: cast_nullable_to_non_nullable
-as String,streamLng: null == streamLng ? _self.streamLng : streamLng // ignore: cast_nullable_to_non_nullable
+as String,startLat: null == startLat ? _self.startLat : startLat // ignore: cast_nullable_to_non_nullable
+as String,startLng: null == startLng ? _self.startLng : startLng // ignore: cast_nullable_to_non_nullable
 as String,deliveryLat: null == deliveryLat ? _self.deliveryLat : deliveryLat // ignore: cast_nullable_to_non_nullable
 as String,deliveryLng: null == deliveryLng ? _self.deliveryLng : deliveryLng // ignore: cast_nullable_to_non_nullable
 as String,
@@ -157,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String recipientPhone,  String streamLat,  String streamLng,  String deliveryLat,  String deliveryLng)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String recipientPhone,  String startLat,  String startLng,  String deliveryLat,  String deliveryLng)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateOrderRequest() when $default != null:
-return $default(_that.recipientPhone,_that.streamLat,_that.streamLng,_that.deliveryLat,_that.deliveryLng);case _:
+return $default(_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng);case _:
   return orElse();
 
 }
@@ -178,10 +178,10 @@ return $default(_that.recipientPhone,_that.streamLat,_that.streamLng,_that.deliv
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String recipientPhone,  String streamLat,  String streamLng,  String deliveryLat,  String deliveryLng)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String recipientPhone,  String startLat,  String startLng,  String deliveryLat,  String deliveryLng)  $default,) {final _that = this;
 switch (_that) {
 case _CreateOrderRequest():
-return $default(_that.recipientPhone,_that.streamLat,_that.streamLng,_that.deliveryLat,_that.deliveryLng);case _:
+return $default(_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +198,10 @@ return $default(_that.recipientPhone,_that.streamLat,_that.streamLng,_that.deliv
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String recipientPhone,  String streamLat,  String streamLng,  String deliveryLat,  String deliveryLng)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String recipientPhone,  String startLat,  String startLng,  String deliveryLat,  String deliveryLng)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateOrderRequest() when $default != null:
-return $default(_that.recipientPhone,_that.streamLat,_that.streamLng,_that.deliveryLat,_that.deliveryLng);case _:
+return $default(_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng);case _:
   return null;
 
 }
@@ -213,12 +213,12 @@ return $default(_that.recipientPhone,_that.streamLat,_that.streamLng,_that.deliv
 @JsonSerializable()
 
 class _CreateOrderRequest implements CreateOrderRequest {
-  const _CreateOrderRequest({required this.recipientPhone, required this.streamLat, required this.streamLng, required this.deliveryLat, required this.deliveryLng});
+  const _CreateOrderRequest({required this.recipientPhone, required this.startLat, required this.startLng, required this.deliveryLat, required this.deliveryLng});
   factory _CreateOrderRequest.fromJson(Map<String, dynamic> json) => _$CreateOrderRequestFromJson(json);
 
 @override final  String recipientPhone;
-@override final  String streamLat;
-@override final  String streamLng;
+@override final  String startLat;
+@override final  String startLng;
 @override final  String deliveryLat;
 @override final  String deliveryLng;
 
@@ -235,16 +235,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateOrderRequest&&(identical(other.recipientPhone, recipientPhone) || other.recipientPhone == recipientPhone)&&(identical(other.streamLat, streamLat) || other.streamLat == streamLat)&&(identical(other.streamLng, streamLng) || other.streamLng == streamLng)&&(identical(other.deliveryLat, deliveryLat) || other.deliveryLat == deliveryLat)&&(identical(other.deliveryLng, deliveryLng) || other.deliveryLng == deliveryLng));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateOrderRequest&&(identical(other.recipientPhone, recipientPhone) || other.recipientPhone == recipientPhone)&&(identical(other.startLat, startLat) || other.startLat == startLat)&&(identical(other.startLng, startLng) || other.startLng == startLng)&&(identical(other.deliveryLat, deliveryLat) || other.deliveryLat == deliveryLat)&&(identical(other.deliveryLng, deliveryLng) || other.deliveryLng == deliveryLng));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,recipientPhone,streamLat,streamLng,deliveryLat,deliveryLng);
+int get hashCode => Object.hash(runtimeType,recipientPhone,startLat,startLng,deliveryLat,deliveryLng);
 
 @override
 String toString() {
-  return 'CreateOrderRequest(recipientPhone: $recipientPhone, streamLat: $streamLat, streamLng: $streamLng, deliveryLat: $deliveryLat, deliveryLng: $deliveryLng)';
+  return 'CreateOrderRequest(recipientPhone: $recipientPhone, startLat: $startLat, startLng: $startLng, deliveryLat: $deliveryLat, deliveryLng: $deliveryLng)';
 }
 
 
@@ -255,7 +255,7 @@ abstract mixin class _$CreateOrderRequestCopyWith<$Res> implements $CreateOrderR
   factory _$CreateOrderRequestCopyWith(_CreateOrderRequest value, $Res Function(_CreateOrderRequest) _then) = __$CreateOrderRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String recipientPhone, String streamLat, String streamLng, String deliveryLat, String deliveryLng
+ String recipientPhone, String startLat, String startLng, String deliveryLat, String deliveryLng
 });
 
 
@@ -272,11 +272,11 @@ class __$CreateOrderRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateOrderRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? recipientPhone = null,Object? streamLat = null,Object? streamLng = null,Object? deliveryLat = null,Object? deliveryLng = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,}) {
   return _then(_CreateOrderRequest(
 recipientPhone: null == recipientPhone ? _self.recipientPhone : recipientPhone // ignore: cast_nullable_to_non_nullable
-as String,streamLat: null == streamLat ? _self.streamLat : streamLat // ignore: cast_nullable_to_non_nullable
-as String,streamLng: null == streamLng ? _self.streamLng : streamLng // ignore: cast_nullable_to_non_nullable
+as String,startLat: null == startLat ? _self.startLat : startLat // ignore: cast_nullable_to_non_nullable
+as String,startLng: null == startLng ? _self.startLng : startLng // ignore: cast_nullable_to_non_nullable
 as String,deliveryLat: null == deliveryLat ? _self.deliveryLat : deliveryLat // ignore: cast_nullable_to_non_nullable
 as String,deliveryLng: null == deliveryLng ? _self.deliveryLng : deliveryLng // ignore: cast_nullable_to_non_nullable
 as String,

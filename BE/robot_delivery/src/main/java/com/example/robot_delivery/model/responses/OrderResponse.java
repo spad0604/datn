@@ -13,8 +13,8 @@ public class OrderResponse {
     private UserSummary customer;
     private UserSummary recipient;
     private String recipientPhone;
-    private Double streamLat;
-    private Double streamLng;
+    private Double startLat;
+    private Double startLng;
     private Double deliveryLat;
     private Double deliveryLng;
     private String pinCode;

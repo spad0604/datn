@@ -1,37 +1,35 @@
 import 'dart:isolate';
 
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:robot_delivery/app/service/socket_isolate_service.dart';
 
 class TrackingRobotController extends GetxController {
-  RxDouble robotLat = 0.0.obs;
-  RxDouble robotLng = 0.0.obs;
+  final Rx<LatLng?> robotLocation = Rx<LatLng?>(null);
 
   Isolate? _isolate;
-
   final ReceivePort _receivePort = ReceivePort();
 
   void startTracking(String robotId) async {
     stopTracking();
 
-    _isolate = await Isolate.spawn(_isolateEntry, [
-      _receivePort.sendPort,
-      robotId,
-    ]);
+    _isolate = await Isolate.spawn(
+      SocketIsolateService.spawnIsolateEntry,
+      [_receivePort.sendPort, robotId],
+    );
 
     _receivePort.listen((message) {
-      if (message['type'] == 'location') {
+      if (message is Map && message['type'] == 'location') {
         final data = message['data'];
-        robotLat.value = data['latitude'];
-        robotLng.value = data['longitude'];
+        if (data != null) {
+          final lat = double.tryParse(data['lat']?.toString() ?? '');
+          final lng = double.tryParse(data['lng']?.toString() ?? '');
+          if (lat != null && lng != null) {
+            robotLocation.value = LatLng(lat, lng);
+          }
+        }
       }
     });
-  }
-
-  static void _isolateEntry(List<dynamic> args) {
-    SendPort sendPort = args[0];
-    String rId = args[1];
-    SocketIsolateService.spawn(sendPort, rId);
   }
 
   void stopTracking() {

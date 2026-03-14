@@ -6,8 +6,8 @@ part 'create_order_request.g.dart';
 abstract class CreateOrderRequest with _$CreateOrderRequest {
   const factory CreateOrderRequest({
     required String recipientPhone,
-    required String streamLat,
-    required String streamLng,
+    required String startLat,
+    required String startLng,
     required String deliveryLat,
     required String deliveryLng,
     

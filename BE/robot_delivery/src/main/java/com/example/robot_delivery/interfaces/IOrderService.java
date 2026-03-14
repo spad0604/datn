@@ -13,4 +13,7 @@ public interface IOrderService {
     ResponseData<List<OrderResponse>> getMyCreatedOrders(String username);
     ResponseData<List<OrderResponse>> getMyReceivedOrders(String username);
     ResponseData<OrderResponse> getRobotCurrentOrder(Long robotId);
+    
+    ResponseData<OrderResponse> confirmSender(Long orderId, String username);
+    ResponseData<OrderResponse> confirmReceiver(Long orderId, String username);
 }

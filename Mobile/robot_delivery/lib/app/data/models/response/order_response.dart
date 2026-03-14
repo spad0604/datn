@@ -11,8 +11,8 @@ abstract class OrderResponse with _$OrderResponse {
     required Customer customer,
     required Customer recipient,
     required String recipientPhone,
-    required double streamLat,
-    required double streamLng,
+    required double startLat,
+    required double startLng,
     required double deliveryLat,
     required double deliveryLng,
     required String pinCode,
@@ -30,10 +30,23 @@ abstract class OrderResponse with _$OrderResponse {
 abstract class Customer with _$Customer {
   const factory Customer({
     required int id,
-    required String username,
-    required String fullName,
-    required String phoneNumber,
+    String? username,
+    String? phone,
+    String? phoneNumber,
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? address,
   }) = _Customer;
+
+  const Customer._();
+
+  String get fullName {
+    final first = firstName ?? '';
+    final last = lastName ?? '';
+    if (first.isEmpty && last.isEmpty) return username ?? 'Unknown User';
+    return '$first $last'.trim();
+  }
 
   factory Customer.fromJson(Map<String, dynamic> json) => _$CustomerFromJson(json);
 }

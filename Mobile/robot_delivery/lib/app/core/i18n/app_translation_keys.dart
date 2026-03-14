@@ -116,6 +116,7 @@ abstract class AppTranslationKeys {
   static const String createNewOrder = 'create_new_order';
   static const String shippingLocation = 'shipping_location';
   static const String submitOrder = 'submit_order';
+  static const String orderDetails = 'order_details';
 
   static const String loggingIn = 'logging_in';
 }

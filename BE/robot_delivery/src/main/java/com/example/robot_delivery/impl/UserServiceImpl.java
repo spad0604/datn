@@ -182,6 +182,14 @@ public class UserServiceImpl implements IUserService {
         return userRepository.findByEmail(email).orElse(null);
     }
 
+    @Override
+    public User findUserByPhoneNumber(String phoneNumber) {
+        if (phoneNumber == null) {
+            return null;
+        }
+        return userRepository.findByPhoneNumber(phoneNumber).orElse(null);
+    }
+
     private RefreshToken createOrRotateRefreshToken(User user) {
         RefreshToken token = refreshTokenRepository.findByUser(user).orElse(null);
         if (token == null) {

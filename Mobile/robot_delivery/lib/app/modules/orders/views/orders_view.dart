@@ -209,10 +209,17 @@ class OrdersView extends GetView<OrdersController> {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
+                    final order = filtered[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 14),
-                      child: DeliveryHistoryCard(
-                        item: DeliveryHistoryItem.fromOrder(filtered[index]),
+                      child: GestureDetector(
+                        onTap: () => Get.toNamed(
+                          '/order-details',
+                          arguments: order,
+                        ),
+                        child: DeliveryHistoryCard(
+                          item: DeliveryHistoryItem.fromOrder(order),
+                        ),
                       ),
                     );
                   },

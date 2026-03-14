@@ -4,13 +4,29 @@ import 'package:latlong2/latlong.dart';
 import 'package:robot_delivery/app/data/models/nominatim_model.dart';
 import 'package:robot_delivery/app/data/repositories/geocoding_repository.dart';
 import 'package:robot_delivery/app/modules/home/location_picker_map.dart';
+import 'package:robot_delivery/app/core/utils/app_snackbar.dart';
+
+import 'package:robot_delivery/app/data/repositories/user_repository.dart';
+import 'package:robot_delivery/app/data/repositories/order_repository.dart';
+import 'package:robot_delivery/app/data/models/request/create_order_request.dart';
 
 class HomeController extends GetxController {
-  HomeController({GeocodingRepository? geocodingRepository})
-    : _geocodingRepository =
-          geocodingRepository ?? Get.find<GeocodingRepository>();
+  HomeController({
+    GeocodingRepository? geocodingRepository,
+    UserRepository? userRepository,
+    OrderRepository? orderRepository,
+  })  : _geocodingRepository =
+            geocodingRepository ?? Get.find<GeocodingRepository>(),
+        _userRepository = userRepository ?? Get.find<UserRepository>(),
+        _orderRepository = orderRepository ?? Get.find<OrderRepository>();
 
   final GeocodingRepository _geocodingRepository;
+  final UserRepository _userRepository;
+  final OrderRepository _orderRepository;
+
+  final RxBool isCreatingOrder = false.obs;
+
+  final TextEditingController recipientPhoneController = TextEditingController();
 
   final TextEditingController recipientNameController = TextEditingController();
 
@@ -36,8 +52,12 @@ class HomeController extends GetxController {
   final RxnDouble recipientLat = RxnDouble();
   final RxnDouble recipientLon = RxnDouble();
 
+  final RxBool isSearchingUser = false.obs;
+  final RxString userSearchError = ''.obs;
+
   Worker? _shippingDebounceWorker;
   Worker? _recipientDebounceWorker;
+  Worker? _phoneDebounceWorker;
 
   @override
   void onInit() {
@@ -74,6 +94,69 @@ class HomeController extends GetxController {
         isSearchingRecipient.value = false;
       }
     }, time: const Duration(seconds: 1));
+
+    _phoneDebounceWorker = debounce<String>(
+      recipientPhoneController.text.obs, 
+      (phone) => {}, // Changed to use explicit button for phone search to avoid spamming
+    );
+  }
+
+  Future<void> searchUserByPhone() async {
+    final phone = recipientPhoneController.text.trim();
+    if (phone.isEmpty) return;
+
+    isSearchingUser.value = true;
+    userSearchError.value = '';
+
+    try {
+      final response = await _userRepository.searchUserByPhone(phone);
+      if (response.data != null) {
+        final name = response.data!.fullName ?? response.data!.username ?? 'Unknown';
+        recipientNameController.text = name;
+        AppSnackbar.success('Tìm thấy người dùng: $name');
+      } else {
+        userSearchError.value = 'Không tìm thấy người dùng';
+        AppSnackbar.error('Không tìm thấy người dùng với số điện thoại này');
+      }
+    } catch (e) {
+      userSearchError.value = 'Lỗi tìm kiếm';
+    } finally {
+      isSearchingUser.value = false;
+    }
+  }
+
+  Future<void> submitOrder() async {
+    if (recipientNameController.text.isEmpty ||
+        recipientPhoneController.text.isEmpty ||
+        shippingLat.value == null ||
+        recipientLat.value == null) {
+      AppSnackbar.error('Vui lòng điền đầy đủ thông tin bắt buộc và chọn vị trí trên bản đồ');
+      return;
+    }
+
+    isCreatingOrder.value = true;
+    try {
+      final request = CreateOrderRequest(
+        recipientPhone: recipientPhoneController.text.trim(),
+        startLat: shippingLat.value!.toString(),
+        startLng: shippingLon.value!.toString(),
+        deliveryLat: recipientLat.value!.toString(),
+        deliveryLng: recipientLon.value!.toString(),
+      );
+
+      final response = await _orderRepository.createOrder(request);
+
+      if (response.data != null) {
+        AppSnackbar.success('Tạo đơn hàng thành công!');
+        Get.back(); // Or navigate to order details
+      } else {
+        AppSnackbar.error(response.message ?? 'Lỗi tạo đơn hàng');
+      }
+    } catch (e) {
+      AppSnackbar.error('Đã xảy ra lỗi không mong muốn');
+    } finally {
+      isCreatingOrder.value = false;
+    }
   }
 
   void onShippingQueryChanged(String value) {
@@ -157,6 +240,8 @@ class HomeController extends GetxController {
   void onClose() {
     _shippingDebounceWorker?.dispose();
     _recipientDebounceWorker?.dispose();
+    _phoneDebounceWorker?.dispose();
+    recipientPhoneController.dispose();
     recipientNameController.dispose();
     shippingLocationController.dispose();
     recipientAddressController.dispose();

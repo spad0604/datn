@@ -32,9 +32,9 @@ public class Order {
 
     private String deliveryId;
 
-    private Double streamLat;
+    private Double startLat;
 
-    private Double streamLng;
+    private Double startLng;
 
     private Double deliveryLat;
 

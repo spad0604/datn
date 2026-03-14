@@ -9,6 +9,9 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/main/bindings/main_binding.dart';
 import '../modules/main/views/main_view.dart';
+import '../modules/orders/bindings/order_detail_binding.dart';
+import '../modules/orders/views/order_detail_view.dart';
+import '../modules/splash/splash_view.dart';
 
 part 'app_routes.dart';
 
@@ -50,6 +53,15 @@ abstract class AppPages {
       name: Routes.NOTIFICATIONS,
       page: () => const NotificationsView(),
       binding: NotificationsBinding(),
+    ),
+    GetPage(
+      name: Routes.ORDER_DETAILS,
+      page: () => const OrderDetailView(),
+      binding: OrderDetailBinding(),
+    ),
+    GetPage(
+      name: Routes.SPLASH,
+      page: () => const SplashView(),
     ),
   ];
 }

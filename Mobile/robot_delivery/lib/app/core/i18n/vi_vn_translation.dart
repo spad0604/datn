@@ -124,6 +124,7 @@ class ViVNTranslation extends Translations {
       AppTranslationKeys.createNewOrder: 'Tạo đơn hàng mới',
       AppTranslationKeys.shippingLocation: 'Vị trí giao hàng',
       AppTranslationKeys.submitOrder: 'Gửi đơn hàng',
+      AppTranslationKeys.orderDetails: 'Chi tiết đơn hàng',
 
       AppTranslationKeys.loggingIn: 'Đang đăng nhập...',
     },

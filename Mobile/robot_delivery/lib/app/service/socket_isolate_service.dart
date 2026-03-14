@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 
@@ -6,36 +5,40 @@ import 'package:robot_delivery/app/core/constants/app_config.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 
 class SocketIsolateService {
-  static Future<void> spawn(SendPort mainSendPort, String robotId) async {
-    final stompConfig = StompConfig(
-      url: 'ws://${AppConfig.baseServer}/ws-delivery',
-      onConnect: (frame) {
-        print('Isolate: Connected to WebSocket');
+  /// Entry point for Isolate.spawn (must be a top-level or static function).
+  /// args[0] = SendPort, args[1] = robotId (String)
+  static void spawnIsolateEntry(List<dynamic> args) {
+    final sendPort = args[0] as SendPort;
+    final robotId = args[1] as String;
 
-        mainSendPort.send({'type': 'status', 'status': 'connected'});
-      },
-      onWebSocketDone: () => print('Isolate: WebSocket connection closed'),
-      reconnectDelay: const Duration(seconds: 5),
+    StompClient? clientRef;
+
+    clientRef = StompClient(
+      config: StompConfig(
+        url: AppConfig.wsUrl,
+        onConnect: (frame) {
+          sendPort.send({'type': 'status', 'status': 'connected'});
+
+          clientRef?.subscribe(
+            destination: '/topic/robot/$robotId',
+            callback: (StompFrame frame) {
+              if (frame.body != null) {
+                try {
+                  sendPort.send({
+                    'type': 'location',
+                    'data': jsonDecode(frame.body!),
+                  });
+                } catch (_) {}
+              }
+            },
+          );
+        },
+        onWebSocketError: (error) => print('Isolate WS error: $error'),
+        onWebSocketDone: () => print('Isolate WS closed'),
+        reconnectDelay: const Duration(seconds: 5),
+      ),
     );
 
-    final client = StompClient(config: stompConfig);
-
-    client.activate();
-
-    Timer.periodic(const Duration(microseconds: 500), (timer) {
-      if (client.connected) {
-        client.subscribe(
-          destination: '/topic/robot/${robotId}',
-          callback: (frame) {
-            if (frame.body != null) {
-              mainSendPort.send({
-                'type': 'location',
-                'data': jsonDecode(frame.body!),
-              });
-            }
-          },
-        );
-      }
-    });
+    clientRef.activate();
   }
 }

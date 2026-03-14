@@ -124,6 +124,7 @@ class EnUSTranslation extends Translations {
       AppTranslationKeys.createNewOrder: 'Create New Order',
       AppTranslationKeys.shippingLocation: 'Shipping Location',
       AppTranslationKeys.submitOrder: 'Submit Order',
+      AppTranslationKeys.orderDetails: 'Order Details',
 
       AppTranslationKeys.loggingIn: 'Logging in...',
     },

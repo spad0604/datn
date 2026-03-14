@@ -56,4 +56,16 @@ public class OrderController {
     public ResponseEntity<ResponseData<OrderResponse>> getRobotCurrentOrder(@PathVariable Long robotId) {
         return ResponseEntity.ok(orderService.getRobotCurrentOrder(robotId));
     }
+
+    @PostMapping("/{id}/confirm-sender")
+    @Operation(summary = "Người gửi xác nhận đã gửi hàng cho robot")
+    public ResponseEntity<ResponseData<OrderResponse>> confirmSender(@PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(orderService.confirmSender(id, authentication.getName()));
+    }
+
+    @PostMapping("/{id}/confirm-receiver")
+    @Operation(summary = "Người nhận xác nhận đã nhận hàng từ robot")
+    public ResponseEntity<ResponseData<OrderResponse>> confirmReceiver(@PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(orderService.confirmReceiver(id, authentication.getName()));
+    }
 }

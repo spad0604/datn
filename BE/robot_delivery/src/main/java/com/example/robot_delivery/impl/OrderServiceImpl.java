@@ -48,8 +48,8 @@ public class OrderServiceImpl implements IOrderService {
                 .customer(mapToUserSummary(order.getCustomerId()))
                 .recipient(mapToUserSummary(order.getRecipientId()))
                 .recipientPhone(order.getRecipientPhone())
-                .streamLat(order.getStreamLat())
-                .streamLng(order.getStreamLng())
+                .startLat(order.getStartLat())
+                .startLng(order.getStartLng())
                 .deliveryLat(order.getDeliveryLat())
                 .deliveryLng(order.getDeliveryLng())
                 .pinCode(order.getPinCode())
@@ -72,8 +72,8 @@ public class OrderServiceImpl implements IOrderService {
                 .customerId(customer)
                 .senderName(customer.getFirstName() + " " + customer.getLastName())
                 .recipientPhone(request.getRecipientPhone())
-                .streamLat(request.getStreamLat())
-                .streamLng(request.getStreamLng())
+                .startLat(request.getStartLat())
+                .startLng(request.getStartLng())
                 .deliveryLat(request.getDeliveryLat())
                 .deliveryLng(request.getDeliveryLng())
                 .pinCode(generatePinCode())
@@ -93,7 +93,7 @@ public class OrderServiceImpl implements IOrderService {
         for (Robot robot : idleRobots) {
             double distance = calculateDistance(
                     robot.getLatitude(), robot.getLongitude(),
-                    order.getStreamLat(), order.getStreamLng()
+                    order.getStartLat(), order.getStartLng()
             );
             if (distance < minDistance) {
                 minDistance = distance;
@@ -189,6 +189,70 @@ public class OrderServiceImpl implements IOrderService {
         
         return order.map(value -> ResponseData.<OrderResponse>builder().message("Success").data(mapToOrderResponse(value)).build())
                 .orElse(ResponseData.<OrderResponse>builder().message("No active order for this robot").build());
+    }
+
+    @Override
+    @Transactional
+    public ResponseData<OrderResponse> confirmSender(Long orderId, String username) {
+        return orderRepository.findById(orderId).map(order -> {
+            // Verify the user is the sender
+            if (!order.getCustomerId().getUsername().equals(username)) {
+                return ResponseData.<OrderResponse>builder().message("Access denied. Only the sender can confirm sending.").build();
+            }
+
+            if (order.getStatus() != OrderStatusEnum.PENDING || order.getRobot() == null) {
+                return ResponseData.<OrderResponse>builder().message("Order cannot be confirmed at this stage").build();
+            }
+
+            order.setStatus(OrderStatusEnum.DELIVERING);
+            Robot robot = order.getRobot();
+            robot.setStatus(RobotStatusEnum.DELIVERING);
+            
+            robotRepository.save(robot);
+            Order savedOrder = orderRepository.save(order);
+            
+            return ResponseData.<OrderResponse>builder()
+                    .message("Sender confirmed successfully")
+                    .data(mapToOrderResponse(savedOrder))
+                    .build();
+        }).orElse(ResponseData.<OrderResponse>builder().message("Order not found").build());
+    }
+
+    @Override
+    @Transactional
+    public ResponseData<OrderResponse> confirmReceiver(Long orderId, String username) {
+        return orderRepository.findById(orderId).map(order -> {
+            // Verify the user is the receiver if recipientId is present
+            if (order.getRecipientId() != null && !order.getRecipientId().getUsername().equals(username)) {
+                 return ResponseData.<OrderResponse>builder().message("Access denied. Only the receiver can confirm receiving.").build();
+            } else if (order.getRecipientId() == null) {
+                 // Fallback if recipient ID is not mapped via phone number (e.g. user not registered)
+                 // You might want a different logic or allow the sender to confirm if recipient is anonymous, or use pin code.
+                 // Currently, if the system allows placing order to unregistered user, we might relax username check here 
+                 // but for security we should only allow the correct user. 
+                 // Assuming here the user receiving must be the mapped recipient.
+                 User currentUser = userRepository.findByUsername(username).orElse(null);
+                 if (currentUser == null || !currentUser.getPhoneNumber().equals(order.getRecipientPhone())) {
+                      return ResponseData.<OrderResponse>builder().message("Access denied. Phone number does not match recipient.").build();
+                 }
+            }
+
+            if (order.getStatus() != OrderStatusEnum.DELIVERING || order.getRobot() == null) {
+                return ResponseData.<OrderResponse>builder().message("Order is not currently being delivered").build();
+            }
+
+            order.setStatus(OrderStatusEnum.DELIVERED);
+            Robot robot = order.getRobot();
+            robot.setStatus(RobotStatusEnum.IDLE);
+            
+            robotRepository.save(robot);
+            Order savedOrder = orderRepository.save(order);
+            
+            return ResponseData.<OrderResponse>builder()
+                    .message("Receiver confirmed successfully")
+                    .data(mapToOrderResponse(savedOrder))
+                    .build();
+        }).orElse(ResponseData.<OrderResponse>builder().message("Order not found").build());
     }
 
     private String generatePinCode() {

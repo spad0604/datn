@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       // Routes
-      initialRoute: Routes.LOGIN,
+      initialRoute: Routes.SPLASH,
       getPages: AppPages.pages,
       builder: EasyLoading.init(),
     );

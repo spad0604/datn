@@ -54,7 +54,7 @@ public class RobotDispatchService {
             for (Robot robot : idleRobots) {
                 double distance = calculateDistance(
                         robot.getLatitude(), robot.getLongitude(),
-                        order.getStreamLat(), order.getStreamLng()
+                        order.getStartLat(), order.getStartLng()
                 );
                 if (distance < minDistance) {
                     minDistance = distance;

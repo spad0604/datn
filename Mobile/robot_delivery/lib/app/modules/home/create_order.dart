@@ -4,7 +4,6 @@ import 'package:robot_delivery/app/common/widget/custom_button.dart';
 import 'package:robot_delivery/app/common/widget/custom_textfield.dart';
 import 'package:robot_delivery/app/core/i18n/app_translation_keys.dart';
 import 'package:robot_delivery/app/core/theme/app_colors.dart';
-import 'package:robot_delivery/app/core/utils/app_snackbar.dart';
 import 'package:robot_delivery/app/modules/home/home_controller.dart';
 
 class CreateNewOrder extends StatelessWidget {
@@ -42,6 +41,47 @@ class CreateNewOrder extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: CustomTextfield(
+                      controller: homeController.recipientPhoneController,
+                      hintText: 'Nhập số điện thoại',
+                      title: 'SĐT Người nhận',
+                      isRequired: true,
+                      suffixIcon: Icons.phone,
+                      keyboardType: TextInputType.phone,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Obx(() => SizedBox(
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: homeController.isSearchingUser.value
+                              ? null
+                              : () => homeController.searchUserByPhone(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: homeController.isSearchingUser.value
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.search, color: Colors.white),
+                        ),
+                      )),
+                ],
+              ),
+              const SizedBox(height: 16),
               CustomTextfield(
                 controller: homeController.recipientNameController,
                 hintText: 'e.g. Jan Doe',
@@ -191,14 +231,14 @@ class CreateNewOrder extends StatelessWidget {
                 title: AppTranslationKeys.packageWeight.tr,
               ),
               const SizedBox(height: 40),
-              CustomButton(
-                text: AppTranslationKeys.submitOrder.tr,
+              Obx(() => CustomButton(
+                text: homeController.isCreatingOrder.value ? 'Đang tạo...' : AppTranslationKeys.submitOrder.tr,
                 textColor: AppColors.white,
                 backgroundColor: AppColors.primary,
-                onPressed: () {
-                  AppSnackbar.success(AppTranslationKeys.submitOrder.tr);
-                },
-              ),
+                onPressed: homeController.isCreatingOrder.value 
+                  ? () {} 
+                  : () => homeController.submitOrder(),
+              )),
             ],
           ),
         ),

@@ -74,4 +74,42 @@ class OrderRepository {
       );
     }
   }
+
+  Future<ResponseData<OrderResponse>> confirmSender(int orderId) async {
+    try {
+      final response = await _apiClient.post<dynamic>(
+        AppEndpoints.confirmSender.replaceAll('{orderId}', orderId.toString()),
+      );
+
+      if (response is Map<String, dynamic>) {
+        return ResponseData.fromJson(
+          response,
+          (json) => OrderResponse.fromJson(json as Map<String, dynamic>),
+        );
+      }
+
+      return ResponseData(message: 'Failed to confirm sender: Invalid format.', data: null);
+    } catch (e) {
+      return ResponseData(message: 'Failed to confirm sender: $e', data: null);
+    }
+  }
+
+  Future<ResponseData<OrderResponse>> confirmReceiver(int orderId) async {
+    try {
+      final response = await _apiClient.post<dynamic>(
+        AppEndpoints.confirmReceiver.replaceAll('{orderId}', orderId.toString()),
+      );
+
+      if (response is Map<String, dynamic>) {
+        return ResponseData.fromJson(
+          response,
+          (json) => OrderResponse.fromJson(json as Map<String, dynamic>),
+        );
+      }
+
+      return ResponseData(message: 'Failed to confirm receiver: Invalid format.', data: null);
+    } catch (e) {
+      return ResponseData(message: 'Failed to confirm receiver: $e', data: null);
+    }
+  }
 }

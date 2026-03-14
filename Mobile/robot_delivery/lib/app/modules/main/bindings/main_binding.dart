@@ -7,7 +7,9 @@ import 'package:robot_delivery/app/modules/map/controllers/map_controller.dart';
 import 'package:robot_delivery/app/modules/map/controllers/tracking_robot_controller.dart';
 import 'package:robot_delivery/app/modules/orders/bindings/orders_binding.dart';
 import 'package:robot_delivery/app/modules/profile/controllers/profile_controller.dart';
-
+import 'package:robot_delivery/app/data/repositories/user_repository.dart';
+import 'package:robot_delivery/app/data/repositories/geocoding_repository.dart';
+import 'package:robot_delivery/app/modules/home/home_controller.dart';
 import '../controllers/main_controller.dart';
 
 class MainBinding extends Bindings {
@@ -38,6 +40,10 @@ class MainBinding extends Bindings {
     Get.lazyPut(() => TrackingRobotController());
 
     Get.lazyPut(() => OrderRepository(Get.find<ApiClient>()));
+    Get.lazyPut(() => UserRepository(Get.find<ApiClient>()));
+    Get.lazyPut(() => GeocodingRepository());
+
+    Get.lazyPut(() => HomeController());
 
     if (!Get.isRegistered<MapController>()) {
       Get.lazyPut<MapController>(() => MapController());

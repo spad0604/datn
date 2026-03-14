@@ -18,4 +18,6 @@ public interface IUserService {
     User findByUsername(String username);
 
     User findByEmail(String email);
+
+    User findUserByPhoneNumber(String phoneNumber);
 }

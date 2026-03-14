@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateOrderRequest {
     private String recipientPhone;
-    private Double streamLat;
-    private Double streamLng;
+    private Double startLat;
+    private Double startLng;
     private Double deliveryLat;
     private Double deliveryLng;
 }

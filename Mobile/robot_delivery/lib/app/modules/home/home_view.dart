@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:robot_delivery/app/common/widget/app_bottom_nav_bar.dart';
 import 'package:robot_delivery/app/common/widget/custom_icon_button.dart';
 import 'package:robot_delivery/app/core/i18n/app_translation_keys.dart';
@@ -29,19 +31,26 @@ class HomeView extends GetView<HomeController> {
           HomeHeaderWidget(),
           const SizedBox(height: 20),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: RefreshIndicator(
+              onRefresh: mainController.refreshOrders,
               child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const CurrentDelivery(),
-                    const SizedBox(height: 20),
-                    QuickActions(),
-                    const SizedBox(height: 20),
-                    UpcomingOrders(onSeeAll: () { mainController.setTabIndex(1); }),
-                    const SizedBox(height: 16),
-                  ],
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 20),
+                        child: CurrentDelivery(),
+                      ),
+                      const SizedBox(height: 20),
+                      QuickActions(),
+                      const SizedBox(height: 20),
+                      UpcomingOrders(onSeeAll: () { mainController.setTabIndex(1); }),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -39,6 +39,13 @@ class MainController extends GetxController {
     }
   }
 
+  Future<void> refreshOrders() async {
+    await Future.wait([
+      fetchMyReceivedOrders(),
+      fetchMyOrders(),
+    ]);
+  }
+
   void setInitialTab(AppNavTab tab) {
     if (_didSetInitialTab) return;
     _didSetInitialTab = true;

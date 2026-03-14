@@ -104,7 +104,7 @@ class ProfileView extends GetView<ProfileController> {
                           text: AppTranslationKeys.logout.tr,
                           textColor: AppColors.white,
                           backgroundColor: AppColors.error,
-                          onPressed: () {},
+                          onPressed: controller.logout,
                         ),
                       ],
                     ),

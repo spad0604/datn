@@ -17,7 +17,6 @@ class UpcomingOrders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = mainController.myReceivedOrders;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,26 +39,48 @@ class UpcomingOrders extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        ListView.separated(
-          itemCount: items.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final order = items[index];
-            return UpcomingOrderCard.fromOrder(
-              order,
-              onTap: onOrderTap == null
-                  ? null
-                  : () => onOrderTap!(UpcomingOrderItem(
-                        icon: Icons.local_shipping,
-                        title: order.senderName,
-                        trackingId: order.orderId,
-                        status: _mapOrderStatus(order.status),
-                      )),
+        Obx(() {
+          final items = mainController.myReceivedOrders;
+          if (items.isEmpty) {
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.slate50,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.slate200, width: 1),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.local_shipping_outlined, size: 38, color: AppColors.slate300),
+                  const SizedBox(height: 10),
+                  Text(
+                    AppTranslationKeys.noOrders.tr,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.slate400,
+                    ),
+                  ),
+                ],
+              ),
             );
-          },
-        ),
+          }
+          return ListView.separated(
+            itemCount: items.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final order = items[index];
+              return UpcomingOrderCard.fromOrder(
+                order,
+                onTap: () => Get.toNamed('/order-details', arguments: order),
+              );
+            },
+          );
+        }),
       ],
     );
   }
