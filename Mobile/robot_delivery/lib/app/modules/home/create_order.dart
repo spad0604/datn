@@ -32,15 +32,6 @@ class CreateNewOrder extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const Text(
-                'Fill in the details below to schedule a pickup',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.slate900,
-                ),
-              ),
-              const SizedBox(height: 24),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -56,7 +47,7 @@ class CreateNewOrder extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Obx(() => SizedBox(
-                        height: 52,
+                        height: 60,
                         child: ElevatedButton(
                           onPressed: homeController.isSearchingUser.value
                               ? null
@@ -84,14 +75,14 @@ class CreateNewOrder extends StatelessWidget {
               const SizedBox(height: 16),
               CustomTextfield(
                 controller: homeController.recipientNameController,
-                hintText: 'e.g. Jan Doe',
+                hintText: 'Nhập tên người nhận',
                 title: AppTranslationKeys.recipientName.tr,
                 isRequired: true,
                 suffixIcon: Icons.person_outline,
               ),
               const SizedBox(height: 16),
               CustomTextfield(
-                hintText: 'e.g. 456 Warehouse Rd, City, Country',
+                hintText: 'Nhập địa chỉ lấy hàng',
                 title: AppTranslationKeys.shippingLocation.tr,
                 controller: homeController.shippingLocationController,
                 prefixIcon: Icons.location_on_outlined,
@@ -159,7 +150,7 @@ class CreateNewOrder extends StatelessWidget {
               const SizedBox(height: 16),
               CustomTextfield(
                 controller: homeController.recipientAddressController,
-                hintText: 'e.g. 123 Main St, City, Country',
+                hintText: 'Nhập địa chỉ người nhận',
                 title: AppTranslationKeys.recipientAddress.tr,
                 isRequired: true,
                 prefixIcon: Icons.location_on_outlined,
