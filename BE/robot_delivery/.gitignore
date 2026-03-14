@@ -33,4 +33,4 @@ build/
 .vscode/
 
 # Firebase
-src/main/java/com/example/robot_delivery/config/serviceAccountKey.json
+src/main/resources/serviceAccountKey.json
