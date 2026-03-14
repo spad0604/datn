@@ -143,11 +143,23 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
+    @Transactional
     public ResponseData<Void> deleteOrder(Long id, String username) {
         return orderRepository.findById(id).map(existing -> {
             if (!existing.getCustomerId().getUsername().equals(username)) {
                 return ResponseData.<Void>builder().message("Access denied").build();
             }
+
+            // Nếu đơn hàng đang có robot được gán (chưa giao hàng),
+            // chuyển robot về trạng thái IDLE để sẵn sàng nhận đơn mới
+            if (existing.getRobot() != null &&
+                    (existing.getStatus() == OrderStatusEnum.PENDING ||
+                     existing.getStatus() == OrderStatusEnum.WAIT_ROBOT)) {
+                Robot robot = existing.getRobot();
+                robot.setStatus(RobotStatusEnum.IDLE);
+                robotRepository.save(robot);
+            }
+
             orderRepository.delete(existing);
             return ResponseData.<Void>builder().message("Order deleted").build();
         }).orElse(ResponseData.<Void>builder().message("Order not found").build());

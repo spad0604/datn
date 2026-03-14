@@ -19,8 +19,8 @@ _OrderResponse _$OrderResponseFromJson(Map<String, dynamic> json) =>
       deliveryLng: (json['deliveryLng'] as num).toDouble(),
       pinCode: json['pinCode'] as String,
       senderName: json['senderName'] as String,
-      robotId: (json['robotId'] as num).toInt(),
-      robotName: json['robotName'] as String,
+      robotId: (json['robotId'] as num?)?.toInt(),
+      robotName: json['robotName'] as String?,
       status: json['status'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
     );

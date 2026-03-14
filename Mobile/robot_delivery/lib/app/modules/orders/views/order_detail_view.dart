@@ -37,7 +37,9 @@ class OrderDetailView extends GetView<OrderDetailController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
         }
 
         final order = controller.currentOrder.value;
@@ -47,14 +49,8 @@ class OrderDetailView extends GetView<OrderDetailController> {
 
         return Column(
           children: [
-            Expanded(
-              flex: 5,
-              child: _buildMap(order),
-            ),
-            Expanded(
-              flex: 4,
-              child: _buildOrderInfoSheet(context, order),
-            ),
+            Expanded(flex: 5, child: _buildMap(order)),
+            Expanded(flex: 4, child: _buildOrderInfoSheet(context, order)),
           ],
         );
       }),
@@ -66,10 +62,7 @@ class OrderDetailView extends GetView<OrderDetailController> {
     final endLatLng = LatLng(order.deliveryLat, order.deliveryLng);
 
     return FlutterMap(
-      options: MapOptions(
-        initialCenter: startLatLng,
-        initialZoom: 14.0,
-      ),
+      options: MapOptions(initialCenter: startLatLng, initialZoom: 14.0),
       children: [
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -78,9 +71,9 @@ class OrderDetailView extends GetView<OrderDetailController> {
         PolylineLayer(
           polylines: [
             Polyline(
-              points: controller.routePoints.isNotEmpty 
-                ? controller.routePoints 
-                : [startLatLng, endLatLng],
+              points: controller.routePoints.isNotEmpty
+                  ? controller.routePoints
+                  : [startLatLng, endLatLng],
               color: AppColors.primary,
               strokeWidth: 5.0,
             ),
@@ -173,7 +166,10 @@ class OrderDetailView extends GetView<OrderDetailController> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary10,
                     borderRadius: BorderRadius.circular(12),
@@ -191,20 +187,33 @@ class OrderDetailView extends GetView<OrderDetailController> {
             const SizedBox(height: 24),
             _buildInfoRow(Icons.person, 'Người gửi', order.senderName),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.person_pin, 'Người nhận', order.recipient.fullName),
+            _buildInfoRow(
+              Icons.person_pin,
+              'Người nhận',
+              order.recipient.fullName,
+            ),
             const SizedBox(height: 12),
             _buildInfoRow(Icons.phone, 'SĐT Nhận', order.recipientPhone),
             const SizedBox(height: 12),
             _buildInfoRow(Icons.pin, 'Pin Code', order.pinCode),
             const SizedBox(height: 32),
-            // Action Buttons based on status (Dummy permissions - user must be sender/receiver)
-            if (controller.isSender && (order.status == 'PENDING' || order.status == 'WAIT_ROBOT'))
+            if (controller.isSender &&
+                (order.status == 'PENDING' ||
+                    order.status == 'WAIT_ROBOT')) ...[
               CustomButton(
                 text: 'Xác nhận gửi hàng (Người gửi)',
                 backgroundColor: AppColors.primary,
                 textColor: AppColors.white,
                 onPressed: controller.confirmSender,
               ),
+              const SizedBox(height: 16),
+              CustomButton(
+                text: 'Xoá đơn hàng',
+                textColor: AppColors.white,
+                backgroundColor: AppColors.error,
+                onPressed: controller.deleteOrder,
+              ),
+            ],
             if (!controller.isSender && order.status == 'DELIVERING')
               CustomButton(
                 text: 'Xác nhận nhận hàng (Người nhận)',
@@ -228,10 +237,7 @@ class OrderDetailView extends GetView<OrderDetailController> {
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.slate500,
-              ),
+              style: const TextStyle(fontSize: 12, color: AppColors.slate500),
             ),
             Text(
               value,

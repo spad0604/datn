@@ -9,7 +9,7 @@ import 'package:robot_delivery/app/modules/map/controllers/tracking_robot_contro
 
 class OrderDetailController extends GetxController {
   OrderDetailController({required OrderRepository orderRepository})
-      : _orderRepository = orderRepository;
+    : _orderRepository = orderRepository;
 
   final OrderRepository _orderRepository;
 
@@ -21,7 +21,6 @@ class OrderDetailController extends GetxController {
 
   bool isSender = false;
 
-  // Expose robot location from tracking controller
   Rx<LatLng?> get robotLocation => _trackingController.robotLocation;
 
   @override
@@ -39,7 +38,6 @@ class OrderDetailController extends GetxController {
         isSender = mainController.myOrders.any((o) => o.id == order.id);
       } catch (_) {}
 
-      // Start socket tracking if order is in active state
       if (order.robotId != 0 &&
           (order.status == 'PENDING' ||
               order.status == 'DELIVERING' ||
@@ -47,13 +45,37 @@ class OrderDetailController extends GetxController {
         _trackingController.startTracking(order.robotId.toString());
       }
 
-      // Fetch OSRM route using ExternalApiClient
-      _fetchRoute(order.startLat, order.startLng, order.deliveryLat, order.deliveryLng);
+      _fetchRoute(
+        order.startLat,
+        order.startLng,
+        order.deliveryLat,
+        order.deliveryLng,
+      );
+    }
+  }
+
+  Future<void> deleteOrder() async {
+    try {
+      final orderId = currentOrder.value?.id;
+
+      if (orderId == null) return;
+
+      await _orderRepository.deleteOrder(orderId);
+
+      Get.back();
+
+      return;
+    } catch (e) {
+      return;
     }
   }
 
   Future<void> _fetchRoute(
-      double startLat, double startLng, double destLat, double destLng) async {
+    double startLat,
+    double startLng,
+    double destLat,
+    double destLng,
+  ) async {
     try {
       final url =
           'https://router.project-osrm.org/route/v1/driving/$startLng,$startLat;$destLng,$destLat?geometries=geojson';
@@ -62,10 +84,7 @@ class OrderDetailController extends GetxController {
       if (routes.isNotEmpty) {
         final coordinates = routes[0]['geometry']['coordinates'] as List;
         routePoints.value = coordinates.map((c) {
-          return LatLng(
-            (c[1] as num).toDouble(),
-            (c[0] as num).toDouble(),
-          );
+          return LatLng((c[1] as num).toDouble(), (c[0] as num).toDouble());
         }).toList();
       }
     } catch (e) {

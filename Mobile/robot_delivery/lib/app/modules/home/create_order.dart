@@ -46,30 +46,32 @@ class CreateNewOrder extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Obx(() => SizedBox(
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: homeController.isSearchingUser.value
-                              ? null
-                              : () => homeController.searchUserByPhone(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                  Obx(
+                    () => SizedBox(
+                      height: 60,
+                      child: ElevatedButton(
+                        onPressed: homeController.isSearchingUser.value
+                            ? null
+                            : () => homeController.searchUserByPhone(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: homeController.isSearchingUser.value
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.search, color: Colors.white),
                         ),
-                      )),
+                        child: homeController.isSearchingUser.value
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.search, color: Colors.white),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -91,6 +93,42 @@ class CreateNewOrder extends StatelessWidget {
                   homeController.pickShippingLocationFromMap();
                 },
                 onChanged: homeController.onShippingQueryChanged,
+              ),
+              Obx(
+                () => Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 4),
+                  child: GestureDetector(
+                    onTap: homeController.isGettingCurrentLocation.value
+                        ? null
+                        : homeController.getCurrentLocationForShipping,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.my_location,
+                          size: 16,
+                          color: homeController.isGettingCurrentLocation.value
+                              ? AppColors.slate400
+                              : AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          homeController.isGettingCurrentLocation.value
+                              ? 'Đang lấy vị trí...'
+                              : 'Dùng vị trí hiện tại',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: homeController.isGettingCurrentLocation.value
+                                ? AppColors.slate400
+                                : AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               Obx(() {
                 if (homeController.isSearchingShipping.value) {
@@ -222,14 +260,18 @@ class CreateNewOrder extends StatelessWidget {
                 title: AppTranslationKeys.packageWeight.tr,
               ),
               const SizedBox(height: 40),
-              Obx(() => CustomButton(
-                text: homeController.isCreatingOrder.value ? 'Đang tạo...' : AppTranslationKeys.submitOrder.tr,
-                textColor: AppColors.white,
-                backgroundColor: AppColors.primary,
-                onPressed: homeController.isCreatingOrder.value 
-                  ? () {} 
-                  : () => homeController.submitOrder(),
-              )),
+              Obx(
+                () => CustomButton(
+                  text: homeController.isCreatingOrder.value
+                      ? 'Đang tạo...'
+                      : AppTranslationKeys.submitOrder.tr,
+                  textColor: AppColors.white,
+                  backgroundColor: AppColors.primary,
+                  onPressed: homeController.isCreatingOrder.value
+                      ? () {}
+                      : () => homeController.submitOrder(),
+                ),
+              ),
             ],
           ),
         ),

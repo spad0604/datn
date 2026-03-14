@@ -17,8 +17,8 @@ abstract class OrderResponse with _$OrderResponse {
     required double deliveryLng,
     required String pinCode,
     required String senderName,
-    required int robotId,
-    required String robotName,
+    int? robotId,
+    String? robotName,
     required String status,
     required DateTime createdAt,
   }) = _OrderResponse;

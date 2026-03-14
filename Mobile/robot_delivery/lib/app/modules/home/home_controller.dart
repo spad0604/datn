@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:robot_delivery/app/data/models/nominatim_model.dart';
 import 'package:robot_delivery/app/data/repositories/geocoding_repository.dart';
@@ -15,10 +16,10 @@ class HomeController extends GetxController {
     GeocodingRepository? geocodingRepository,
     UserRepository? userRepository,
     OrderRepository? orderRepository,
-  })  : _geocodingRepository =
-            geocodingRepository ?? Get.find<GeocodingRepository>(),
-        _userRepository = userRepository ?? Get.find<UserRepository>(),
-        _orderRepository = orderRepository ?? Get.find<OrderRepository>();
+  }) : _geocodingRepository =
+           geocodingRepository ?? Get.find<GeocodingRepository>(),
+       _userRepository = userRepository ?? Get.find<UserRepository>(),
+       _orderRepository = orderRepository ?? Get.find<OrderRepository>();
 
   final GeocodingRepository _geocodingRepository;
   final UserRepository _userRepository;
@@ -26,7 +27,8 @@ class HomeController extends GetxController {
 
   final RxBool isCreatingOrder = false.obs;
 
-  final TextEditingController recipientPhoneController = TextEditingController();
+  final TextEditingController recipientPhoneController =
+      TextEditingController();
 
   final TextEditingController recipientNameController = TextEditingController();
 
@@ -54,6 +56,7 @@ class HomeController extends GetxController {
 
   final RxBool isSearchingUser = false.obs;
   final RxString userSearchError = ''.obs;
+  final RxBool isGettingCurrentLocation = false.obs;
 
   Worker? _shippingDebounceWorker;
   Worker? _recipientDebounceWorker;
@@ -96,8 +99,9 @@ class HomeController extends GetxController {
     }, time: const Duration(seconds: 1));
 
     _phoneDebounceWorker = debounce<String>(
-      recipientPhoneController.text.obs, 
-      (phone) => {}, // Changed to use explicit button for phone search to avoid spamming
+      recipientPhoneController.text.obs,
+      (phone) =>
+          {}, // Changed to use explicit button for phone search to avoid spamming
     );
   }
 
@@ -111,7 +115,8 @@ class HomeController extends GetxController {
     try {
       final response = await _userRepository.searchUserByPhone(phone);
       if (response.data != null) {
-        final name = response.data!.fullName ?? response.data!.username ?? 'Unknown';
+        final name =
+            response.data!.fullName ?? response.data!.username ?? 'Unknown';
         recipientNameController.text = name;
         AppSnackbar.success('Tìm thấy người dùng: $name');
       } else {
@@ -130,7 +135,9 @@ class HomeController extends GetxController {
         recipientPhoneController.text.isEmpty ||
         shippingLat.value == null ||
         recipientLat.value == null) {
-      AppSnackbar.error('Vui lòng điền đầy đủ thông tin bắt buộc và chọn vị trí trên bản đồ');
+      AppSnackbar.error(
+        'Vui lòng điền đầy đủ thông tin bắt buộc và chọn vị trí trên bản đồ',
+      );
       return;
     }
 
@@ -147,8 +154,11 @@ class HomeController extends GetxController {
       final response = await _orderRepository.createOrder(request);
 
       if (response.data != null) {
-        AppSnackbar.success('Tạo đơn hàng thành công!');
-        Get.back(); // Or navigate to order details
+        AppSnackbar.success('Tạo đơn hàng thành công!, tự động thoát trong 2s');
+        Future.delayed(const Duration(seconds: 2), () {
+          Get.back();
+          Get.back();
+        });
       } else {
         AppSnackbar.error(response.message ?? 'Lỗi tạo đơn hàng');
       }
@@ -234,6 +244,73 @@ class HomeController extends GetxController {
     recipientAddressController.text =
         address ?? '${picked.latitude}, ${picked.longitude}';
     _recipientQuery.value = recipientAddressController.text;
+  }
+
+  Future<void> getCurrentLocationForDelivery() async {
+    await _doGetCurrentLocation(
+      onSuccess: (position, address) {
+        recipientLat.value = position.latitude;
+        recipientLon.value = position.longitude;
+        recipientSuggestions.clear();
+        recipientAddressController.text = address;
+        _recipientQuery.value = address;
+      },
+    );
+  }
+
+  Future<void> getCurrentLocationForShipping() async {
+    await _doGetCurrentLocation(
+      onSuccess: (position, address) {
+        shippingLat.value = position.latitude;
+        shippingLon.value = position.longitude;
+        shippingSuggestions.clear();
+        shippingLocationController.text = address;
+        _shippingQuery.value = address;
+      },
+    );
+  }
+
+  Future<void> _doGetCurrentLocation({
+    required Function(Position position, String address) onSuccess,
+  }) async {
+    isGettingCurrentLocation.value = true;
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          AppSnackbar.error('Vui lòng cấp quyền truy cập vị trí');
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        AppSnackbar.error(
+          'Quyền truy cập vị trí bị từ chối vĩnh viễn. Vui lòng bật trong Cài đặt.',
+        );
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      final address =
+          await _geocodingRepository.reverseGeocode(
+            lat: position.latitude,
+            lon: position.longitude,
+          ) ??
+          '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}';
+
+      onSuccess(position, address);
+      AppSnackbar.success('Đã lấy vị trí hiện tại!');
+    } catch (e) {
+      AppSnackbar.error('Không thể lấy vị trí: $e');
+    } finally {
+      isGettingCurrentLocation.value = false;
+    }
   }
 
   @override

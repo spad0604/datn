@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OrderResponse {
 
- int get id; String get orderId; Customer get customer; Customer get recipient; String get recipientPhone; double get startLat; double get startLng; double get deliveryLat; double get deliveryLng; String get pinCode; String get senderName; int get robotId; String get robotName; String get status; DateTime get createdAt;
+ int get id; String get orderId; Customer get customer; Customer get recipient; String get recipientPhone; double get startLat; double get startLng; double get deliveryLat; double get deliveryLng; String get pinCode; String get senderName; int? get robotId; String? get robotName; String get status; DateTime get createdAt;
 /// Create a copy of OrderResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $OrderResponseCopyWith<$Res>  {
   factory $OrderResponseCopyWith(OrderResponse value, $Res Function(OrderResponse) _then) = _$OrderResponseCopyWithImpl;
 @useResult
 $Res call({
- int id, String orderId, Customer customer, Customer recipient, String recipientPhone, double startLat, double startLng, double deliveryLat, double deliveryLng, String pinCode, String senderName, int robotId, String robotName, String status, DateTime createdAt
+ int id, String orderId, Customer customer, Customer recipient, String recipientPhone, double startLat, double startLng, double deliveryLat, double deliveryLng, String pinCode, String senderName, int? robotId, String? robotName, String status, DateTime createdAt
 });
 
 
@@ -65,7 +65,7 @@ class _$OrderResponseCopyWithImpl<$Res>
 
 /// Create a copy of OrderResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? orderId = null,Object? customer = null,Object? recipient = null,Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,Object? pinCode = null,Object? senderName = null,Object? robotId = null,Object? robotName = null,Object? status = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? orderId = null,Object? customer = null,Object? recipient = null,Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,Object? pinCode = null,Object? senderName = null,Object? robotId = freezed,Object? robotName = freezed,Object? status = null,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,orderId: null == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
@@ -78,9 +78,9 @@ as double,deliveryLat: null == deliveryLat ? _self.deliveryLat : deliveryLat // 
 as double,deliveryLng: null == deliveryLng ? _self.deliveryLng : deliveryLng // ignore: cast_nullable_to_non_nullable
 as double,pinCode: null == pinCode ? _self.pinCode : pinCode // ignore: cast_nullable_to_non_nullable
 as String,senderName: null == senderName ? _self.senderName : senderName // ignore: cast_nullable_to_non_nullable
-as String,robotId: null == robotId ? _self.robotId : robotId // ignore: cast_nullable_to_non_nullable
-as int,robotName: null == robotName ? _self.robotName : robotName // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,robotId: freezed == robotId ? _self.robotId : robotId // ignore: cast_nullable_to_non_nullable
+as int?,robotName: freezed == robotName ? _self.robotName : robotName // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
@@ -185,7 +185,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int robotId,  String robotName,  String status,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OrderResponse() when $default != null:
 return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
@@ -206,7 +206,7 @@ return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.reci
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int robotId,  String robotName,  String status,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _OrderResponse():
 return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
@@ -226,7 +226,7 @@ return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.reci
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int robotId,  String robotName,  String status,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _OrderResponse() when $default != null:
 return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
@@ -241,7 +241,7 @@ return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.reci
 @JsonSerializable()
 
 class _OrderResponse implements OrderResponse {
-  const _OrderResponse({required this.id, required this.orderId, required this.customer, required this.recipient, required this.recipientPhone, required this.startLat, required this.startLng, required this.deliveryLat, required this.deliveryLng, required this.pinCode, required this.senderName, required this.robotId, required this.robotName, required this.status, required this.createdAt});
+  const _OrderResponse({required this.id, required this.orderId, required this.customer, required this.recipient, required this.recipientPhone, required this.startLat, required this.startLng, required this.deliveryLat, required this.deliveryLng, required this.pinCode, required this.senderName, this.robotId, this.robotName, required this.status, required this.createdAt});
   factory _OrderResponse.fromJson(Map<String, dynamic> json) => _$OrderResponseFromJson(json);
 
 @override final  int id;
@@ -255,8 +255,8 @@ class _OrderResponse implements OrderResponse {
 @override final  double deliveryLng;
 @override final  String pinCode;
 @override final  String senderName;
-@override final  int robotId;
-@override final  String robotName;
+@override final  int? robotId;
+@override final  String? robotName;
 @override final  String status;
 @override final  DateTime createdAt;
 
@@ -293,7 +293,7 @@ abstract mixin class _$OrderResponseCopyWith<$Res> implements $OrderResponseCopy
   factory _$OrderResponseCopyWith(_OrderResponse value, $Res Function(_OrderResponse) _then) = __$OrderResponseCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String orderId, Customer customer, Customer recipient, String recipientPhone, double startLat, double startLng, double deliveryLat, double deliveryLng, String pinCode, String senderName, int robotId, String robotName, String status, DateTime createdAt
+ int id, String orderId, Customer customer, Customer recipient, String recipientPhone, double startLat, double startLng, double deliveryLat, double deliveryLng, String pinCode, String senderName, int? robotId, String? robotName, String status, DateTime createdAt
 });
 
 
@@ -310,7 +310,7 @@ class __$OrderResponseCopyWithImpl<$Res>
 
 /// Create a copy of OrderResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? orderId = null,Object? customer = null,Object? recipient = null,Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,Object? pinCode = null,Object? senderName = null,Object? robotId = null,Object? robotName = null,Object? status = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? orderId = null,Object? customer = null,Object? recipient = null,Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,Object? pinCode = null,Object? senderName = null,Object? robotId = freezed,Object? robotName = freezed,Object? status = null,Object? createdAt = null,}) {
   return _then(_OrderResponse(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,orderId: null == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
@@ -323,9 +323,9 @@ as double,deliveryLat: null == deliveryLat ? _self.deliveryLat : deliveryLat // 
 as double,deliveryLng: null == deliveryLng ? _self.deliveryLng : deliveryLng // ignore: cast_nullable_to_non_nullable
 as double,pinCode: null == pinCode ? _self.pinCode : pinCode // ignore: cast_nullable_to_non_nullable
 as String,senderName: null == senderName ? _self.senderName : senderName // ignore: cast_nullable_to_non_nullable
-as String,robotId: null == robotId ? _self.robotId : robotId // ignore: cast_nullable_to_non_nullable
-as int,robotName: null == robotName ? _self.robotName : robotName // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,robotId: freezed == robotId ? _self.robotId : robotId // ignore: cast_nullable_to_non_nullable
+as int?,robotName: freezed == robotName ? _self.robotName : robotName // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));

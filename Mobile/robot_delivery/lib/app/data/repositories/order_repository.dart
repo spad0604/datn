@@ -25,7 +25,10 @@ class OrderRepository {
         );
       }
 
-      return ResponseData(message: 'Failed to create order: Invalid response format.', data: null);
+      return ResponseData(
+        message: 'Failed to create order: Invalid response format.',
+        data: null,
+      );
     } catch (e) {
       print('Create order error: $e');
       return ResponseData(message: 'Failed to create order: $e', data: null);
@@ -45,7 +48,10 @@ class OrderRepository {
         );
       }
 
-      return ResponseData(message: 'Failed to fetch my orders: Invalid response format.', data: null);
+      return ResponseData(
+        message: 'Failed to fetch my orders: Invalid response format.',
+        data: null,
+      );
     } catch (e) {
       print('Get my orders error: $e');
       return ResponseData(message: 'Failed to fetch my orders: $e', data: null);
@@ -54,7 +60,9 @@ class OrderRepository {
 
   Future<ResponseData<List<OrderResponse>>> getMyReceivedOrders() async {
     try {
-      final response = await _apiClient.get<dynamic>(AppEndpoints.myReceivedOrder);
+      final response = await _apiClient.get<dynamic>(
+        AppEndpoints.myReceivedOrder,
+      );
 
       if (response is Map<String, dynamic>) {
         return ResponseData.fromJson(
@@ -65,7 +73,10 @@ class OrderRepository {
         );
       }
 
-      return ResponseData(message: 'Failed to fetch my received orders: Invalid response format.', data: null);
+      return ResponseData(
+        message: 'Failed to fetch my received orders: Invalid response format.',
+        data: null,
+      );
     } catch (e) {
       print('Get my received orders error: $e');
       return ResponseData(
@@ -88,7 +99,10 @@ class OrderRepository {
         );
       }
 
-      return ResponseData(message: 'Failed to confirm sender: Invalid format.', data: null);
+      return ResponseData(
+        message: 'Failed to confirm sender: Invalid format.',
+        data: null,
+      );
     } catch (e) {
       return ResponseData(message: 'Failed to confirm sender: $e', data: null);
     }
@@ -97,7 +111,10 @@ class OrderRepository {
   Future<ResponseData<OrderResponse>> confirmReceiver(int orderId) async {
     try {
       final response = await _apiClient.post<dynamic>(
-        AppEndpoints.confirmReceiver.replaceAll('{orderId}', orderId.toString()),
+        AppEndpoints.confirmReceiver.replaceAll(
+          '{orderId}',
+          orderId.toString(),
+        ),
       );
 
       if (response is Map<String, dynamic>) {
@@ -107,9 +124,37 @@ class OrderRepository {
         );
       }
 
-      return ResponseData(message: 'Failed to confirm receiver: Invalid format.', data: null);
+      return ResponseData(
+        message: 'Failed to confirm receiver: Invalid format.',
+        data: null,
+      );
     } catch (e) {
-      return ResponseData(message: 'Failed to confirm receiver: $e', data: null);
+      return ResponseData(
+        message: 'Failed to confirm receiver: $e',
+        data: null,
+      );
+    }
+  }
+
+  Future<ResponseData<OrderResponse>> deleteOrder(int orderId) async {
+    try {
+      final response = await _apiClient.delete<dynamic>(
+        AppEndpoints.deleteOrder.replaceAll('{orderId}', orderId.toString()),
+      );
+
+      if (response is Map<String, dynamic>) {
+        return ResponseData.fromJson(
+          response,
+          (json) => OrderResponse.fromJson(json as Map<String, dynamic>),
+        );
+      }
+
+      return ResponseData(
+        message: 'Failed to delete order: Invalid format.',
+        data: null,
+      );
+    } catch (e) {
+      return ResponseData(message: 'Failed to delete order: $e', data: null);
     }
   }
 }

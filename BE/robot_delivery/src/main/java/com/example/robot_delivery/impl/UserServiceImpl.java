@@ -73,6 +73,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional
     public ResponseData<LoginResponse> login(LoginRequest loginRequest) {
         if (loginRequest == null || loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
             throw new IllegalArgumentException("Missing username/password");
@@ -83,6 +84,12 @@ public class UserServiceImpl implements IUserService {
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Invalid credentials");
+        }
+
+        // Lưu FCM token vào DB nếu có
+        if (loginRequest.getFcmToken() != null && !loginRequest.getFcmToken().isBlank()) {
+            user.setFcmToken(loginRequest.getFcmToken());
+            userRepository.save(user);
         }
 
         String accessToken = jwtService.generateToken(user.getUsername(), buildFullName(user), user.getEmail());

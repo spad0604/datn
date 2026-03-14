@@ -47,13 +47,6 @@ class LoginView extends GetView<LoginController> {
                   style: TextStyle(fontSize: 14, color: AppColors.slate500),
                 ),
                 const SizedBox(height: 24),
-                Obx(
-                  () => _RolePicker(
-                    value: controller.role.value,
-                    onChanged: controller.setRole,
-                  ),
-                ),
-                const SizedBox(height: 24),
                 CustomTextfield(
                   controller: controller.usernameController,
                   prefixIcon: Icons.email_outlined,
@@ -168,10 +161,7 @@ class LoginView extends GetView<LoginController> {
 }
 
 class _RolePicker extends StatelessWidget {
-  const _RolePicker({
-    required this.value,
-    required this.onChanged,
-  });
+  const _RolePicker({required this.value, required this.onChanged});
 
   final LoginRole value;
   final ValueChanged<LoginRole> onChanged;

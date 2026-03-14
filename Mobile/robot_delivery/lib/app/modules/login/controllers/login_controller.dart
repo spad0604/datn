@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -26,10 +27,23 @@ class LoginController extends GetxController {
     role.value = value;
   }
 
-  void onSubmitLogin(String username, String password) {
+  void onSubmitLogin(String username, String password) async {
     EasyLoading.show(status: AppTranslationKeys.loggingIn.tr);
+
+    // Lấy FCM token trước khi gửi request login
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (_) {
+      // Không block login nếu lấy FCM token thất bại
+    }
+
     authRepository
-        .login(LoginRequest(username: username.trim(), password: password.trim()))
+        .login(LoginRequest(
+          username: username.trim(),
+          password: password.trim(),
+          fcmToken: fcmToken,
+        ))
         .then((value) {
           EasyLoading.dismiss();
           if (value.data != null) {

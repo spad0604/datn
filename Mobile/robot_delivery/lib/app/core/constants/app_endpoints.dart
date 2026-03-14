@@ -10,6 +10,7 @@ class AppEndpoints {
   static const String login = '/auth/login';
   static const String changePassword = '/auth/change-password';
 
+  static const String deleteOrder = '/orders/delete/{orderId}';
   static const String createOrder = '/orders/create';
   static const String myOrder = '/orders/my-created';
   static const String myReceivedOrder = '/orders/my-received';
