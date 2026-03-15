@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:robot_delivery/app/core/i18n/app_translation_keys.dart';
+
 import 'package:robot_delivery/app/core/theme/app_colors.dart';
 
 enum AppNavTab { home, orders, map, profile }
@@ -37,26 +40,28 @@ class AppBottomNavBar extends StatelessWidget {
           onTap: onChanged,
           selectedItemColor: AppColors.primary,
           unselectedItemColor: AppColors.slate400,
-          items: const [
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: AppTranslationKeys.home.tr,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.history),
-              activeIcon: Icon(Icons.history),
-              label: 'History',
+              icon: const Icon(Icons.history),
+              activeIcon: const Icon(Icons.history),
+              label: AppTranslationKeys.history.tr,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.map_outlined),
-              activeIcon: Icon(Icons.map),
-              label: 'Map',
+              icon: const Icon(Icons.map_outlined),
+              activeIcon: const Icon(Icons.map),
+              label: AppTranslationKeys.mapTitle.tr,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
+              icon: const Icon(Icons.person_outline),
+              activeIcon: const Icon(Icons.person),
+              label: AppTranslationKeys.profileView.tr,
             ),
           ],
         ),
@@ -64,3 +69,4 @@ class AppBottomNavBar extends StatelessWidget {
     );
   }
 }
+

@@ -59,7 +59,10 @@ public class OrderServiceImpl implements IOrderService {
                 .robotName(order.getRobot() != null ? order.getRobot().getRobotName() : null)
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())
+                .senderAddress(order.getSenderAddress())
+                .deliveryAddress(order.getDeliveryAddress())
                 .build();
+
     }
 
     @Override
@@ -75,10 +78,13 @@ public class OrderServiceImpl implements IOrderService {
                 .recipientPhone(request.getRecipientPhone())
                 .startLat(request.getStartLat())
                 .startLng(request.getStartLng())
+                .senderAddress(request.getSenderAddress())
                 .deliveryLat(request.getDeliveryLat())
                 .deliveryLng(request.getDeliveryLng())
+                .deliveryAddress(request.getDeliveryAddress())
                 .pinCode(generatePinCode())
                 .createdAt(LocalDateTime.now())
+
                 .build();
 
         // Tự động tìm recipientId theo số điện thoại
@@ -151,8 +157,13 @@ public class OrderServiceImpl implements IOrderService {
                 return ResponseData.<OrderResponse>builder().message("Access denied").build();
             }
             existing.setRecipientPhone(request.getRecipientPhone());
+            existing.setStartLat(request.getStartLat());
+            existing.setStartLng(request.getStartLng());
+            existing.setSenderAddress(request.getSenderAddress());
             existing.setDeliveryLat(request.getDeliveryLat());
             existing.setDeliveryLng(request.getDeliveryLng());
+            existing.setDeliveryAddress(request.getDeliveryAddress());
+
             
             if (request.getRecipientPhone() != null) {
                 userRepository.findByPhoneNumber(request.getRecipientPhone())

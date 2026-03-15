@@ -35,12 +35,15 @@ public class Order {
     private Double startLat;
 
     private Double startLng;
+    private String senderAddress;
 
     private Double deliveryLat;
 
     private Double deliveryLng;
+    private String deliveryAddress;
 
     private String pinCode;
+
 
     private String senderName;
 

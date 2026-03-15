@@ -11,13 +11,18 @@ import com.example.robot_delivery.repositorys.RefreshTokenRepository;
 import com.example.robot_delivery.repositorys.UserRepository;
 import com.example.robot_delivery.security.JwtService;
 import com.example.robot_delivery.security.RefreshToken;
+import com.example.robot_delivery.service.CloudinaryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,6 +32,9 @@ public class UserServiceImpl implements IUserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     private static final long REFRESH_TOKEN_EXPIRE_DAYS = 7;
 
@@ -196,6 +204,24 @@ public class UserServiceImpl implements IUserService {
         }
         return userRepository.findByPhoneNumber(phoneNumber).orElse(null);
     }
+
+    @Override
+    @Transactional
+    public User uploadAvatar(MultipartFile file, String username) {
+        try {
+            String url = cloudinaryService.uploadAndGetUrl(file);
+            User user = userRepository.findByUsername(username).orElse(null);
+            if (user != null) {
+                user.setAvatarUrl(url);
+                return userRepository.save(user);
+            }
+            return null;
+        } catch (Exception e) {
+            System.err.println("Upload avatar error: " + e.getMessage());
+            return null;
+        }
+    }
+
 
     private RefreshToken createOrRotateRefreshToken(User user) {
         RefreshToken token = refreshTokenRepository.findByUser(user).orElse(null);

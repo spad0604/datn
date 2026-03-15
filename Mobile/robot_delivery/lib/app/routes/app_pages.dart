@@ -11,7 +11,10 @@ import '../modules/main/bindings/main_binding.dart';
 import '../modules/main/views/main_view.dart';
 import '../modules/orders/bindings/order_detail_binding.dart';
 import '../modules/orders/views/order_detail_view.dart';
+import '../modules/register/bindings/register_binding.dart';
+import '../modules/register/views/register_view.dart';
 import '../modules/splash/splash_view.dart';
+
 
 part 'app_routes.dart';
 
@@ -63,5 +66,11 @@ abstract class AppPages {
       name: Routes.SPLASH,
       page: () => const SplashView(),
     ),
+    GetPage(
+      name: Routes.REGISTER,
+      page: () => const RegisterView(),
+      binding: RegisterBinding(),
+    ),
   ];
 }
+

@@ -145,11 +145,15 @@ class HomeController extends GetxController {
     try {
       final request = CreateOrderRequest(
         recipientPhone: recipientPhoneController.text.trim(),
-        startLat: shippingLat.value!.toString(),
-        startLng: shippingLon.value!.toString(),
-        deliveryLat: recipientLat.value!.toString(),
-        deliveryLng: recipientLon.value!.toString(),
+        startLat: shippingLat.value!,
+        startLng: shippingLon.value!,
+        senderAddress: shippingLocationController.text.trim(),
+        deliveryLat: recipientLat.value!,
+        deliveryLng: recipientLon.value!,
+        deliveryAddress: recipientAddressController.text.trim(),
       );
+
+
 
       final response = await _orderRepository.createOrder(request);
 

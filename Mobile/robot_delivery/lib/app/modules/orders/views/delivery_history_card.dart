@@ -53,7 +53,7 @@ class DeliveryHistoryCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${AppTranslationKeys.sender.tr} ${item.sender}',
+                        '${item.senderAddress ?? item.sender} → ${item.deliveryAddress ?? '...'}',
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -62,6 +62,7 @@ class DeliveryHistoryCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+
                       const SizedBox(height: 6),
                       Text(
                         item.dateTimeText,

@@ -6,6 +6,7 @@ import com.example.robot_delivery.model.request.ChangePasswordRequest;
 import com.example.robot_delivery.model.request.LoginRequest;
 import com.example.robot_delivery.model.request.RegisterRequest;
 import com.example.robot_delivery.model.responses.LoginResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface IUserService {
     ResponseData<LoginResponse> register(RegisterRequest registerRequest);
@@ -20,4 +21,6 @@ public interface IUserService {
     User findByEmail(String email);
 
     User findUserByPhoneNumber(String phoneNumber);
+
+    User uploadAvatar(MultipartFile file, String username);
 }

@@ -98,14 +98,18 @@ class CurrentDelivery extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Order #${order.orderId}',
+                        '${AppTranslationKeys.order.tr} #${order.orderId}',
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.slate900),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Từ ${order.senderName} → ${order.recipient.fullName}',
+                        '${order.senderAddress ?? order.senderName} → ${order.deliveryAddress ?? order.recipient.fullName}',
                         style: const TextStyle(fontSize: 13, color: AppColors.slate600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+
+
                     ],
                   ),
                 ),
@@ -204,10 +208,11 @@ class CurrentDelivery extends StatelessWidget {
 
   String _statusLabel(String status) {
     switch (status.toUpperCase()) {
-      case 'WAIT_ROBOT': return 'Đang chờ robot...';
-      case 'PENDING': return 'Robot đang đến lấy hàng';
-      case 'DELIVERING': return 'Đang giao hàng';
+      case 'WAIT_ROBOT': return AppTranslationKeys.waitingForRobot.tr;
+      case 'PENDING': return AppTranslationKeys.robotComingToPickup.tr;
+      case 'DELIVERING': return AppTranslationKeys.deliveringStatus.tr;
       default: return status;
     }
   }
 }
+

@@ -157,14 +157,18 @@ class OrderDetailView extends GetView<OrderDetailController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Order #${order.orderId}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.slate900,
+                Expanded(
+                  child: Text(
+                    '${AppTranslationKeys.order.tr} #${order.orderId}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.slate900,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -175,40 +179,54 @@ class OrderDetailView extends GetView<OrderDetailController> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    order.status,
+                    _displayStatus(order.status),
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+
               ],
             ),
             const SizedBox(height: 24),
-            _buildInfoRow(Icons.person, 'Người gửi', order.senderName),
+            _buildInfoRow(Icons.person, AppTranslationKeys.sender.tr, order.senderName),
+            const SizedBox(height: 12),
+            _buildInfoRow(
+              Icons.location_on_outlined,
+              AppTranslationKeys.senderLocationLabel.tr,
+              order.senderAddress ?? '${order.startLat}, ${order.startLng}',
+            ),
             const SizedBox(height: 12),
             _buildInfoRow(
               Icons.person_pin,
-              'Người nhận',
+              AppTranslationKeys.recipientName.tr,
               order.recipient.fullName,
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.phone, 'SĐT Nhận', order.recipientPhone),
+            _buildInfoRow(
+              Icons.local_shipping_outlined,
+              AppTranslationKeys.deliveryAddressLabel.tr,
+              order.deliveryAddress ?? '${order.deliveryLat}, ${order.deliveryLng}',
+            ),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.pin, 'Pin Code', order.pinCode),
+            _buildInfoRow(Icons.phone, AppTranslationKeys.recipientPhoneLabel.tr, order.recipientPhone),
+            const SizedBox(height: 12),
+            _buildInfoRow(Icons.pin, AppTranslationKeys.pinCode.tr, order.pinCode),
+
             const SizedBox(height: 32),
             if (controller.isSender &&
                 (order.status == 'PENDING' ||
                     order.status == 'WAIT_ROBOT')) ...[
               CustomButton(
-                text: 'Xác nhận gửi hàng (Người gửi)',
+                text: AppTranslationKeys.confirmSenderButton.tr,
                 backgroundColor: AppColors.primary,
                 textColor: AppColors.white,
                 onPressed: controller.confirmSender,
               ),
               const SizedBox(height: 16),
               CustomButton(
-                text: 'Xoá đơn hàng',
+                text: AppTranslationKeys.deleteOrderButton.tr,
                 textColor: AppColors.white,
                 backgroundColor: AppColors.error,
                 onPressed: controller.deleteOrder,
@@ -216,7 +234,7 @@ class OrderDetailView extends GetView<OrderDetailController> {
             ],
             if (!controller.isSender && order.status == 'DELIVERING')
               CustomButton(
-                text: 'Xác nhận nhận hàng (Người nhận)',
+                text: AppTranslationKeys.confirmReceiverButton.tr,
                 backgroundColor: AppColors.primary,
                 textColor: AppColors.white,
                 onPressed: controller.confirmReceiver,
@@ -227,29 +245,46 @@ class OrderDetailView extends GetView<OrderDetailController> {
     );
   }
 
+  String _displayStatus(String status) {
+    switch (status.toUpperCase()) {
+      case 'WAIT_ROBOT': return AppTranslationKeys.waitingForRobot.tr;
+      case 'PENDING': return AppTranslationKeys.robotComingToPickup.tr;
+      case 'DELIVERING': return AppTranslationKeys.deliveringStatus.tr;
+      case 'DELIVERED': return AppTranslationKeys.deliveredStatus.tr;
+      case 'CANCELLED': return AppTranslationKeys.cancelledStatus.tr;
+      default: return status;
+    }
+  }
+
+
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
         Icon(icon, color: AppColors.slate400, size: 24),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 12, color: AppColors.slate500),
-            ),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: AppColors.slate900,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(fontSize: 12, color: AppColors.slate500),
               ),
-            ),
-          ],
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.slate900,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
+

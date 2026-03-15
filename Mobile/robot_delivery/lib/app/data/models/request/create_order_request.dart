@@ -6,12 +6,15 @@ part 'create_order_request.g.dart';
 abstract class CreateOrderRequest with _$CreateOrderRequest {
   const factory CreateOrderRequest({
     required String recipientPhone,
-    required String startLat,
-    required String startLng,
-    required String deliveryLat,
-    required String deliveryLng,
-    
+    required double startLat,
+    required double startLng,
+    required double deliveryLat,
+    required double deliveryLng,
+    String? senderAddress,
+    String? deliveryAddress,
   }) = _CreateOrderRequest;
+
+
 
   factory CreateOrderRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateOrderRequestFromJson(json);

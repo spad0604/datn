@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OrderResponse {
 
- int get id; String get orderId; Customer get customer; Customer get recipient; String get recipientPhone; double get startLat; double get startLng; double get deliveryLat; double get deliveryLng; String get pinCode; String get senderName; int? get robotId; String? get robotName; String get status; DateTime get createdAt;
+ int get id; String get orderId; Customer get customer; Customer get recipient; String get recipientPhone; double get startLat; double get startLng; double get deliveryLat; double get deliveryLng; String? get senderAddress; String? get deliveryAddress; String get pinCode; String get senderName; int? get robotId; String? get robotName; String get status; DateTime get createdAt;
 /// Create a copy of OrderResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $OrderResponseCopyWith<OrderResponse> get copyWith => _$OrderResponseCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrderResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&(identical(other.customer, customer) || other.customer == customer)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.recipientPhone, recipientPhone) || other.recipientPhone == recipientPhone)&&(identical(other.startLat, startLat) || other.startLat == startLat)&&(identical(other.startLng, startLng) || other.startLng == startLng)&&(identical(other.deliveryLat, deliveryLat) || other.deliveryLat == deliveryLat)&&(identical(other.deliveryLng, deliveryLng) || other.deliveryLng == deliveryLng)&&(identical(other.pinCode, pinCode) || other.pinCode == pinCode)&&(identical(other.senderName, senderName) || other.senderName == senderName)&&(identical(other.robotId, robotId) || other.robotId == robotId)&&(identical(other.robotName, robotName) || other.robotName == robotName)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrderResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&(identical(other.customer, customer) || other.customer == customer)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.recipientPhone, recipientPhone) || other.recipientPhone == recipientPhone)&&(identical(other.startLat, startLat) || other.startLat == startLat)&&(identical(other.startLng, startLng) || other.startLng == startLng)&&(identical(other.deliveryLat, deliveryLat) || other.deliveryLat == deliveryLat)&&(identical(other.deliveryLng, deliveryLng) || other.deliveryLng == deliveryLng)&&(identical(other.senderAddress, senderAddress) || other.senderAddress == senderAddress)&&(identical(other.deliveryAddress, deliveryAddress) || other.deliveryAddress == deliveryAddress)&&(identical(other.pinCode, pinCode) || other.pinCode == pinCode)&&(identical(other.senderName, senderName) || other.senderName == senderName)&&(identical(other.robotId, robotId) || other.robotId == robotId)&&(identical(other.robotName, robotName) || other.robotName == robotName)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,orderId,customer,recipient,recipientPhone,startLat,startLng,deliveryLat,deliveryLng,pinCode,senderName,robotId,robotName,status,createdAt);
+int get hashCode => Object.hash(runtimeType,id,orderId,customer,recipient,recipientPhone,startLat,startLng,deliveryLat,deliveryLng,senderAddress,deliveryAddress,pinCode,senderName,robotId,robotName,status,createdAt);
 
 @override
 String toString() {
-  return 'OrderResponse(id: $id, orderId: $orderId, customer: $customer, recipient: $recipient, recipientPhone: $recipientPhone, startLat: $startLat, startLng: $startLng, deliveryLat: $deliveryLat, deliveryLng: $deliveryLng, pinCode: $pinCode, senderName: $senderName, robotId: $robotId, robotName: $robotName, status: $status, createdAt: $createdAt)';
+  return 'OrderResponse(id: $id, orderId: $orderId, customer: $customer, recipient: $recipient, recipientPhone: $recipientPhone, startLat: $startLat, startLng: $startLng, deliveryLat: $deliveryLat, deliveryLng: $deliveryLng, senderAddress: $senderAddress, deliveryAddress: $deliveryAddress, pinCode: $pinCode, senderName: $senderName, robotId: $robotId, robotName: $robotName, status: $status, createdAt: $createdAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $OrderResponseCopyWith<$Res>  {
   factory $OrderResponseCopyWith(OrderResponse value, $Res Function(OrderResponse) _then) = _$OrderResponseCopyWithImpl;
 @useResult
 $Res call({
- int id, String orderId, Customer customer, Customer recipient, String recipientPhone, double startLat, double startLng, double deliveryLat, double deliveryLng, String pinCode, String senderName, int? robotId, String? robotName, String status, DateTime createdAt
+ int id, String orderId, Customer customer, Customer recipient, String recipientPhone, double startLat, double startLng, double deliveryLat, double deliveryLng, String? senderAddress, String? deliveryAddress, String pinCode, String senderName, int? robotId, String? robotName, String status, DateTime createdAt
 });
 
 
@@ -65,7 +65,7 @@ class _$OrderResponseCopyWithImpl<$Res>
 
 /// Create a copy of OrderResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? orderId = null,Object? customer = null,Object? recipient = null,Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,Object? pinCode = null,Object? senderName = null,Object? robotId = freezed,Object? robotName = freezed,Object? status = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? orderId = null,Object? customer = null,Object? recipient = null,Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,Object? senderAddress = freezed,Object? deliveryAddress = freezed,Object? pinCode = null,Object? senderName = null,Object? robotId = freezed,Object? robotName = freezed,Object? status = null,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,orderId: null == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
@@ -76,7 +76,9 @@ as String,startLat: null == startLat ? _self.startLat : startLat // ignore: cast
 as double,startLng: null == startLng ? _self.startLng : startLng // ignore: cast_nullable_to_non_nullable
 as double,deliveryLat: null == deliveryLat ? _self.deliveryLat : deliveryLat // ignore: cast_nullable_to_non_nullable
 as double,deliveryLng: null == deliveryLng ? _self.deliveryLng : deliveryLng // ignore: cast_nullable_to_non_nullable
-as double,pinCode: null == pinCode ? _self.pinCode : pinCode // ignore: cast_nullable_to_non_nullable
+as double,senderAddress: freezed == senderAddress ? _self.senderAddress : senderAddress // ignore: cast_nullable_to_non_nullable
+as String?,deliveryAddress: freezed == deliveryAddress ? _self.deliveryAddress : deliveryAddress // ignore: cast_nullable_to_non_nullable
+as String?,pinCode: null == pinCode ? _self.pinCode : pinCode // ignore: cast_nullable_to_non_nullable
 as String,senderName: null == senderName ? _self.senderName : senderName // ignore: cast_nullable_to_non_nullable
 as String,robotId: freezed == robotId ? _self.robotId : robotId // ignore: cast_nullable_to_non_nullable
 as int?,robotName: freezed == robotName ? _self.robotName : robotName // ignore: cast_nullable_to_non_nullable
@@ -185,10 +187,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String? senderAddress,  String? deliveryAddress,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OrderResponse() when $default != null:
-return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.senderAddress,_that.deliveryAddress,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
   return orElse();
 
 }
@@ -206,10 +208,10 @@ return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.reci
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String? senderAddress,  String? deliveryAddress,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _OrderResponse():
-return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.senderAddress,_that.deliveryAddress,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -226,10 +228,10 @@ return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.reci
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String orderId,  Customer customer,  Customer recipient,  String recipientPhone,  double startLat,  double startLng,  double deliveryLat,  double deliveryLng,  String? senderAddress,  String? deliveryAddress,  String pinCode,  String senderName,  int? robotId,  String? robotName,  String status,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _OrderResponse() when $default != null:
-return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.recipientPhone,_that.startLat,_that.startLng,_that.deliveryLat,_that.deliveryLng,_that.senderAddress,_that.deliveryAddress,_that.pinCode,_that.senderName,_that.robotId,_that.robotName,_that.status,_that.createdAt);case _:
   return null;
 
 }
@@ -241,7 +243,7 @@ return $default(_that.id,_that.orderId,_that.customer,_that.recipient,_that.reci
 @JsonSerializable()
 
 class _OrderResponse implements OrderResponse {
-  const _OrderResponse({required this.id, required this.orderId, required this.customer, required this.recipient, required this.recipientPhone, required this.startLat, required this.startLng, required this.deliveryLat, required this.deliveryLng, required this.pinCode, required this.senderName, this.robotId, this.robotName, required this.status, required this.createdAt});
+  const _OrderResponse({required this.id, required this.orderId, required this.customer, required this.recipient, required this.recipientPhone, required this.startLat, required this.startLng, required this.deliveryLat, required this.deliveryLng, this.senderAddress, this.deliveryAddress, required this.pinCode, required this.senderName, this.robotId, this.robotName, required this.status, required this.createdAt});
   factory _OrderResponse.fromJson(Map<String, dynamic> json) => _$OrderResponseFromJson(json);
 
 @override final  int id;
@@ -253,6 +255,8 @@ class _OrderResponse implements OrderResponse {
 @override final  double startLng;
 @override final  double deliveryLat;
 @override final  double deliveryLng;
+@override final  String? senderAddress;
+@override final  String? deliveryAddress;
 @override final  String pinCode;
 @override final  String senderName;
 @override final  int? robotId;
@@ -273,16 +277,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrderResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&(identical(other.customer, customer) || other.customer == customer)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.recipientPhone, recipientPhone) || other.recipientPhone == recipientPhone)&&(identical(other.startLat, startLat) || other.startLat == startLat)&&(identical(other.startLng, startLng) || other.startLng == startLng)&&(identical(other.deliveryLat, deliveryLat) || other.deliveryLat == deliveryLat)&&(identical(other.deliveryLng, deliveryLng) || other.deliveryLng == deliveryLng)&&(identical(other.pinCode, pinCode) || other.pinCode == pinCode)&&(identical(other.senderName, senderName) || other.senderName == senderName)&&(identical(other.robotId, robotId) || other.robotId == robotId)&&(identical(other.robotName, robotName) || other.robotName == robotName)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrderResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.orderId, orderId) || other.orderId == orderId)&&(identical(other.customer, customer) || other.customer == customer)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.recipientPhone, recipientPhone) || other.recipientPhone == recipientPhone)&&(identical(other.startLat, startLat) || other.startLat == startLat)&&(identical(other.startLng, startLng) || other.startLng == startLng)&&(identical(other.deliveryLat, deliveryLat) || other.deliveryLat == deliveryLat)&&(identical(other.deliveryLng, deliveryLng) || other.deliveryLng == deliveryLng)&&(identical(other.senderAddress, senderAddress) || other.senderAddress == senderAddress)&&(identical(other.deliveryAddress, deliveryAddress) || other.deliveryAddress == deliveryAddress)&&(identical(other.pinCode, pinCode) || other.pinCode == pinCode)&&(identical(other.senderName, senderName) || other.senderName == senderName)&&(identical(other.robotId, robotId) || other.robotId == robotId)&&(identical(other.robotName, robotName) || other.robotName == robotName)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,orderId,customer,recipient,recipientPhone,startLat,startLng,deliveryLat,deliveryLng,pinCode,senderName,robotId,robotName,status,createdAt);
+int get hashCode => Object.hash(runtimeType,id,orderId,customer,recipient,recipientPhone,startLat,startLng,deliveryLat,deliveryLng,senderAddress,deliveryAddress,pinCode,senderName,robotId,robotName,status,createdAt);
 
 @override
 String toString() {
-  return 'OrderResponse(id: $id, orderId: $orderId, customer: $customer, recipient: $recipient, recipientPhone: $recipientPhone, startLat: $startLat, startLng: $startLng, deliveryLat: $deliveryLat, deliveryLng: $deliveryLng, pinCode: $pinCode, senderName: $senderName, robotId: $robotId, robotName: $robotName, status: $status, createdAt: $createdAt)';
+  return 'OrderResponse(id: $id, orderId: $orderId, customer: $customer, recipient: $recipient, recipientPhone: $recipientPhone, startLat: $startLat, startLng: $startLng, deliveryLat: $deliveryLat, deliveryLng: $deliveryLng, senderAddress: $senderAddress, deliveryAddress: $deliveryAddress, pinCode: $pinCode, senderName: $senderName, robotId: $robotId, robotName: $robotName, status: $status, createdAt: $createdAt)';
 }
 
 
@@ -293,7 +297,7 @@ abstract mixin class _$OrderResponseCopyWith<$Res> implements $OrderResponseCopy
   factory _$OrderResponseCopyWith(_OrderResponse value, $Res Function(_OrderResponse) _then) = __$OrderResponseCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String orderId, Customer customer, Customer recipient, String recipientPhone, double startLat, double startLng, double deliveryLat, double deliveryLng, String pinCode, String senderName, int? robotId, String? robotName, String status, DateTime createdAt
+ int id, String orderId, Customer customer, Customer recipient, String recipientPhone, double startLat, double startLng, double deliveryLat, double deliveryLng, String? senderAddress, String? deliveryAddress, String pinCode, String senderName, int? robotId, String? robotName, String status, DateTime createdAt
 });
 
 
@@ -310,7 +314,7 @@ class __$OrderResponseCopyWithImpl<$Res>
 
 /// Create a copy of OrderResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? orderId = null,Object? customer = null,Object? recipient = null,Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,Object? pinCode = null,Object? senderName = null,Object? robotId = freezed,Object? robotName = freezed,Object? status = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? orderId = null,Object? customer = null,Object? recipient = null,Object? recipientPhone = null,Object? startLat = null,Object? startLng = null,Object? deliveryLat = null,Object? deliveryLng = null,Object? senderAddress = freezed,Object? deliveryAddress = freezed,Object? pinCode = null,Object? senderName = null,Object? robotId = freezed,Object? robotName = freezed,Object? status = null,Object? createdAt = null,}) {
   return _then(_OrderResponse(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,orderId: null == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
@@ -321,7 +325,9 @@ as String,startLat: null == startLat ? _self.startLat : startLat // ignore: cast
 as double,startLng: null == startLng ? _self.startLng : startLng // ignore: cast_nullable_to_non_nullable
 as double,deliveryLat: null == deliveryLat ? _self.deliveryLat : deliveryLat // ignore: cast_nullable_to_non_nullable
 as double,deliveryLng: null == deliveryLng ? _self.deliveryLng : deliveryLng // ignore: cast_nullable_to_non_nullable
-as double,pinCode: null == pinCode ? _self.pinCode : pinCode // ignore: cast_nullable_to_non_nullable
+as double,senderAddress: freezed == senderAddress ? _self.senderAddress : senderAddress // ignore: cast_nullable_to_non_nullable
+as String?,deliveryAddress: freezed == deliveryAddress ? _self.deliveryAddress : deliveryAddress // ignore: cast_nullable_to_non_nullable
+as String?,pinCode: null == pinCode ? _self.pinCode : pinCode // ignore: cast_nullable_to_non_nullable
 as String,senderName: null == senderName ? _self.senderName : senderName // ignore: cast_nullable_to_non_nullable
 as String,robotId: freezed == robotId ? _self.robotId : robotId // ignore: cast_nullable_to_non_nullable
 as int?,robotName: freezed == robotName ? _self.robotName : robotName // ignore: cast_nullable_to_non_nullable
@@ -356,7 +362,7 @@ $CustomerCopyWith<$Res> get recipient {
 /// @nodoc
 mixin _$Customer {
 
- int get id; String? get username; String? get phone; String? get phoneNumber; String? get firstName; String? get lastName; String? get email; String? get address;
+ int get id; String? get username; String? get phone; String? get phoneNumber; String? get firstName; String? get lastName; String? get email; String? get address; String? get avatarUrl;
 /// Create a copy of Customer
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -369,16 +375,16 @@ $CustomerCopyWith<Customer> get copyWith => _$CustomerCopyWithImpl<Customer>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Customer&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.address, address) || other.address == address));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Customer&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.address, address) || other.address == address)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,username,phone,phoneNumber,firstName,lastName,email,address);
+int get hashCode => Object.hash(runtimeType,id,username,phone,phoneNumber,firstName,lastName,email,address,avatarUrl);
 
 @override
 String toString() {
-  return 'Customer(id: $id, username: $username, phone: $phone, phoneNumber: $phoneNumber, firstName: $firstName, lastName: $lastName, email: $email, address: $address)';
+  return 'Customer(id: $id, username: $username, phone: $phone, phoneNumber: $phoneNumber, firstName: $firstName, lastName: $lastName, email: $email, address: $address, avatarUrl: $avatarUrl)';
 }
 
 
@@ -389,7 +395,7 @@ abstract mixin class $CustomerCopyWith<$Res>  {
   factory $CustomerCopyWith(Customer value, $Res Function(Customer) _then) = _$CustomerCopyWithImpl;
 @useResult
 $Res call({
- int id, String? username, String? phone, String? phoneNumber, String? firstName, String? lastName, String? email, String? address
+ int id, String? username, String? phone, String? phoneNumber, String? firstName, String? lastName, String? email, String? address, String? avatarUrl
 });
 
 
@@ -406,7 +412,7 @@ class _$CustomerCopyWithImpl<$Res>
 
 /// Create a copy of Customer
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = freezed,Object? phone = freezed,Object? phoneNumber = freezed,Object? firstName = freezed,Object? lastName = freezed,Object? email = freezed,Object? address = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = freezed,Object? phone = freezed,Object? phoneNumber = freezed,Object? firstName = freezed,Object? lastName = freezed,Object? email = freezed,Object? address = freezed,Object? avatarUrl = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,username: freezed == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -416,6 +422,7 @@ as String?,firstName: freezed == firstName ? _self.firstName : firstName // igno
 as String?,lastName: freezed == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
 as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String?,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -501,10 +508,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String? username,  String? phone,  String? phoneNumber,  String? firstName,  String? lastName,  String? email,  String? address)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String? username,  String? phone,  String? phoneNumber,  String? firstName,  String? lastName,  String? email,  String? address,  String? avatarUrl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Customer() when $default != null:
-return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firstName,_that.lastName,_that.email,_that.address);case _:
+return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firstName,_that.lastName,_that.email,_that.address,_that.avatarUrl);case _:
   return orElse();
 
 }
@@ -522,10 +529,10 @@ return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firs
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String? username,  String? phone,  String? phoneNumber,  String? firstName,  String? lastName,  String? email,  String? address)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String? username,  String? phone,  String? phoneNumber,  String? firstName,  String? lastName,  String? email,  String? address,  String? avatarUrl)  $default,) {final _that = this;
 switch (_that) {
 case _Customer():
-return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firstName,_that.lastName,_that.email,_that.address);case _:
+return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firstName,_that.lastName,_that.email,_that.address,_that.avatarUrl);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -542,10 +549,10 @@ return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firs
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String? username,  String? phone,  String? phoneNumber,  String? firstName,  String? lastName,  String? email,  String? address)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String? username,  String? phone,  String? phoneNumber,  String? firstName,  String? lastName,  String? email,  String? address,  String? avatarUrl)?  $default,) {final _that = this;
 switch (_that) {
 case _Customer() when $default != null:
-return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firstName,_that.lastName,_that.email,_that.address);case _:
+return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firstName,_that.lastName,_that.email,_that.address,_that.avatarUrl);case _:
   return null;
 
 }
@@ -557,7 +564,7 @@ return $default(_that.id,_that.username,_that.phone,_that.phoneNumber,_that.firs
 @JsonSerializable()
 
 class _Customer extends Customer {
-  const _Customer({required this.id, this.username, this.phone, this.phoneNumber, this.firstName, this.lastName, this.email, this.address}): super._();
+  const _Customer({required this.id, this.username, this.phone, this.phoneNumber, this.firstName, this.lastName, this.email, this.address, this.avatarUrl}): super._();
   factory _Customer.fromJson(Map<String, dynamic> json) => _$CustomerFromJson(json);
 
 @override final  int id;
@@ -568,6 +575,7 @@ class _Customer extends Customer {
 @override final  String? lastName;
 @override final  String? email;
 @override final  String? address;
+@override final  String? avatarUrl;
 
 /// Create a copy of Customer
 /// with the given fields replaced by the non-null parameter values.
@@ -582,16 +590,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Customer&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.address, address) || other.address == address));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Customer&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.phone, phone) || other.phone == phone)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.address, address) || other.address == address)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,username,phone,phoneNumber,firstName,lastName,email,address);
+int get hashCode => Object.hash(runtimeType,id,username,phone,phoneNumber,firstName,lastName,email,address,avatarUrl);
 
 @override
 String toString() {
-  return 'Customer(id: $id, username: $username, phone: $phone, phoneNumber: $phoneNumber, firstName: $firstName, lastName: $lastName, email: $email, address: $address)';
+  return 'Customer(id: $id, username: $username, phone: $phone, phoneNumber: $phoneNumber, firstName: $firstName, lastName: $lastName, email: $email, address: $address, avatarUrl: $avatarUrl)';
 }
 
 
@@ -602,7 +610,7 @@ abstract mixin class _$CustomerCopyWith<$Res> implements $CustomerCopyWith<$Res>
   factory _$CustomerCopyWith(_Customer value, $Res Function(_Customer) _then) = __$CustomerCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String? username, String? phone, String? phoneNumber, String? firstName, String? lastName, String? email, String? address
+ int id, String? username, String? phone, String? phoneNumber, String? firstName, String? lastName, String? email, String? address, String? avatarUrl
 });
 
 
@@ -619,7 +627,7 @@ class __$CustomerCopyWithImpl<$Res>
 
 /// Create a copy of Customer
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = freezed,Object? phone = freezed,Object? phoneNumber = freezed,Object? firstName = freezed,Object? lastName = freezed,Object? email = freezed,Object? address = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = freezed,Object? phone = freezed,Object? phoneNumber = freezed,Object? firstName = freezed,Object? lastName = freezed,Object? email = freezed,Object? address = freezed,Object? avatarUrl = freezed,}) {
   return _then(_Customer(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,username: freezed == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -629,6 +637,7 @@ as String?,firstName: freezed == firstName ? _self.firstName : firstName // igno
 as String?,lastName: freezed == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
 as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String?,address: freezed == address ? _self.address : address // ignore: cast_nullable_to_non_nullable
+as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

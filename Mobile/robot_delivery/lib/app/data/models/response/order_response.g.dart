@@ -17,6 +17,8 @@ _OrderResponse _$OrderResponseFromJson(Map<String, dynamic> json) =>
       startLng: (json['startLng'] as num).toDouble(),
       deliveryLat: (json['deliveryLat'] as num).toDouble(),
       deliveryLng: (json['deliveryLng'] as num).toDouble(),
+      senderAddress: json['senderAddress'] as String?,
+      deliveryAddress: json['deliveryAddress'] as String?,
       pinCode: json['pinCode'] as String,
       senderName: json['senderName'] as String,
       robotId: (json['robotId'] as num?)?.toInt(),
@@ -36,6 +38,8 @@ Map<String, dynamic> _$OrderResponseToJson(_OrderResponse instance) =>
       'startLng': instance.startLng,
       'deliveryLat': instance.deliveryLat,
       'deliveryLng': instance.deliveryLng,
+      'senderAddress': instance.senderAddress,
+      'deliveryAddress': instance.deliveryAddress,
       'pinCode': instance.pinCode,
       'senderName': instance.senderName,
       'robotId': instance.robotId,
@@ -53,6 +57,7 @@ _Customer _$CustomerFromJson(Map<String, dynamic> json) => _Customer(
   lastName: json['lastName'] as String?,
   email: json['email'] as String?,
   address: json['address'] as String?,
+  avatarUrl: json['avatarUrl'] as String?,
 );
 
 Map<String, dynamic> _$CustomerToJson(_Customer instance) => <String, dynamic>{
@@ -64,4 +69,5 @@ Map<String, dynamic> _$CustomerToJson(_Customer instance) => <String, dynamic>{
   'lastName': instance.lastName,
   'email': instance.email,
   'address': instance.address,
+  'avatarUrl': instance.avatarUrl,
 };

@@ -19,6 +19,8 @@ public class User {
 
     private String username;
 
+    private String avatarUrl;
+
     @JsonIgnore
     private String password;
 

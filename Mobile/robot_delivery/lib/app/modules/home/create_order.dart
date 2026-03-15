@@ -38,12 +38,13 @@ class CreateNewOrder extends StatelessWidget {
                   Expanded(
                     child: CustomTextfield(
                       controller: homeController.recipientPhoneController,
-                      hintText: 'Nhập số điện thoại',
-                      title: 'SĐT Người nhận',
+                      hintText: AppTranslationKeys.enterPhoneNumber.tr,
+                      title: AppTranslationKeys.recipientPhoneLabel.tr,
                       isRequired: true,
                       suffixIcon: Icons.phone,
                       keyboardType: TextInputType.phone,
                     ),
+
                   ),
                   const SizedBox(width: 8),
                   Obx(
@@ -77,15 +78,17 @@ class CreateNewOrder extends StatelessWidget {
               const SizedBox(height: 16),
               CustomTextfield(
                 controller: homeController.recipientNameController,
-                hintText: 'Nhập tên người nhận',
+                hintText: AppTranslationKeys.enterRecipientName.tr,
                 title: AppTranslationKeys.recipientName.tr,
                 isRequired: true,
                 suffixIcon: Icons.person_outline,
               ),
+
               const SizedBox(height: 16),
               CustomTextfield(
-                hintText: 'Nhập địa chỉ lấy hàng',
+                hintText: AppTranslationKeys.enterPickupLocation.tr,
                 title: AppTranslationKeys.shippingLocation.tr,
+
                 controller: homeController.shippingLocationController,
                 prefixIcon: Icons.location_on_outlined,
                 suffixIcon: Icons.map_outlined,
@@ -115,8 +118,8 @@ class CreateNewOrder extends StatelessWidget {
                         const SizedBox(width: 6),
                         Text(
                           homeController.isGettingCurrentLocation.value
-                              ? 'Đang lấy vị trí...'
-                              : 'Dùng vị trí hiện tại',
+                              ? AppTranslationKeys.gettingLocation.tr
+                              : AppTranslationKeys.useCurrentLocation.tr,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -125,6 +128,7 @@ class CreateNewOrder extends StatelessWidget {
                                 : AppColors.primary,
                           ),
                         ),
+
                       ],
                     ),
                   ),
@@ -188,8 +192,9 @@ class CreateNewOrder extends StatelessWidget {
               const SizedBox(height: 16),
               CustomTextfield(
                 controller: homeController.recipientAddressController,
-                hintText: 'Nhập địa chỉ người nhận',
+                hintText: AppTranslationKeys.enterRecipientAddress.tr,
                 title: AppTranslationKeys.recipientAddress.tr,
+
                 isRequired: true,
                 prefixIcon: Icons.location_on_outlined,
                 suffixIcon: Icons.map_outlined,
@@ -263,8 +268,9 @@ class CreateNewOrder extends StatelessWidget {
               Obx(
                 () => CustomButton(
                   text: homeController.isCreatingOrder.value
-                      ? 'Đang tạo...'
+                      ? AppTranslationKeys.creatingOrder.tr
                       : AppTranslationKeys.submitOrder.tr,
+
                   textColor: AppColors.white,
                   backgroundColor: AppColors.primary,
                   onPressed: homeController.isCreatingOrder.value

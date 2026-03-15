@@ -7,8 +7,10 @@ import 'package:robot_delivery/app/common/widget/custom_icon_button.dart';
 import 'package:robot_delivery/app/common/widget/custom_textfield.dart';
 import 'package:robot_delivery/app/core/i18n/app_translation_keys.dart';
 import 'package:robot_delivery/app/core/theme/app_colors.dart';
+import 'package:robot_delivery/app/routes/app_pages.dart';
 
 import '../controllers/login_controller.dart';
+
 
 class LoginView extends GetView<LoginController> {
   const LoginView({super.key});
@@ -43,16 +45,18 @@ class LoginView extends GetView<LoginController> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Robot delivery logistics management system',
+                  AppTranslationKeys.appDescription.tr,
                   style: TextStyle(fontSize: 14, color: AppColors.slate500),
                 ),
+
                 const SizedBox(height: 24),
                 CustomTextfield(
                   controller: controller.usernameController,
                   prefixIcon: Icons.email_outlined,
                   hintText: AppTranslationKeys.emailHint.tr,
-                  title: 'Email',
+                  title: AppTranslationKeys.email.tr,
                 ),
+
                 const SizedBox(height: 16),
                 Obx(
                   () => CustomTextfield(
@@ -115,8 +119,10 @@ class LoginView extends GetView<LoginController> {
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
-                        recognizer: TapGestureRecognizer()..onTap = () {},
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => Get.toNamed(Routes.REGISTER),
                       ),
+
                     ],
                   ),
                 ),

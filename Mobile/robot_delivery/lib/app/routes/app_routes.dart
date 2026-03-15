@@ -14,6 +14,7 @@ abstract class Routes {
   static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
   static const ORDER_DETAILS = _Paths.ORDER_DETAILS;
   static const SPLASH = _Paths.SPLASH;
+  static const REGISTER = _Paths.REGISTER;
 }
 
 abstract class _Paths {
@@ -28,4 +29,6 @@ abstract class _Paths {
   static const NOTIFICATIONS = '/notifications';
   static const ORDER_DETAILS = '/order-details';
   static const SPLASH = '/splash';
+  static const REGISTER = '/register';
 }
+

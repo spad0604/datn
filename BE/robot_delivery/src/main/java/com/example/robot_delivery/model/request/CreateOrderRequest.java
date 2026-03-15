@@ -13,6 +13,9 @@ public class CreateOrderRequest {
     private String recipientPhone;
     private Double startLat;
     private Double startLng;
+    private String senderAddress;
     private Double deliveryLat;
     private Double deliveryLng;
+    private String deliveryAddress;
 }
+

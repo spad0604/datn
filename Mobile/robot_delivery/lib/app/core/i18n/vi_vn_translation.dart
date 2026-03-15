@@ -30,6 +30,9 @@ class ViVNTranslation extends Translations {
       AppTranslationKeys.orContinueWith: 'HOẶC TIẾP TỤC VỚI',
       AppTranslationKeys.quickActions: 'Hành động nhanh',
       AppTranslationKeys.pending: 'Đang chờ',
+      AppTranslationKeys.from: 'Từ',
+      AppTranslationKeys.to: 'Đến',
+      AppTranslationKeys.order: 'Đơn hàng',
 
       // History
       AppTranslationKeys.deliveryHistory: 'Lịch sử giao hàng',
@@ -117,16 +120,41 @@ class ViVNTranslation extends Translations {
       AppTranslationKeys.moving: 'Đang di chuyển',
       AppTranslationKeys.inTransit: 'Đang vận chuyển',
       AppTranslationKeys.scheduled: 'Đã lên lịch',
+      AppTranslationKeys.waitingForRobot: 'Đang chờ robot...',
+      AppTranslationKeys.robotComingToPickup: 'Robot đang đến lấy hàng',
+      AppTranslationKeys.deliveringStatus: 'Đang giao hàng',
 
       AppTranslationKeys.recipientName: 'Tên người nhận',
       AppTranslationKeys.recipientAddress: 'Địa chỉ người nhận',
       AppTranslationKeys.packageWeight: 'Trọng lượng',
+      AppTranslationKeys.recipientPhoneLabel: 'SĐT Người nhận',
+      AppTranslationKeys.enterPhoneNumber: 'Nhập số điện thoại',
+      AppTranslationKeys.enterRecipientName: 'Nhập tên người nhận',
+      AppTranslationKeys.enterPickupLocation: 'Nhập địa chỉ lấy hàng',
+      AppTranslationKeys.gettingLocation: 'Đang lấy vị trí...',
+      AppTranslationKeys.useCurrentLocation: 'Dùng vị trí hiện tại',
+      AppTranslationKeys.enterRecipientAddress: 'Nhập địa chỉ người nhận',
+      AppTranslationKeys.creatingOrder: 'Đang tạo...',
+      AppTranslationKeys.recenter: 'Căn giữa',
+      AppTranslationKeys.pinCode: 'Mã PIN',
+      AppTranslationKeys.confirmSenderButton: 'Xác nhận gửi hàng',
+      AppTranslationKeys.confirmReceiverButton: 'Xác nhận nhận hàng',
+      AppTranslationKeys.deleteOrderButton: 'Hủy đơn hàng',
       AppTranslationKeys.createNewOrder: 'Tạo đơn hàng mới',
       AppTranslationKeys.shippingLocation: 'Vị trí giao hàng',
       AppTranslationKeys.submitOrder: 'Gửi đơn hàng',
       AppTranslationKeys.orderDetails: 'Chi tiết đơn hàng',
 
+      AppTranslationKeys.appDescription: 'Hệ thống quản lý logistics giao hàng bằng robot',
+      AppTranslationKeys.firstName: 'Tên',
+      AppTranslationKeys.lastName: 'Họ',
+      AppTranslationKeys.username: 'Tên đăng nhập',
+      AppTranslationKeys.reEnterPassword: 'Nhập lại mật khẩu',
+
       AppTranslationKeys.loggingIn: 'Đang đăng nhập...',
+      AppTranslationKeys.senderLocationLabel: 'Địa chỉ gửi',
+      AppTranslationKeys.deliveryAddressLabel: 'Địa chỉ nhận',
     },
+
   };
 }

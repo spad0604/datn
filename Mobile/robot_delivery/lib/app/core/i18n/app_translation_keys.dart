@@ -22,6 +22,10 @@ abstract class AppTranslationKeys {
   static const String orContinueWith = 'or_continue_with';
   static const String quickActions = 'quick_actions';
   static const String pending = 'pending';
+  static const String from = 'from';
+  static const String to = 'to';
+  static const String order = 'order';
+
 
   // History
   static const String deliveryHistory = 'delivery_history';
@@ -79,6 +83,10 @@ abstract class AppTranslationKeys {
   static const String moving = 'moving';
   static const String inTransit = 'in_transit';
   static const String scheduled = 'scheduled';
+  static const String waitingForRobot = 'waiting_for_robot';
+  static const String robotComingToPickup = 'robot_coming_to_pickup';
+  static const String deliveringStatus = 'delivering_status';
+
 
   // Quick Actions
   static const String newOrder = 'new_order';
@@ -113,10 +121,35 @@ abstract class AppTranslationKeys {
   static const String recipientName = 'recipient_name';
   static const String recipientAddress = 'recipient_address';
   static const String packageWeight = 'package_weight';
+  static const String recipientPhoneLabel = 'recipient_phone_label';
+  static const String enterPhoneNumber = 'enter_phone_number';
+  static const String enterRecipientName = 'enter_recipient_name';
+  static const String enterPickupLocation = 'enter_pickup_location';
+  static const String gettingLocation = 'getting_location';
+  static const String useCurrentLocation = 'use_current_location';
+  static const String enterRecipientAddress = 'enter_recipient_address';
+  static const String creatingOrder = 'creating_order';
+  static const String recenter = 'recenter';
+  static const String pinCode = 'pin_code';
+
+  static const String confirmSenderButton = 'confirm_sender_button';
+  static const String confirmReceiverButton = 'confirm_receiver_button';
+  static const String deleteOrderButton = 'delete_order_button';
   static const String createNewOrder = 'create_new_order';
+
   static const String shippingLocation = 'shipping_location';
   static const String submitOrder = 'submit_order';
   static const String orderDetails = 'order_details';
 
+  static const String appDescription = 'app_description';
+  static const String firstName = 'first_name';
+  static const String lastName = 'last_name';
+  static const String username = 'username';
+  static const String reEnterPassword = 're_enter_password';
+
   static const String loggingIn = 'logging_in';
+  static const String senderLocationLabel = 'sender_location_label';
+  static const String deliveryAddressLabel = 'delivery_address_label';
 }
+
+

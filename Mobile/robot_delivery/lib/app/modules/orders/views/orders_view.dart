@@ -24,7 +24,10 @@ class DeliveryHistoryItem {
     required this.leadingBg,
     required this.leadingFg,
     this.showMapPreview = false,
+    this.senderAddress,
+    this.deliveryAddress,
   });
+
 
   final String title;
   final String sender;
@@ -34,24 +37,33 @@ class DeliveryHistoryItem {
   final Color leadingBg;
   final Color leadingFg;
   final bool showMapPreview;
+  final String? senderAddress;
+  final String? deliveryAddress;
+
 
   static DeliveryHistoryItem fromOrder(OrderResponse order) {
     final status = _mapStatus(order.status);
     return DeliveryHistoryItem(
-      title: 'Order #${order.orderId}',
+      title: '${AppTranslationKeys.order.tr} #${order.orderId}',
       sender: order.senderName,
+
       dateTimeText: DateFormat('MMM d, yyyy • h:mm a').format(order.createdAt.toLocal()),
       status: status,
       leadingIcon: _leadingIcon(status),
       leadingBg: _leadingBg(status),
       leadingFg: _leadingFg(status),
+      senderAddress: order.senderAddress,
+      deliveryAddress: order.deliveryAddress,
     );
+
   }
 
   static ItemEnum _mapStatus(String s) {
     switch (s.toUpperCase()) {
       case 'DELIVERED':
         return ItemEnum.delivered;
+      case 'CANCELLED':
+        return ItemEnum.cancelled;
       case 'WAIT_ROBOT':
       case 'PENDING':
       case 'DELIVERING':
@@ -60,6 +72,7 @@ class DeliveryHistoryItem {
         return ItemEnum.arriving;
     }
   }
+
 
   static IconData _leadingIcon(ItemEnum status) {
     switch (status) {

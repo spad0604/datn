@@ -34,8 +34,9 @@ class MapView extends GetView<MapController> {
                   IconButton(
                     onPressed: controller.recenter,
                     icon: const Icon(Icons.my_location, color: AppColors.primary),
-                    tooltip: 'Recenter',
+                    tooltip: AppTranslationKeys.recenter.tr,
                   ),
+
                 ],
               ),
             ),
@@ -51,8 +52,9 @@ class MapView extends GetView<MapController> {
                         width: 44,
                         height: 44,
                         child: Tooltip(
-                          message: 'Order ${data.order.orderId}',
+                          message: '${AppTranslationKeys.order.tr} ${data.order.orderId}',
                           child: Container(
+
                             decoration: BoxDecoration(
                               color: AppColors.white,
                               borderRadius: BorderRadius.circular(9999),

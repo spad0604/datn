@@ -29,6 +29,9 @@ class EnUSTranslation extends Translations {
       AppTranslationKeys.orContinueWith: 'OR CONTINUE WITH',
       AppTranslationKeys.quickActions: 'Quick Actions',
       AppTranslationKeys.pending: 'Pending',
+      AppTranslationKeys.from: 'From',
+      AppTranslationKeys.to: 'To',
+      AppTranslationKeys.order: 'Order',
 
       // History
       AppTranslationKeys.deliveryHistory: 'Delivery History',
@@ -117,16 +120,41 @@ class EnUSTranslation extends Translations {
       AppTranslationKeys.moving: 'Moving',
       AppTranslationKeys.inTransit: 'In Transit',
       AppTranslationKeys.scheduled: 'Scheduled',
+      AppTranslationKeys.waitingForRobot: 'Waiting for robot...',
+      AppTranslationKeys.robotComingToPickup: 'Robot is coming for pickup',
+      AppTranslationKeys.deliveringStatus: 'Delivering',
 
       AppTranslationKeys.recipientName: 'Recipient Name',
       AppTranslationKeys.recipientAddress: 'Recipient Address',
       AppTranslationKeys.packageWeight: 'Package Weight',
+      AppTranslationKeys.recipientPhoneLabel: 'Recipient Phone',
+      AppTranslationKeys.enterPhoneNumber: 'Enter phone number',
+      AppTranslationKeys.enterRecipientName: 'Enter recipient name',
+      AppTranslationKeys.enterPickupLocation: 'Enter pickup location',
+      AppTranslationKeys.gettingLocation: 'Getting location...',
+      AppTranslationKeys.useCurrentLocation: 'Use current location',
+      AppTranslationKeys.enterRecipientAddress: 'Enter recipient address',
+      AppTranslationKeys.creatingOrder: 'Creating order...',
+      AppTranslationKeys.recenter: 'Recenter',
+      AppTranslationKeys.pinCode: 'Pin Code',
+      AppTranslationKeys.confirmSenderButton: 'Confirm Pickup',
+      AppTranslationKeys.confirmReceiverButton: 'Confirm Reception',
+      AppTranslationKeys.deleteOrderButton: 'Cancel Order',
       AppTranslationKeys.createNewOrder: 'Create New Order',
       AppTranslationKeys.shippingLocation: 'Shipping Location',
       AppTranslationKeys.submitOrder: 'Submit Order',
       AppTranslationKeys.orderDetails: 'Order Details',
 
+      AppTranslationKeys.appDescription: 'Robot delivery logistics management system',
+      AppTranslationKeys.firstName: 'First Name',
+      AppTranslationKeys.lastName: 'Last Name',
+      AppTranslationKeys.username: 'Username',
+      AppTranslationKeys.reEnterPassword: 'Re-enter password',
+
       AppTranslationKeys.loggingIn: 'Logging in...',
+      AppTranslationKeys.senderLocationLabel: 'Sender Location',
+      AppTranslationKeys.deliveryAddressLabel: 'Delivery Address',
     },
+
   };
 }

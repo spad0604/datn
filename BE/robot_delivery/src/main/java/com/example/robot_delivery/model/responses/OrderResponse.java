@@ -15,9 +15,12 @@ public class OrderResponse {
     private String recipientPhone;
     private Double startLat;
     private Double startLng;
+    private String senderAddress;
     private Double deliveryLat;
     private Double deliveryLng;
+    private String deliveryAddress;
     private String pinCode;
+
     private String senderName;
     private Long robotId;
     private String robotName;

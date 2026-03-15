@@ -20,10 +20,11 @@ class ApiClient {
       connectTimeout: AppConfig.connectTimeout,
       receiveTimeout: AppConfig.receiveTimeout,
       sendTimeout: AppConfig.sendTimeout,
+      contentType: 'application/json',
       headers: const {
-        'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+
     );
 
     final tokenStorage = _tokenStorage;

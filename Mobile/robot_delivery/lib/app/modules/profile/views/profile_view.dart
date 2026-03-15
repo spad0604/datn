@@ -50,7 +50,13 @@ class ProfileView extends GetView<ProfileController> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(height: 24),
-                          ProfileImage(),
+                          ProfileImage(
+                            imageUrl: controller.currentUser.value?.avatarUrl,
+                            onTap: () {
+                              controller.pickImage();
+                            },
+                          ),
+
                           const SizedBox(height: 16),
                           CustomTextfield(
                             suffixIcon: controller.isUpdatingProfile.value

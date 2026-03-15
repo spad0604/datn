@@ -22,4 +22,6 @@ class AppEndpoints {
 
   static const String myNotifications = '/notifications';
   static const String markNotificationRead = '/notifications/{id}/read';
+
+  static const String uploadAvatarUrl = '/users/upload_avatar';
 }

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:robot_delivery/app/core/theme/app_colors.dart';
 
 class ProfileImage extends StatelessWidget {
-  const ProfileImage({super.key, this.imageUrl});
+  const ProfileImage({super.key, this.imageUrl, this.onTap});
 
   final String? imageUrl;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -18,22 +19,30 @@ class ProfileImage extends StatelessWidget {
         Positioned(
           bottom: -4,
           right: -4,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              shape: BoxShape.circle,
-            ),
+          child: GestureDetector(
+            onTap: onTap,
             child: Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
+              decoration: const BoxDecoration(
+                color: AppColors.white,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.camera_alt_outlined, size: 16, color: AppColors.white,),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.camera_alt_outlined,
+                  size: 16,
+                  color: AppColors.white,
+                ),
+              ),
             ),
           ),
         ),
+
       ],
     );
   }

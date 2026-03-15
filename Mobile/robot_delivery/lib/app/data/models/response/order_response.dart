@@ -15,7 +15,10 @@ abstract class OrderResponse with _$OrderResponse {
     required double startLng,
     required double deliveryLat,
     required double deliveryLng,
+    String? senderAddress,
+    String? deliveryAddress,
     required String pinCode,
+
     required String senderName,
     int? robotId,
     String? robotName,
@@ -37,7 +40,9 @@ abstract class Customer with _$Customer {
     String? lastName,
     String? email,
     String? address,
+    String? avatarUrl,
   }) = _Customer;
+
 
   const Customer._();
 
