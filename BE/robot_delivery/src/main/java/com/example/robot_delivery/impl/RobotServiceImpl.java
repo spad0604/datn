@@ -67,8 +67,8 @@ public class RobotServiceImpl implements IRobotService {
                     if (dist < 0.2 && !Boolean.TRUE.equals(order.getIsDeliveryNotified())) {
                         notificationService.sendAndSaveNotification(
                                 order.getRecipientId(),
-                                "Robot sắp đến!",
-                                "Robot sắp giao hàng cho bạn, vui lòng chuẩn bị ra nhận.",
+                                "Đơn hàng từ " + order.getSenderName() + " sắp đến!",
+                                "Robot đang giao đơn hàng từ " + order.getSenderName() + " sắp đến chỗ bạn, vui lòng chuẩn bị ra nhận.",
                                 "ROBOT_APPROACHING_DELIVERY",
                                 order.getId()
                         );

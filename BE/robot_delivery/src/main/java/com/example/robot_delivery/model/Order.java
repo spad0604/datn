@@ -40,6 +40,7 @@ public class Order {
     private Double deliveryLat;
 
     private Double deliveryLng;
+    
     private String deliveryAddress;
 
     private String pinCode;

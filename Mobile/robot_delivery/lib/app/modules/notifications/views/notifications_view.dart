@@ -255,9 +255,8 @@ class _NotificationTile extends StatelessWidget {
               color: AppColors.slate600,
               fontWeight: FontWeight.w500,
               fontSize: 13,
+              height: 1.4,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
         trailing: Column(

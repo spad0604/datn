@@ -125,8 +125,8 @@ public class OrderServiceImpl implements IOrderService {
         if (savedOrder.getRecipientId() != null) {
             notificationService.sendAndSaveNotification(
                 savedOrder.getRecipientId(),
-                "Bạn có đơn hàng mới!",
-                "Người gửi " + savedOrder.getSenderName() + " vừa tạo một đơn hàng cho bạn. Mã PIN nhận hàng là: " + savedOrder.getPinCode(),
+                "Đơn hàng mới từ " + savedOrder.getSenderName(),
+                "Bạn có một đơn hàng mới từ " + savedOrder.getSenderName() + ". Mã PIN nhận hàng là: " + savedOrder.getPinCode(),
                 "ORDER_CREATED",
                 savedOrder.getId()
             );
@@ -200,7 +200,7 @@ public class OrderServiceImpl implements IOrderService {
                 notificationService.sendAndSaveNotification(
                     existing.getRecipientId(),
                     "Đơn hàng bị huỷ",
-                    "Người gửi đã huỷ đơn hàng gửi cho bạn.",
+                    "Đơn hàng từ " + existing.getSenderName() + " đã bị huỷ.",
                     "ORDER_CANCELLED",
                     existing.getId()
                 );
