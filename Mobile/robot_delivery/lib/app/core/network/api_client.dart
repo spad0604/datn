@@ -20,9 +20,15 @@ class ApiClient {
       connectTimeout: AppConfig.connectTimeout,
       receiveTimeout: AppConfig.receiveTimeout,
       sendTimeout: AppConfig.sendTimeout,
+      followRedirects: true,
+      maxRedirects: 5,
+      validateStatus: (status) {
+        return status != null && status < 500;
+      },
       contentType: 'application/json',
       headers: const {
         'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
 
     );

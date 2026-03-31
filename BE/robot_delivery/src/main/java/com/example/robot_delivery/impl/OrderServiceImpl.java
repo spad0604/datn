@@ -12,6 +12,7 @@ import com.example.robot_delivery.model.enums.RobotStatusEnum;
 import com.example.robot_delivery.repositorys.OrderRepository;
 import com.example.robot_delivery.repositorys.RobotRepository;
 import com.example.robot_delivery.repositorys.UserRepository;
+import com.example.robot_delivery.service.RobotOrderEventPublisher;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class OrderServiceImpl implements IOrderService {
     private final RobotRepository robotRepository;
     private final UserRepository userRepository;
     private final com.example.robot_delivery.service.NotificationService notificationService;
+    private final RobotOrderEventPublisher robotOrderEventPublisher;
 
     private OrderResponse.UserSummary mapToUserSummary(User user) {
         if (user == null) return null;
@@ -57,6 +59,7 @@ public class OrderServiceImpl implements IOrderService {
                 .senderName(order.getSenderName())
                 .robotId(order.getRobot() != null ? order.getRobot().getId() : null)
                 .robotName(order.getRobot() != null ? order.getRobot().getRobotName() : null)
+                .robotStatus(order.getRobot() != null ? order.getRobot().getStatus() : null)
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())
                 .senderAddress(order.getSenderAddress())
@@ -119,6 +122,10 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         Order savedOrder = orderRepository.save(order);
+
+        if (savedOrder.getRobot() != null) {
+            robotOrderEventPublisher.publishOrderAssigned(savedOrder);
+        }
 
         // --- GỬI THÔNG BÁO ---
         // 1. Thông báo cho người nhận (nếu có tài khoản)
@@ -183,6 +190,11 @@ public class OrderServiceImpl implements IOrderService {
         return orderRepository.findById(id).map(existing -> {
             if (!existing.getCustomerId().getUsername().equals(username)) {
                 return ResponseData.<Void>builder().message("Access denied").build();
+            }
+
+            // Notify robot ASAP (before deleting) so it can stop navigation.
+            if (existing.getRobot() != null) {
+                robotOrderEventPublisher.publishOrderCancelled(existing);
             }
 
             // Nếu đơn hàng đang có robot được gán (chưa giao hàng),
@@ -268,6 +280,8 @@ public class OrderServiceImpl implements IOrderService {
             
             robotRepository.save(robot);
             Order savedOrder = orderRepository.save(order);
+
+            robotOrderEventPublisher.publishOrderStatusChanged(savedOrder, OrderStatusEnum.DELIVERING);
             
             return ResponseData.<OrderResponse>builder()
                     .message("Sender confirmed successfully")
@@ -305,6 +319,8 @@ public class OrderServiceImpl implements IOrderService {
             
             robotRepository.save(robot);
             Order savedOrder = orderRepository.save(order);
+
+            robotOrderEventPublisher.publishOrderStatusChanged(savedOrder, OrderStatusEnum.DELIVERED);
             
             // Thông báo cho người gửi khi người nhận đã nhận hàng thành công
             notificationService.sendAndSaveNotification(

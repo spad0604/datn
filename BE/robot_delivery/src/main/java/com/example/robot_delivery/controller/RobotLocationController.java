@@ -3,6 +3,7 @@ package com.example.robot_delivery.controller;
 import com.example.robot_delivery.impl.RobotServiceImpl;
 import com.example.robot_delivery.model.request.RobotLocationRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -15,11 +16,13 @@ import java.util.Map;
 public class RobotLocationController {
     private final RobotServiceImpl robotService;
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final String SERVER_SECRET = "DATN_2025_2_GIAP";
+
+    @Value("${robot.shared-secret:DATN_2025_2_GIAP}")
+    private String serverSecret;
 
     @MessageMapping("/update-location")
     public void handleRobotLocation(@Payload RobotLocationRequest request) {
-        if (!SERVER_SECRET.equals(request.getSecretKey())) {
+        if (!serverSecret.equals(request.getSecretKey())) {
             return;
         }
 

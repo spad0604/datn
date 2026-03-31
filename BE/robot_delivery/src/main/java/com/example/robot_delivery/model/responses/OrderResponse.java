@@ -1,6 +1,7 @@
 package com.example.robot_delivery.model.responses;
 
 import com.example.robot_delivery.model.enums.OrderStatusEnum;
+import com.example.robot_delivery.model.enums.RobotStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ public class OrderResponse {
     private String senderName;
     private Long robotId;
     private String robotName;
+    private RobotStatusEnum robotStatus;
     private OrderStatusEnum status;
     private LocalDateTime createdAt;
 

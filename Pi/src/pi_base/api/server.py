@@ -28,6 +28,46 @@ def create_http_app(bridge: BridgeApp) -> FastAPI:
         except Exception as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
+    @app.get("/mcu/motor")
+    async def mcu_motor(left: int, right: int) -> dict:
+        await bridge.mark_http_get("/mcu/motor")
+        try:
+            return await bridge.mcu_motor(left=left, right=right)
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/mcu/stop")
+    async def mcu_stop() -> dict:
+        await bridge.mark_http_get("/mcu/stop")
+        try:
+            return await bridge.mcu_stop()
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/mcu/mpu/read")
+    async def mcu_mpu_read() -> dict:
+        await bridge.mark_http_get("/mcu/mpu/read")
+        try:
+            return await bridge.mcu_mpu_read()
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/mcu/unlock")
+    async def mcu_unlock(pin: str) -> dict:
+        await bridge.mark_http_get("/mcu/unlock")
+        try:
+            return await bridge.mcu_unlock(pin=pin)
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/mcu/pin/set")
+    async def mcu_pin_set(pin: str, order_id: int | None = None) -> dict:
+        await bridge.mark_http_get("/mcu/pin/set")
+        try:
+            return await bridge.mcu_pin_set(pin=pin, order_id=order_id)
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
     @app.get("/ws/send")
     async def ws_send(data: str) -> dict:
         await bridge.mark_http_get("/ws/send")

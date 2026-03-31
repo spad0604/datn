@@ -74,4 +74,6 @@ char keypad_open_pin_listen(void)
             }
         }
     }
+
+    return 0;
 }

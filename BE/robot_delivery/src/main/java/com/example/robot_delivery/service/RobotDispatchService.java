@@ -21,6 +21,7 @@ public class RobotDispatchService {
 
     private final OrderRepository orderRepository;
     private final RobotRepository robotRepository;
+    private final RobotOrderEventPublisher robotOrderEventPublisher;
 
     /**
      * Mỗi 10 giây quét các đơn hàng đang đợi robot rảnh
@@ -69,7 +70,9 @@ public class RobotDispatchService {
                 
                 order.setRobot(nearestRobot);
                 order.setStatus(OrderStatusEnum.PENDING);
-                orderRepository.save(order);
+                Order saved = orderRepository.save(order);
+
+                robotOrderEventPublisher.publishOrderAssigned(saved);
 
                 // Loại robot này khỏi danh sách rảnh để không gán cho đơn hàng tiếp theo trong cùng vòng lặp
                 idleRobots.remove(nearestRobot);

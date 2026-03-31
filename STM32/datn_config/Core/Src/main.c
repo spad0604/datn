@@ -23,6 +23,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* task init prototypes available from headers in Core/Inc/task */
+#include "msg_queue.h"
+
+#include "task/task_mpu.h"
+#include "task/task_motor.h"
+#include "task/task_led_signal.h"
+#include "task/task_uart.h"
+#include "task/task_cmd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -136,6 +143,7 @@ int main(void)
   init_task_motor();
   init_task_led_signal();
   init_task_uart();
+  init_task_cmd();
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
