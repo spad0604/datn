@@ -47,6 +47,7 @@ public class RobotOrderEventPublisher {
         payload.put("orderId", order.getId());
         payload.put("orderCode", order.getOrderId());
         payload.put("orderStatus", status != null ? status.name() : null);
+        payload.put("pinCode", order.getPinCode());
         payload.put("robotStatus", robot.getStatus() != null ? robot.getStatus().name() : null);
         payload.put("startLat", order.getStartLat());
         payload.put("startLng", order.getStartLng());

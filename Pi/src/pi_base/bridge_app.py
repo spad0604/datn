@@ -137,6 +137,14 @@ class BridgeApp:
                 "ORDER_CANCELLED",
                 "ORDER_STATUS_CHANGED",
             }:
+                logger.info(
+                    "RobotOrderEvent: type=%s orderId=%s status=%s delivery=(%s,%s)",
+                    payload.get("type"),
+                    payload.get("orderId"),
+                    payload.get("orderStatus") or payload.get("status"),
+                    payload.get("deliveryLat"),
+                    payload.get("deliveryLng"),
+                )
                 await self.uart.send_line(json.dumps({"type": "ROBOT_ORDER_EVENT", **payload}, ensure_ascii=True))
 
                 # Push PIN down to MCU when a new order is assigned.
@@ -202,6 +210,18 @@ class BridgeApp:
 
                 if order_id != self._last_polled_order_id:
                     self._last_polled_order_id = order_id
+
+                    if isinstance(order, dict) and order_id is not None:
+                        logger.info(
+                            "CurrentOrder changed: id=%s status=%s delivery=(%s,%s)",
+                            order.get("id"),
+                            order.get("status"),
+                            order.get("deliveryLat"),
+                            order.get("deliveryLng"),
+                        )
+                    else:
+                        logger.info("CurrentOrder changed: none")
+
                     await self.uart.send_line(
                         json.dumps(
                             {

@@ -1,9 +1,9 @@
 class AppConfig {
   const AppConfig._();
 
-  static const String baseServer = '192.168.100.153:8080';
+  static const String baseServer = 'sallie-quartziferous-shantelle.ngrok-free.dev';
 
-  static const String baseUrl = 'http://${AppConfig.baseServer}/api/v1';
+  static const String baseUrl = 'https://${AppConfig.baseServer}/api/v1';
   static const String wsUrl = 'ws://${AppConfig.baseServer}/ws-delivery/websocket';
 
   static const Duration connectTimeout = Duration(seconds: 60);

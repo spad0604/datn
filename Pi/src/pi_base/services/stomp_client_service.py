@@ -73,6 +73,10 @@ class StompClientService:
         self._conn: Optional[Any] = None
         self._outgoing: asyncio.Queue[tuple[str, str, str]] = asyncio.Queue()
 
+        # Hard-coded liveness checks for demo/dev: log ping/pong.
+        self._ping_interval_sec = 10
+        self._ping_timeout_sec = 5
+
     @property
     def is_connected(self) -> bool:
         return self._conn is not None
@@ -89,6 +93,8 @@ class StompClientService:
                 async with connect(
                     self._server_url,
                     subprotocols=["v12.stomp", "v11.stomp", "v10.stomp"],
+                    ping_interval=None,
+                    ping_timeout=None,
                 ) as websocket:
                     self._conn = websocket
                     logger.info("Connected STOMP websocket: %s", self._server_url)
@@ -98,9 +104,10 @@ class StompClientService:
 
                     recv_task = asyncio.create_task(self._recv_loop(websocket))
                     send_task = asyncio.create_task(self._send_loop(websocket))
+                    ping_task = asyncio.create_task(self._ping_loop(websocket))
 
                     done, pending = await asyncio.wait(
-                        {recv_task, send_task},
+                        {recv_task, send_task, ping_task},
                         return_when=asyncio.FIRST_EXCEPTION,
                     )
                     for task in pending:
@@ -192,3 +199,16 @@ class StompClientService:
             }
             frame = _build_frame("SEND", headers, body)
             await websocket.send(frame)
+
+    async def _ping_loop(self, websocket: Any) -> None:
+        # Send explicit websocket PING frames and log PONG replies.
+        while self._running and self._conn is websocket:
+            await asyncio.sleep(self._ping_interval_sec)
+            try:
+                logger.info("WS ping -> %s", self._server_url)
+                pong_waiter = websocket.ping()
+                await asyncio.wait_for(pong_waiter, timeout=self._ping_timeout_sec)
+                logger.info("WS pong <- %s", self._server_url)
+            except Exception as exc:
+                logger.warning("WS ping/pong failed: %s", exc)
+                raise
