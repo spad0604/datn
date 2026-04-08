@@ -47,6 +47,11 @@ while cap.isOpened():
     
     frame_counter += 1
     
+    if frame_counter < 3000:
+        continue
+    
+    frame = cv2.resize(frame, (640, 480))
+    
     curr_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     
     # Mặc định hiển thị frame thô; nếu tính được VO thì vẽ overlay lên.
@@ -115,6 +120,13 @@ while cap.isOpened():
             cv2.circle(vis, pt2, 5, (0, 255, 0), -1)
             cv2.line(vis, pt1, pt2, (255, 0, 0), 2)
     
+    # Show FPS
+    if frame_counter > 1:
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        cv2.putText(vis, f'FPS: {fps:.2f}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+    
+    # imshow true size not full screen
+    cv2.resizeWindow('Frame', 640, 480)
     cv2.imshow('Frame', vis)
     
     # Cập nhật kp1, des1 cho vòng lặp tiếp theo
