@@ -60,6 +60,22 @@ def create_http_app(bridge: BridgeApp) -> FastAPI:
         except Exception as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
+    @app.get("/mcu/signal")
+    async def mcu_signal(mode: str) -> dict:
+        await bridge.mark_http_get("/mcu/signal")
+        try:
+            return await bridge.mcu_signal(mode=mode)
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    @app.get("/mcu/lock/pulse")
+    async def mcu_lock_pulse(ms: int = 5000) -> dict:
+        await bridge.mark_http_get("/mcu/lock/pulse")
+        try:
+            return await bridge.mcu_lock_pulse(ms=ms)
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
     @app.get("/mcu/pin/set")
     async def mcu_pin_set(pin: str, order_id: int | None = None) -> dict:
         await bridge.mark_http_get("/mcu/pin/set")

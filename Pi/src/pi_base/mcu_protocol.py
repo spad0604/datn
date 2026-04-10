@@ -81,3 +81,11 @@ def cmd_pin_clear() -> str:
 
 def cmd_unlock(pin: str) -> str:
     return build_cmd("UNLOCK", PIN=str(pin))
+
+
+def cmd_signal(mode: str) -> str:
+    return build_cmd("SIGNAL", MODE=str(mode).upper())
+
+
+def cmd_lock_pulse(ms: int = 5000) -> str:
+    return build_cmd("LOCK_PULSE", MS=int(ms))

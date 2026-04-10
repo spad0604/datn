@@ -21,6 +21,16 @@
 #define CMD_TX_MAX 192u
 #endif
 
+#define SIGNAL_RELAY_PORT GPIOB
+#define SIGNAL_LEFT_RELAY GPIO_PIN_12
+#define SIGNAL_RIGHT_RELAY GPIO_PIN_13
+#define SIGNAL_HAZARD_RELAY GPIO_PIN_14
+#define SIGNAL_RELAY_ALL (SIGNAL_LEFT_RELAY | SIGNAL_RIGHT_RELAY | SIGNAL_HAZARD_RELAY)
+
+#define LOCK_PULSE_DEFAULT_MS 5000u
+#define LOCK_PULSE_MIN_MS 100u
+#define LOCK_PULSE_MAX_MS 10000u
+
 static char s_current_pin[8] = {0}; /* 6 digits + null */
 
 static void uart_send_line(const char *line)
@@ -77,6 +87,35 @@ static int16_t clamp_i16(int v, int16_t lo, int16_t hi)
     if (v < lo) return lo;
     if (v > hi) return hi;
     return (int16_t)v;
+}
+
+static uint32_t clamp_u32(uint32_t v, uint32_t lo, uint32_t hi)
+{
+    if (v < lo) return lo;
+    if (v > hi) return hi;
+    return v;
+}
+
+static void signal_set_mode_off(void)
+{
+    HAL_GPIO_WritePin(SIGNAL_RELAY_PORT, SIGNAL_RELAY_ALL, GPIO_PIN_RESET);
+}
+
+static void signal_set_mode_left(void)
+{
+    HAL_GPIO_WritePin(SIGNAL_RELAY_PORT, SIGNAL_RELAY_ALL, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(SIGNAL_RELAY_PORT, SIGNAL_LEFT_RELAY, GPIO_PIN_SET);
+}
+
+static void signal_set_mode_right(void)
+{
+    HAL_GPIO_WritePin(SIGNAL_RELAY_PORT, SIGNAL_RELAY_ALL, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(SIGNAL_RELAY_PORT, SIGNAL_RIGHT_RELAY, GPIO_PIN_SET);
+}
+
+static void signal_set_mode_hazard(void)
+{
+    HAL_GPIO_WritePin(SIGNAL_RELAY_PORT, SIGNAL_RELAY_ALL, GPIO_PIN_SET);
 }
 
 static void handle_cmd_motor(char *saveptr)
@@ -158,12 +197,83 @@ static void handle_cmd_pin_clear(void)
     uart_send_line("RD1;ACK;PIN_CLEAR;OK=1\n");
 }
 
-static void lock_pulse_open(void)
+static void lock_pulse_open(uint32_t pulse_ms)
 {
     /* Assumption: GPIO_PIN_SET opens the lock. Adjust if wiring is inverted. */
     HAL_GPIO_WritePin(Lock_GPIO_Port, Lock_Pin, GPIO_PIN_SET);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(pulse_ms));
     HAL_GPIO_WritePin(Lock_GPIO_Port, Lock_Pin, GPIO_PIN_RESET);
+}
+
+static void handle_cmd_signal(char *saveptr)
+{
+    char *tok;
+    const char *mode = NULL;
+
+    while ((tok = strtok_r(NULL, ";", &saveptr)) != NULL)
+    {
+        if (kv_key_is(tok, "MODE"))
+        {
+            mode = kv_get(tok);
+        }
+    }
+
+    if (mode == NULL)
+    {
+        uart_send_line("RD1;ERR;SIGNAL;OK=0;ERR=NO_MODE\n");
+        return;
+    }
+
+    if (strcmp(mode, "OFF") == 0)
+    {
+        signal_set_mode_off();
+    }
+    else if (strcmp(mode, "LEFT") == 0)
+    {
+        signal_set_mode_left();
+    }
+    else if (strcmp(mode, "RIGHT") == 0)
+    {
+        signal_set_mode_right();
+    }
+    else if (strcmp(mode, "HAZARD") == 0)
+    {
+        signal_set_mode_hazard();
+    }
+    else
+    {
+        uart_send_line("RD1;ERR;SIGNAL;OK=0;ERR=BAD_MODE\n");
+        return;
+    }
+
+    {
+        char out[48];
+        (void)snprintf(out, sizeof(out), "RD1;ACK;SIGNAL;OK=1;MODE=%s\n", mode);
+        uart_send_line(out);
+    }
+}
+
+static void handle_cmd_lock_pulse(char *saveptr)
+{
+    char *tok;
+    uint32_t pulse_ms = LOCK_PULSE_DEFAULT_MS;
+
+    while ((tok = strtok_r(NULL, ";", &saveptr)) != NULL)
+    {
+        if (kv_key_is(tok, "MS"))
+        {
+            pulse_ms = (uint32_t)atoi(kv_get(tok));
+        }
+    }
+
+    pulse_ms = clamp_u32(pulse_ms, LOCK_PULSE_MIN_MS, LOCK_PULSE_MAX_MS);
+    lock_pulse_open(pulse_ms);
+
+    {
+        char out[64];
+        (void)snprintf(out, sizeof(out), "RD1;ACK;LOCK_PULSE;OK=1;MS=%lu\n", (unsigned long)pulse_ms);
+        uart_send_line(out);
+    }
 }
 
 static void handle_cmd_unlock(char *saveptr)
@@ -187,7 +297,7 @@ static void handle_cmd_unlock(char *saveptr)
 
     if (strncmp(pin, s_current_pin, sizeof(s_current_pin)) == 0)
     {
-        lock_pulse_open();
+        lock_pulse_open(LOCK_PULSE_DEFAULT_MS);
         uart_send_line("RD1;EVT;UNLOCKED;OK=1\n");
     }
     else
@@ -251,6 +361,14 @@ static void handle_line(char *line)
     else if (strcmp(name, "UNLOCK") == 0)
     {
         handle_cmd_unlock(saveptr);
+    }
+    else if (strcmp(name, "SIGNAL") == 0)
+    {
+        handle_cmd_signal(saveptr);
+    }
+    else if (strcmp(name, "LOCK_PULSE") == 0)
+    {
+        handle_cmd_lock_pulse(saveptr);
     }
     else if (strcmp(name, "PING") == 0)
     {

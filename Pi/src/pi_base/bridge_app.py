@@ -11,7 +11,17 @@ from .services.local_ws_hub import LocalWebSocketHub
 from .services.stomp_client_service import StompClientService, StompMessage
 from .services.uart_service import UARTService
 from .services.ws_client_service import WSClientService
-from .mcu_protocol import cmd_motor, cmd_motor_stop, cmd_mpu_read, cmd_pin_set, cmd_pin_clear, cmd_unlock, parse_line
+from .mcu_protocol import (
+    cmd_motor,
+    cmd_motor_stop,
+    cmd_mpu_read,
+    cmd_pin_set,
+    cmd_pin_clear,
+    cmd_unlock,
+    cmd_signal,
+    cmd_lock_pulse,
+    parse_line,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -295,6 +305,16 @@ class BridgeApp:
         packet = cmd_unlock(pin)
         await self.uart.send_line(packet)
         return {"ok": True, "target": "mcu", "cmd": "UNLOCK"}
+
+    async def mcu_signal(self, mode: str) -> dict[str, Any]:
+        packet = cmd_signal(mode)
+        await self.uart.send_line(packet)
+        return {"ok": True, "target": "mcu", "cmd": "SIGNAL", "mode": mode.upper()}
+
+    async def mcu_lock_pulse(self, ms: int = 5000) -> dict[str, Any]:
+        packet = cmd_lock_pulse(ms=ms)
+        await self.uart.send_line(packet)
+        return {"ok": True, "target": "mcu", "cmd": "LOCK_PULSE", "ms": int(ms)}
 
     async def send_to_remote_ws(self, data: str) -> dict[str, Any]:
         if self._ws_mode == "stomp":
