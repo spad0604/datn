@@ -30,6 +30,7 @@
 #include "task/task_led_signal.h"
 #include "task/task_uart.h"
 #include "task/task_cmd.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,7 +76,23 @@ void StartDefaultTask(void const * argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int __io_putchar(int ch)
+{
+  if ((CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk) &&
+      (ITM->TCR & ITM_TCR_ITMENA_Msk) &&
+      (ITM->TER & (1UL << 0)))
+  {
+    ITM_SendChar((uint32_t)ch);
+  }
 
+  if (huart2.gState != HAL_UART_STATE_RESET)
+  {
+    uint8_t c = (uint8_t)ch;
+    (void)HAL_UART_Transmit(&huart2, &c, 1, 10);
+  }
+
+  return ch;
+}
 /* USER CODE END 0 */
 
 /**
@@ -94,6 +111,8 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+  setvbuf(stdout, NULL, _IONBF, 0);
+
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -111,6 +130,8 @@ int main(void)
   MX_I2C2_Init();
   MX_TIM3_Init();
   MX_USART2_UART_Init();
+
+  printf("Hello, world!\r\n");
   /* USER CODE BEGIN 2 */
   /* basic initializations (if any) */
   /* USER CODE END 2 */
@@ -156,7 +177,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+      printf("Hello, world!\r\n");
+      osDelay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

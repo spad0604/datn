@@ -1,0 +1,15 @@
+<launch>	
+	        <!--  ************** Navigation ***************  -->
+<arg name="move_forward_only" default="false"/>
+
+<arg name="node_start_delay" default="1.0" />  
+  <!-- <arg name="map_file" default="/home/gps_robot/robot_ws/src/nox/map/map_new.yaml"/> -->
+<!-- <include file="$(find nox)/launch/nox_bringup_tf.launch" /> -->
+  <!-- Map server -->
+  <!-- <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file) "/> -->
+  <!-- <include file="$(find gmcl)/examples/gmcl_diff.launch" /> -->
+  <node name="ServerGet" pkg="server" type="ServerInterface.py"/>
+   <node name="MovingServer" pkg="nox" type="MovingServer.py" output="screen"/>
+   <node name="UpdateLocation" pkg="server" type="UpdateLocation.py"/>
+
+</launch>

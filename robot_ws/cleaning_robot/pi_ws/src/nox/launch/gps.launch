@@ -1,0 +1,37 @@
+<launch>
+	<arg name="set_base_frame" default="base_link"/>
+  <arg name="set_odom_frame" default="odom"/>
+  <arg name="set_map_frame"  default="map"/>
+    <arg name="node_start_delay" default="1.0" />
+     <arg name="port_gps" default="/dev/ttyUSB3" />
+  <arg name="baud_gps" default="115200" />
+  <arg name="frame_id_" default="gps" />
+  <arg name="use_GNSS_time" default="False" />
+  <arg name="time_ref_source" default="gps" />
+  <arg name="useRMC" default="False" />
+    <rosparam command="load" file="$(find nox)/cfg/navsat_param.yaml" />   
+<node pkg="tf" type="static_transform_publisher" name="base_to_gps" args="0.15 0.0 0.25 0.0 0.0 0.0 /base_link /gps 30" />
+      <rosparam command="load" file="$(find nox)/cfg/ekf_params.yaml" />
+  
+    
+  <node name="nmea_serial_driver_node" pkg="nmea_navsat_driver" type="nmea_serial_driver" output="screen">
+      <param name="port" value="$(arg port_gps)"/>
+      <param name="baud" value="$(arg baud_gps)" />
+      <param name="frame_id" value="$(arg frame_id_)" />
+      <param name="use_GNSS_time" value="$(arg use_GNSS_time)" />
+      <param name="time_ref_source" value="$(arg time_ref_source)" />
+      <param name="useRMC" value="$(arg useRMC)" />
+  </node>
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se_map" clear_params="true">
+    <remap from="odometry/filtered" to="odometry/filtered/global"/>
+  </node>
+  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform" clear_params="true" output="screen">
+      <remap from="odometry/filtered" to="odometry/filtered/global"/>
+      <remap from="gps/fix" to="/fix"/>
+      <remap from="imu/data" to="/imu/data"/>
+  </node>
+
+				
+
+	<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find nox)/cfg/rnoviz_slam_base_local_planner.rviz" required="true" /> -->
+</launch>
