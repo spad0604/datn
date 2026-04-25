@@ -24,9 +24,16 @@ class SimpleGPSFirebase:
         self.latest_lat = None
         self.latest_lon = None
 
-        # Firebase
-        firebase_url = "https://robot-delivery-cbdcf-default-rtdb.firebaseio.com"
-        self.firebase = FirebaseClient(firebase_url)
+        # BE websocket client (robot_id fixed to 1)
+        ws_url = rospy.get_param("~ws_url", "ws://127.0.0.1:8080/ws-delivery-native")
+        api_base_url = rospy.get_param("~api_base_url", "http://127.0.0.1:8080/api/v1/robot")
+        secret_key = rospy.get_param("~secret_key", "DATN_2025_2_GIAP")
+        self.firebase = FirebaseClient(
+            ws_url=ws_url,
+            api_base_url=api_base_url,
+            robot_id=1,
+            secret_key=secret_key,
+        )
 
         # Tham số
         self.interval = rospy.get_param("~interval_seconds", 10)
@@ -35,7 +42,7 @@ class SimpleGPSFirebase:
         # Subscribe GPS
         rospy.Subscriber("/fix", NavSatFix, self.gps_callback, queue_size=10)
 
-        rospy.loginfo("Simple GPS Firebase node khởi động.")
+        rospy.loginfo("Simple GPS BE WebSocket node khoi dong.")
         rospy.loginfo(f"   Kiểm tra mỗi {self.interval}s, cập nhật nếu di chuyển >= {self.min_distance}m")
 
     def gps_callback(self, msg):
@@ -49,13 +56,13 @@ class SimpleGPSFirebase:
         if self.latest_lat is None or self.latest_lon is None:
             return  # Chưa có dữ liệu GPS
 
-        # Lấy vị trí hiện tại trên Firebase (làm vị trí "cũ")
+        # Lay vi tri gan nhat da gui len BE (lam vi tri "cu")
         robot = self.firebase.get_robot_location()
         if robot and robot.lat is not None and robot.lon is not None:
             prev_lat = robot.lat
             prev_lon = robot.lon
         else:
-            # Nếu Firebase chưa có → gửi luôn lần đầu
+            # Neu chua co vi tri truoc do -> gui ngay lan dau
             success = self.firebase.update_robot_location(self.latest_lat, self.latest_lon)
             if success:
                 rospy.loginfo(f"Lần đầu gửi vị trí: {self.latest_lat:.6f}, {self.latest_lon:.6f}")
@@ -67,10 +74,10 @@ class SimpleGPSFirebase:
         if distance >= self.min_distance:
             success = self.firebase.update_robot_location(self.latest_lat, self.latest_lon)
             if success:
-                rospy.loginfo(f"✓ Cập nhật Firebase: {self.latest_lat:.6f}, {self.latest_lon:.6f} "
+                rospy.loginfo(f"✓ Cap nhat BE WebSocket: {self.latest_lat:.6f}, {self.latest_lon:.6f} "
                               f"(di chuyển {distance:.1f}m)")
             else:
-                rospy.logerr("✗ Lỗi khi cập nhật Firebase")
+                rospy.logerr("✗ Loi khi cap nhat BE WebSocket")
         # else: Không đủ xa → bỏ qua (không log để đỡ spam)
 
     def run(self):

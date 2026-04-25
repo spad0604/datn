@@ -2,16 +2,14 @@
 # -*- coding: utf-8__ 
 
 """
-ROS Node: Theo dõi đơn hàng Firebase với State Machine
-- Trạng thái LISTENING: Lắng nghe real-time đơn hàng
-- Trạng thái WAITING: Dừng lắng nghe, chờ tín hiệu từ /start_listening để tiếp tục
+ROS Node: Theo doi don hang tu BE WebSocket voi State Machine
+- Trang thai LISTENING: Lang nghe real-time don hang
+- Trang thai WAITING: Dung lang nghe, cho tin hieu tu /start_listening de tiep tuc
 """
 
 import rospy
 from std_msgs.msg import String
 import threading
-import requests
-import json
 from typing import List, Dict, Any
 from geometry_msgs.msg import PoseStamped, PoseArray
 
@@ -27,9 +25,16 @@ class OrderListenerStateMachine:
     def __init__(self):
         rospy.init_node('order_listener_sm', anonymous=False)
 
-        # Firebase
-        firebase_url = "https://robot-delivery-cbdcf-default-rtdb.firebaseio.com"
-        self.firebase = FirebaseClient(firebase_url)
+        # BE websocket client (robot_id is fixed to 1 per project requirement)
+        ws_url = rospy.get_param("~ws_url", "ws://127.0.0.1:8080/ws-delivery-native")
+        api_base_url = rospy.get_param("~api_base_url", "http://127.0.0.1:8080/api/v1/robot")
+        secret_key = rospy.get_param("~secret_key", "DATN_2025_2_GIAP")
+        self.firebase = FirebaseClient(
+            ws_url=ws_url,
+            api_base_url=api_base_url,
+            robot_id=1,
+            secret_key=secret_key,
+        )
 
         # State
         self.state = "LISTENING"  # Ban đầu lắng nghe ngay
@@ -201,70 +206,19 @@ class OrderListenerStateMachine:
     # ====================== WORKER LẮNG NGHE ======================
     def _listen_worker(self):
         def on_error(exc):
-            rospy.logerr(f"[ERROR] Lỗi stream orders: {exc}")
+            rospy.logerr(f"[ERROR] Lỗi stream orders websocket: {exc}")
 
-        while self.is_listening and not rospy.is_shutdown():
-            try:
-                rospy.loginfo("Bắt đầu lắng nghe đơn hàng real-time từ Firebase...")
-                url = f"{self.firebase.base_url}/orders.json"
-                headers = {"Accept": "text/event-stream"}
-                params = {"print": "silent"}
+        def should_stop() -> bool:
+            return (not self.is_listening) or rospy.is_shutdown()
 
-                with requests.get(url, stream=True, headers=headers, params=params, timeout=60) as response:
-                    response.raise_for_status()
-                    event_type = None
-                    data_buffer = []
-
-                    for raw_line in response.iter_lines(decode_unicode=True):
-                        if not self.is_listening or rospy.is_shutdown():
-                            rospy.loginfo("Dừng lắng nghe (state WAITING hoặc shutdown)")
-                            return
-
-                        if raw_line is None:
-                            continue
-                        line = raw_line.strip()
-
-                        if line == "":  # Kết thúc event
-                            if data_buffer:
-                                try:
-                                    payload_str = "\n".join(data_buffer)
-                                    payload = json.loads(payload_str) if payload_str else {}
-                                except json.JSONDecodeError as exc:
-                                    on_error(exc)
-                                    data_buffer = []
-                                    continue
-
-                                orders_dict = self.firebase.get_all_orders()
-                                orders_list = sorted(
-                                    orders_dict.values(),
-                                    key=lambda o: o.createdAt,
-                                    reverse=True
-                                )
-                                self.handle_order_change(orders_list, payload, event_type or "message")
-
-                                data_buffer = []
-                                event_type = None
-
-                        elif line.startswith("event:"):
-                            event_type = line[len("event:"):].strip()
-                        elif line.startswith("data:"):
-                            data_buffer.append(line[len("data:"):].strip())
-
-            except requests.exceptions.RequestException as exc:
-                if not self.is_listening or rospy.is_shutdown():
-                    return
-                on_error(exc)
-                rospy.logwarn("Mất kết nối → chờ 5s trước khi thử lại...")
-                rospy.sleep(5.0)
-
-            except Exception as exc:
-                if not self.is_listening or rospy.is_shutdown():
-                    return
-                on_error(exc)
-                rospy.sleep(5.0)
-
-            if self.is_listening and not rospy.is_shutdown():
-                rospy.sleep(1.0)  # Delay nhỏ trước reconnect
+        rospy.loginfo("Bắt đầu lắng nghe đơn hàng real-time từ BE WebSocket...")
+        self.firebase.listen_orders(
+            on_change=self.handle_order_change,
+            on_error=on_error,
+            retry_delay_seconds=5.0,
+            should_stop=should_stop,
+        )
+        rospy.loginfo("Dừng lắng nghe đơn hàng (WAITING hoặc shutdown).")
 
     # ====================== RUN ======================
     def run(self):

@@ -1,612 +1,555 @@
+"""Compatibility client for robot communication over BE WebSocket/STOMP.
+
+This module intentionally keeps the old names (`FirebaseClient`, `Order`, ...)
+so existing ROS scripts can run without a large refactor.
 """
-Firebase Realtime Database Client
-Đẩy vị trí robot và lấy dữ liệu từ Firebase Realtime Database
-"""
+
+import json
+import math
+import os
+import random
+import time
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 import requests
-import json
-import time
-import random
-import math
-from typing import Any, Callable, Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
-from datetime import datetime
+from websocket import WebSocketTimeoutException, create_connection
 
-
-# ==================== MODELS ====================
 
 @dataclass
 class RoutePoint:
-    """Điểm trên lộ trình"""
     lat: float
     lng: float
     order: int
-    
+
     def to_dict(self) -> dict:
-        return {
-            "lat": self.lat,
-            "lng": self.lng,
-            "order": self.order
-        }
-    
+        return {"lat": self.lat, "lng": self.lng, "order": self.order}
+
     @classmethod
-    def from_dict(cls, data: dict) -> 'RoutePoint':
+    def from_dict(cls, data: dict) -> "RoutePoint":
         return cls(
-            lat=float(data["lat"]),
-            lng=float(data["lng"]),
-            order=int(data["order"])
+            lat=float(data.get("lat", 0.0)),
+            lng=float(data.get("lng", 0.0)),
+            order=int(data.get("order", 0)),
         )
 
 
 @dataclass
 class Order:
-    """Đơn hàng giao hàng"""
-    id: str
-    createdAt: str
-    destinationLat: float
-    destinationLng: float
-    goods: str
-    phoneNumber: str
-    receiverAge: int
-    receiverName: str
-    routePoints: List[RoutePoint]
-    status: str  # "pending", "in_progress", "completed"
-    weight: float
-    
-    def to_dict(self) -> dict:
-        return {
-            "id": self.id,
-            "createdAt": self.createdAt,
-            "destinationLat": self.destinationLat,
-            "destinationLng": self.destinationLng,
-            "goods": self.goods,
-            "phoneNumber": self.phoneNumber,
-            "receiverAge": self.receiverAge,
-            "receiverName": self.receiverName,
-            "routePoints": [rp.to_dict() for rp in self.routePoints],
-            "status": self.status,
-            "weight": self.weight
-        }
-    
-    @classmethod
-    def from_dict(cls, data: dict, order_id: Optional[str] = None) -> 'Order':
-        return cls(
-            id=order_id or data.get("id", ""),
-            createdAt=data["createdAt"],
-            destinationLat=float(data["destinationLat"]),
-            destinationLng=float(data["destinationLng"]),
-            goods=data["goods"],
-            phoneNumber=data["phoneNumber"],
-            receiverAge=int(data["receiverAge"]),
-            receiverName=data["receiverName"],
-            routePoints=[RoutePoint.from_dict(rp) for rp in data["routePoints"]],
-            status=data["status"],
-            weight=float(data["weight"])
-        )
+    id: str = ""
+    createdAt: str = ""
+    destinationLat: float = 0.0
+    destinationLng: float = 0.0
+    goods: str = ""
+    phoneNumber: str = ""
+    receiverAge: int = 0
+    receiverName: str = ""
+    routePoints: List[RoutePoint] = None
+    status: str = ""
+    weight: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.routePoints is None:
+            self.routePoints = []
 
 
 @dataclass
 class Robot:
-    """Vị trí robot"""
     lat: float
-    lon: float  # Note: trong JSON là "lon" nhưng trong model có thể dùng "lng"
-    
-    def to_dict(self) -> dict:
-        return {
-            "lat": self.lat,
-            "lon": self.lon
-        }
-    
-    @classmethod
-    def from_dict(cls, data: dict) -> 'Robot':
-        return cls(
-            lat=float(data["lat"]),
-            lon=float(data.get("lon", data.get("lng", 0.0)))
-        )
+    lon: float
 
 
 @dataclass
 class DatabaseData:
-    """Toàn bộ dữ liệu từ Firebase"""
     orders: Dict[str, Order]
     robot: Robot
-    
-    @classmethod
-    def from_dict(cls, data: dict) -> 'DatabaseData':
-        orders = {}
-        if "orders" in data and data["orders"]:
-            for order_id, order_data in data["orders"].items():
-                orders[order_id] = Order.from_dict(order_data, order_id)
-        
-        robot = Robot.from_dict(data.get("robot", {"lat": 0.0, "lon": 0.0}))
-        
-        return cls(orders=orders, robot=robot)
 
-
-# ==================== FIREBASE CLIENT ====================
 
 class FirebaseClient:
-    """Client để tương tác với Firebase Realtime Database"""
-    
-    def __init__(self, database_url: str):
-        """
-        Khởi tạo Firebase Client
-        
-        Args:
-            database_url: URL của Firebase Realtime Database
-                         Ví dụ: https://robot-delivery-cbdcf-default-rtdb.firebaseio.com
-        """
-        # Đảm bảo URL không có dấu / ở cuối
-        self.base_url = database_url.rstrip('/')
-    
-    def _make_request(self, method: str, path: str = "", data: Optional[dict] = None) -> Optional[dict]:
-        """
-        Thực hiện HTTP request đến Firebase
-        
-        Args:
-            method: HTTP method (GET, PUT, PATCH, POST, DELETE)
-            path: Đường dẫn trong database (ví dụ: "robot", "orders/-OdiO9pdXUIykq5vwqyL")
-            data: Dữ liệu để gửi (nếu có)
-        
-        Returns:
-            Response data dưới dạng dict hoặc None nếu có lỗi
-        """
-        # Tạo URL đúng định dạng Firebase: base_url/path.json hoặc base_url/.json cho root
-        if path:
-            url = f"{self.base_url}/{path}.json"
-        else:
-            url = f"{self.base_url}/.json"
-        
+    """Backward-compatible API now backed by BE websocket + REST."""
+
+    DEFAULT_WS_URL = "ws://127.0.0.1:8080/ws-delivery-native"
+    DEFAULT_API_BASE_URL = "http://127.0.0.1:8080/api/v1/robot"
+    DEFAULT_SECRET = "DATN_2025_2_GIAP"
+
+    def __init__(
+        self,
+        database_url: Optional[str] = None,
+        ws_url: Optional[str] = None,
+        api_base_url: Optional[str] = None,
+        robot_id: int = 1,
+        secret_key: Optional[str] = None,
+    ):
+        self.robot_id = int(robot_id)
+        self.secret_key = secret_key or os.getenv("ROBOT_SHARED_SECRET", self.DEFAULT_SECRET)
+        self.ws_url, self.api_base_url = self._resolve_endpoints(
+            database_url=database_url,
+            ws_url=ws_url,
+            api_base_url=api_base_url,
+        )
+
+        # Keep attribute name for old callers that used `base_url`.
+        self.base_url = self.ws_url
+
+        self._last_robot: Optional[Robot] = None
+        self._orders_cache: Dict[str, Order] = {}
+
+    def _resolve_endpoints(
+        self,
+        database_url: Optional[str],
+        ws_url: Optional[str],
+        api_base_url: Optional[str],
+    ) -> Tuple[str, str]:
+        if ws_url and api_base_url:
+            return ws_url.rstrip("/"), api_base_url.rstrip("/")
+
+        if database_url:
+            candidate = database_url.rstrip("/")
+            if candidate.startswith("ws://") or candidate.startswith("wss://"):
+                return (
+                    candidate,
+                    api_base_url.rstrip("/") if api_base_url else self.DEFAULT_API_BASE_URL,
+                )
+
+            if "firebaseio" not in candidate:
+                parsed = urlparse(candidate)
+                if parsed.scheme in ("http", "https"):
+                    inferred_ws = self._infer_ws_from_http(candidate)
+                    inferred_api = f"{parsed.scheme}://{parsed.netloc}/api/v1/robot"
+                    return (
+                        ws_url.rstrip("/") if ws_url else inferred_ws,
+                        api_base_url.rstrip("/") if api_base_url else inferred_api,
+                    )
+
+        return (
+            ws_url.rstrip("/") if ws_url else os.getenv("ROBOT_WS_URL", self.DEFAULT_WS_URL),
+            api_base_url.rstrip("/")
+            if api_base_url
+            else os.getenv("ROBOT_API_BASE_URL", self.DEFAULT_API_BASE_URL),
+        )
+
+    def _infer_ws_from_http(self, http_url: str) -> str:
+        parsed = urlparse(http_url)
+        ws_scheme = "wss" if parsed.scheme == "https" else "ws"
+        return f"{ws_scheme}://{parsed.netloc}/ws-delivery-native"
+
+    def _build_frame(self, command: str, headers: Dict[str, str], body: str = "") -> str:
+        lines = [command]
+        for key, value in headers.items():
+            lines.append(f"{key}:{value}")
+        return "\n".join(lines) + "\n\n" + body + "\x00"
+
+    def _parse_frame(self, raw_frame: str) -> Optional[Tuple[str, Dict[str, str], str]]:
+        frame = raw_frame.lstrip("\n")
+        if not frame.strip():
+            return None
+
+        head, sep, body = frame.partition("\n\n")
+        if not sep:
+            body = ""
+
+        lines = head.split("\n")
+        command = lines[0].strip()
+        headers: Dict[str, str] = {}
+
+        for line in lines[1:]:
+            if ":" not in line:
+                continue
+            key, value = line.split(":", 1)
+            headers[key.strip()] = value.strip()
+
+        return command, headers, body
+
+    def _recv_frames(self, ws, buffer: str, timeout_seconds: float = 1.0):
+        ws.settimeout(timeout_seconds)
         try:
-            if method.upper() == "GET":
-                response = requests.get(url, timeout=10)
-            elif method.upper() == "PUT":
-                response = requests.put(url, json=data, timeout=10)
-            elif method.upper() == "PATCH":
-                response = requests.patch(url, json=data, timeout=10)
-            elif method.upper() == "POST":
-                response = requests.post(url, json=data, timeout=10)
-            elif method.upper() == "DELETE":
-                response = requests.delete(url, timeout=10)
+            chunk = ws.recv()
+        except WebSocketTimeoutException:
+            return [], buffer
+
+        if isinstance(chunk, bytes):
+            chunk = chunk.decode("utf-8", errors="ignore")
+        if not isinstance(chunk, str):
+            chunk = str(chunk)
+
+        buffer += chunk
+        frames = []
+        while "\x00" in buffer:
+            raw_frame, buffer = buffer.split("\x00", 1)
+            parsed = self._parse_frame(raw_frame)
+            if parsed:
+                frames.append(parsed)
+
+        return frames, buffer
+
+    def _open_stomp_connection(self, timeout_seconds: float = 8.0):
+        ws = create_connection(self.ws_url, timeout=timeout_seconds)
+
+        host_header = urlparse(self.ws_url).hostname or "localhost"
+        connect_frame = self._build_frame(
+            "CONNECT",
+            {
+                "accept-version": "1.2",
+                "host": host_header,
+                "heart-beat": "10000,10000",
+            },
+        )
+        ws.send(connect_frame)
+
+        buffer = ""
+        deadline = time.time() + timeout_seconds
+        while time.time() < deadline:
+            frames, buffer = self._recv_frames(ws, buffer, timeout_seconds=1.0)
+            for command, _, body in frames:
+                if command == "CONNECTED":
+                    return ws
+                if command == "ERROR":
+                    raise RuntimeError(f"STOMP ERROR while CONNECT: {body}")
+
+            ws.send("\n")
+
+        ws.close()
+        raise TimeoutError("Timeout waiting for STOMP CONNECTED frame")
+
+    def _send_json(self, destination: str, payload: Dict[str, Any]) -> bool:
+        ws = None
+        try:
+            ws = self._open_stomp_connection()
+            body = json.dumps(payload)
+            ws.send(
+                self._build_frame(
+                    "SEND",
+                    {
+                        "destination": destination,
+                        "content-type": "application/json",
+                    },
+                    body,
+                )
+            )
+            ws.send(self._build_frame("DISCONNECT", {}))
+            return True
+        except Exception as exc:
+            print(f"[WS] send error: {exc}")
+            return False
+        finally:
+            if ws is not None:
+                try:
+                    ws.close()
+                except Exception:
+                    pass
+
+    def _order_from_payload(self, payload: Dict[str, Any]) -> Optional[Order]:
+        if not payload:
+            return None
+
+        data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+        order_id = data.get("id") or data.get("orderId")
+        if order_id is None:
+            return None
+
+        status_raw = data.get("status")
+        if status_raw is None:
+            status_raw = data.get("orderStatus")
+        status = str(status_raw).lower() if status_raw is not None else ""
+
+        created_at = data.get("createdAt")
+        if created_at is None:
+            ts = data.get("ts")
+            if ts is not None:
+                try:
+                    created_at = datetime.utcfromtimestamp(float(ts) / 1000.0).isoformat() + "Z"
+                except Exception:
+                    created_at = str(ts)
             else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
-            
-            response.raise_for_status()
-            
-            # Firebase trả về null nếu không có dữ liệu
-            if response.text == "null":
+                created_at = ""
+
+        destination_lat = data.get("deliveryLat")
+        if destination_lat is None:
+            destination_lat = data.get("destinationLat")
+
+        destination_lng = data.get("deliveryLng")
+        if destination_lng is None:
+            destination_lng = data.get("destinationLng")
+
+        route_points: List[RoutePoint] = []
+        raw_route = data.get("routePoints")
+        if isinstance(raw_route, list) and raw_route:
+            for idx, item in enumerate(raw_route):
+                if isinstance(item, dict):
+                    route_points.append(
+                        RoutePoint(
+                            lat=float(item.get("lat", 0.0)),
+                            lng=float(item.get("lng", 0.0)),
+                            order=int(item.get("order", idx)),
+                        )
+                    )
+        else:
+            start_lat = data.get("startLat")
+            start_lng = data.get("startLng")
+            if start_lat is not None and start_lng is not None:
+                route_points.append(RoutePoint(float(start_lat), float(start_lng), 0))
+            if destination_lat is not None and destination_lng is not None:
+                route_points.append(RoutePoint(float(destination_lat), float(destination_lng), 1))
+
+        receiver_name = (
+            data.get("receiverName")
+            or data.get("recipientName")
+            or data.get("recipientFullName")
+            or data.get("senderName")
+            or data.get("deliveryAddress")
+            or "unknown"
+        )
+
+        phone = data.get("phoneNumber") or data.get("recipientPhone") or ""
+        goods = data.get("goods") or data.get("orderCode") or ""
+
+        try:
+            dest_lat_val = float(destination_lat) if destination_lat is not None else 0.0
+            dest_lng_val = float(destination_lng) if destination_lng is not None else 0.0
+        except Exception:
+            dest_lat_val = 0.0
+            dest_lng_val = 0.0
+
+        return Order(
+            id=str(order_id),
+            createdAt=str(created_at),
+            destinationLat=dest_lat_val,
+            destinationLng=dest_lng_val,
+            goods=str(goods),
+            phoneNumber=str(phone),
+            receiverAge=int(data.get("receiverAge") or 0),
+            receiverName=str(receiver_name),
+            routePoints=route_points,
+            status=status,
+            weight=float(data.get("weight") or 0.0),
+        )
+
+    def fetch_current_order(self) -> Optional[Order]:
+        url = f"{self.api_base_url}/{self.robot_id}/current-order"
+        try:
+            response = requests.get(
+                url,
+                headers={"X-Robot-Secret": self.secret_key},
+                timeout=10,
+            )
+            if response.status_code != 200:
                 return None
-            
-            return response.json()
-        
-        except requests.exceptions.RequestException as e:
-            print(f"Lỗi khi thực hiện request: {e}")
+            payload = response.json()
+            order = self._order_from_payload(payload)
+            if order:
+                self._orders_cache[order.id] = order
+            return order
+        except Exception:
             return None
-        except json.JSONDecodeError as e:
-            print(f"Lỗi khi parse JSON: {e}")
-            return None
-    
+
     def update_robot_location(self, lat: float, lon: float) -> bool:
-        """
-        Cập nhật vị trí robot lên Firebase
-        
-        Args:
-            lat: Vĩ độ
-            lon: Kinh độ
-        
-        Returns:
-            True nếu thành công, False nếu có lỗi
-        """
-        robot_data = {
-            "lat": lat,
-            "lon": lon
+        payload = {
+            "lat": float(lat),
+            "lng": float(lon),
+            "robotId": self.robot_id,
+            "secretKey": self.secret_key,
+            "heading": 0.0,
         }
-        
-        result = self._make_request("PUT", "robot", robot_data)
-        return result is not None
-    
+        success = self._send_json("/app/update-location", payload)
+        if success:
+            self._last_robot = Robot(lat=float(lat), lon=float(lon))
+        return success
+
     def get_robot_location(self) -> Optional[Robot]:
-        """
-        Lấy vị trí robot từ Firebase
-        
-        Returns:
-            Robot object hoặc None nếu có lỗi
-        """
-        data = self._make_request("GET", "robot")
-        if data is None:
-            return None
-        
-        try:
-            return Robot.from_dict(data)
-        except (KeyError, ValueError) as e:
-            print(f"Lỗi khi parse robot data: {e}")
-            return None
-    
+        return self._last_robot
+
     def get_all_orders(self) -> Dict[str, Order]:
-        """
-        Lấy tất cả đơn hàng từ Firebase
-        
-        Returns:
-            Dictionary với key là order_id và value là Order object
-        """
-        data = self._make_request("GET", "orders")
-        if data is None:
-            return {}
-        
-        orders = {}
-        try:
-            for order_id, order_data in data.items():
-                orders[order_id] = Order.from_dict(order_data, order_id)
-        except (KeyError, ValueError) as e:
-            print(f"Lỗi khi parse orders data: {e}")
-        
-        return orders
-    
+        return dict(self._orders_cache)
+
     def get_order(self, order_id: str) -> Optional[Order]:
-        """
-        Lấy một đơn hàng cụ thể từ Firebase
-        
-        Args:
-            order_id: ID của đơn hàng
-        
-        Returns:
-            Order object hoặc None nếu không tìm thấy hoặc có lỗi
-        """
-        data = self._make_request("GET", f"orders/{order_id}")
-        if data is None:
-            return None
-        
-        try:
-            return Order.from_dict(data, order_id)
-        except (KeyError, ValueError) as e:
-            print(f"Lỗi khi parse order data: {e}")
-            return None
-    
+        key = str(order_id)
+        order = self._orders_cache.get(key)
+        if order is not None:
+            return order
+
+        current = self.fetch_current_order()
+        if current and current.id == key:
+            return current
+        return None
+
     def get_all_data(self) -> Optional[DatabaseData]:
-        """
-        Lấy toàn bộ dữ liệu từ Firebase (orders + robot)
-        
-        Returns:
-            DatabaseData object hoặc None nếu có lỗi
-        """
-        data = self._make_request("GET")
-        if data is None:
-            return None
-        
-        try:
-            return DatabaseData.from_dict(data)
-        except (KeyError, ValueError) as e:
-            print(f"Lỗi khi parse database data: {e}")
-            return None
+        robot = self._last_robot or Robot(lat=0.0, lon=0.0)
+        return DatabaseData(orders=self.get_all_orders(), robot=robot)
 
     def listen_orders(
         self,
         on_change: Callable[[List[Order], Dict[str, Any], str], None],
         on_error: Optional[Callable[[Exception], None]] = None,
         retry_delay_seconds: float = 5.0,
+        should_stop: Optional[Callable[[], bool]] = None,
     ) -> None:
-        """
-        Lắng nghe thay đổi của danh sách đơn hàng theo thời gian thực.
+        def stop_requested() -> bool:
+            return bool(should_stop and should_stop())
 
-        Args:
-            on_change: Callback khi có thay đổi. Tham số gồm:
-                - danh sách Order đã được sắp xếp giảm dần theo createdAt
-                - payload gốc từ Firebase (dict)
-                - event_type (put, patch, keep-alive, ...)
-            on_error: Callback khi có lỗi (optional). Nếu không truyền sẽ in ra console.
-            retry_delay_seconds: Thời gian chờ trước khi thử kết nối lại khi gặp lỗi.
-
-        Ví dụ:
-
-            def handle_change(orders, payload, event_type):
-                print(f\"Có {len(orders)} đơn hàng (event={event_type})\")
-
-            firebase.listen_orders(handle_change)
-        """
-        url = f"{self.base_url}/orders.json"
-        headers = {"Accept": "text/event-stream"}
-        params = {"print": "silent"}  # Giảm dung lượng dữ liệu
-
-        def _emit_error(exc: Exception) -> None:
+        def emit_error(exc: Exception) -> None:
             if on_error:
                 on_error(exc)
             else:
-                print(f"Lỗi stream orders: {exc}")
+                print(f"[WS] listen error: {exc}")
 
-        while True:
+        while not stop_requested():
+            ws = None
             try:
-                with requests.get(
-                    url,
-                    stream=True,
-                    headers=headers,
-                    params=params,
-                    timeout=60,
-                ) as response:
-                    response.raise_for_status()
+                ws = self._open_stomp_connection()
+                ws.send(
+                    self._build_frame(
+                        "SUBSCRIBE",
+                        {
+                            "id": f"robot-order-{self.robot_id}",
+                            "destination": f"/topic/robot-order/{self.robot_id}",
+                            "ack": "auto",
+                        },
+                    )
+                )
 
-                    event_type: Optional[str] = None
-                    data_buffer: List[str] = []
+                snapshot = self.fetch_current_order()
+                if snapshot is not None:
+                    ordered = sorted(self._orders_cache.values(), key=lambda o: o.createdAt, reverse=True)
+                    on_change(ordered, {"source": "rest-snapshot"}, "snapshot")
 
-                    for raw_line in response.iter_lines(decode_unicode=True):
-                        if raw_line is None:
-                            continue
+                buffer = ""
+                while not stop_requested():
+                    frames, buffer = self._recv_frames(ws, buffer, timeout_seconds=1.0)
+                    if not frames:
+                        # heart-beat
+                        ws.send("\n")
+                        continue
 
-                        line = raw_line.strip()
-
-                        # Dòng trống => kết thúc một event
-                        if line == "":
-                            if not data_buffer:
-                                event_type = None
+                    for command, _, body in frames:
+                        if command == "MESSAGE":
+                            payload = json.loads(body) if body else {}
+                            order = self._order_from_payload(payload)
+                            if order is None:
                                 continue
 
-                            try:
-                                payload_str = "\n".join(data_buffer).strip()
-                                payload: Dict[str, Any] = (
-                                    json.loads(payload_str) if payload_str else {}
-                                )
-                            except json.JSONDecodeError as exc:
-                                _emit_error(exc)
-                                data_buffer = []
-                                event_type = None
-                                continue
-
-                            # Lấy lại toàn bộ danh sách đơn hàng (đảm bảo đồng bộ)
-                            orders_dict = self.get_all_orders()
-                            orders_list = sorted(
-                                orders_dict.values(),
+                            self._orders_cache[order.id] = order
+                            ordered = sorted(
+                                self._orders_cache.values(),
                                 key=lambda o: o.createdAt,
                                 reverse=True,
                             )
 
-                            try:
-                                on_change(orders_list, payload, event_type or "message")
-                            except Exception as callback_exc:  # pragma: no cover
-                                _emit_error(callback_exc)
+                            event_type = str(payload.get("type", "message"))
+                            on_change(ordered, payload, event_type)
 
-                            data_buffer = []
-                            event_type = None
-                            continue
-
-                        if line.startswith("event:"):
-                            event_type = line[len("event:") :].strip()
-                        elif line.startswith("data:"):
-                            data_buffer.append(line[len("data:") :].strip())
-                        else:
-                            # Các dòng khác (ví dụ comment bắt đầu bằng ':') bỏ qua
-                            continue
+                        elif command == "ERROR":
+                            raise RuntimeError(body or "STOMP ERROR frame received")
 
             except KeyboardInterrupt:
-                print("\nĐã dừng lắng nghe đơn hàng (KeyboardInterrupt)")
                 break
-            except requests.exceptions.RequestException as exc:
-                _emit_error(exc)
-            except Exception as exc:  # pragma: no cover
-                _emit_error(exc)
+            except Exception as exc:
+                if stop_requested():
+                    break
+                emit_error(exc)
+            finally:
+                if ws is not None:
+                    try:
+                        ws.close()
+                    except Exception:
+                        pass
 
-            time.sleep(retry_delay_seconds)
+            if not stop_requested():
+                time.sleep(retry_delay_seconds)
 
-
-# ==================== HELPER FUNCTIONS ====================
 
 def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """
-    Tính khoảng cách giữa 2 điểm tọa độ (Haversine formula)
-    Trả về khoảng cách tính bằng mét
-    
-    Args:
-        lat1, lon1: Tọa độ điểm 1
-        lat2, lon2: Tọa độ điểm 2
-    
-    Returns:
-        Khoảng cách tính bằng mét
-    """
-    R = 6371000  # Bán kính Trái Đất tính bằng mét
-    
+    r = 6371000
     phi1 = math.radians(lat1)
     phi2 = math.radians(lat2)
     delta_phi = math.radians(lat2 - lat1)
     delta_lambda = math.radians(lon2 - lon1)
-    
-    a = math.sin(delta_phi / 2) ** 2 + \
-        math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+
+    a = (
+        math.sin(delta_phi / 2) ** 2
+        + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
+    )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    
-    return R * c
+    return r * c
 
 
-def generate_next_location(current_lat: float, current_lon: float, 
-                          max_distance_meters: float = 200.0) -> Tuple[float, float]:
-    """
-    Tạo tọa độ mới trong phạm vi Hà Nội, không quá xa điểm hiện tại
-    
-    Args:
-        current_lat: Vĩ độ hiện tại
-        current_lon: Kinh độ hiện tại
-        max_distance_meters: Khoảng cách tối đa từ điểm hiện tại (mét), mặc định 200m
-    
-    Returns:
-        Tuple (lat, lon) mới
-    """
-    # Phạm vi Hà Nội (trung tâm)
-    # lat: 20.9 - 21.1, lon: 105.7 - 105.9
-    HANOI_LAT_MIN = 20.9
-    HANOI_LAT_MAX = 21.1
-    HANOI_LON_MIN = 105.7
-    HANOI_LON_MAX = 105.9
-    
-    # Chuyển đổi khoảng cách từ mét sang độ (xấp xỉ)
-    # 1 độ lat ≈ 111,000 mét
-    # 1 độ lon ≈ 111,000 * cos(lat) mét
+def generate_next_location(
+    current_lat: float,
+    current_lon: float,
+    max_distance_meters: float = 200.0,
+) -> Tuple[float, float]:
+    hanoi_lat_min = 20.9
+    hanoi_lat_max = 21.1
+    hanoi_lon_min = 105.7
+    hanoi_lon_max = 105.9
+
     lat_degree_per_meter = 1.0 / 111000.0
     lon_degree_per_meter = 1.0 / (111000.0 * math.cos(math.radians(current_lat)))
-    
+
     max_lat_delta = max_distance_meters * lat_degree_per_meter
     max_lon_delta = max_distance_meters * lon_degree_per_meter
-    
-    # Tạo tọa độ mới trong phạm vi cho phép
-    attempts = 0
-    while attempts < 50:  # Thử tối đa 50 lần
-        # Tạo tọa độ ngẫu nhiên trong phạm vi
+
+    for _ in range(50):
         new_lat = current_lat + random.uniform(-max_lat_delta, max_lat_delta)
         new_lon = current_lon + random.uniform(-max_lon_delta, max_lon_delta)
-        
-        # Đảm bảo trong phạm vi Hà Nội
-        new_lat = max(HANOI_LAT_MIN, min(HANOI_LAT_MAX, new_lat))
-        new_lon = max(HANOI_LON_MIN, min(HANOI_LON_MAX, new_lon))
-        
-        # Kiểm tra khoảng cách
-        distance = calculate_distance(current_lat, current_lon, new_lat, new_lon)
-        if distance <= max_distance_meters:
-            return (new_lat, new_lon)
-        
-        attempts += 1
-    
-    # Nếu không tìm được trong phạm vi, trả về điểm gần nhất trong phạm vi
+
+        new_lat = max(hanoi_lat_min, min(hanoi_lat_max, new_lat))
+        new_lon = max(hanoi_lon_min, min(hanoi_lon_max, new_lon))
+
+        if calculate_distance(current_lat, current_lon, new_lat, new_lon) <= max_distance_meters:
+            return new_lat, new_lon
+
     new_lat = current_lat + random.uniform(-max_lat_delta * 0.5, max_lat_delta * 0.5)
     new_lon = current_lon + random.uniform(-max_lon_delta * 0.5, max_lon_delta * 0.5)
-    new_lat = max(HANOI_LAT_MIN, min(HANOI_LAT_MAX, new_lat))
-    new_lon = max(HANOI_LON_MIN, min(HANOI_LON_MAX, new_lon))
-    
-    return (new_lat, new_lon)
+    return (
+        max(hanoi_lat_min, min(hanoi_lat_max, new_lat)),
+        max(hanoi_lon_min, min(hanoi_lon_max, new_lon)),
+    )
 
 
-def run_periodic_location_update(firebase_client: FirebaseClient, 
-                                interval_seconds: int = 10,
-                                max_distance_meters: float = 200.0,
-                                initial_lat: Optional[float] = None,
-                                initial_lon: Optional[float] = None):
-    """
-    Chạy định kỳ đẩy tọa độ robot lên Firebase
-    
-    Args:
-        firebase_client: FirebaseClient instance
-        interval_seconds: Khoảng thời gian giữa các lần cập nhật (giây), mặc định 10s
-        max_distance_meters: Khoảng cách tối đa giữa các điểm (mét), mặc định 200m
-        initial_lat: Vĩ độ ban đầu (nếu None sẽ lấy từ Firebase)
-        initial_lon: Kinh độ ban đầu (nếu None sẽ lấy từ Firebase)
-    """
-    print(f"=== Bắt đầu đẩy tọa độ robot định kỳ (mỗi {interval_seconds}s) ===")
-    print(f"Khoảng cách tối đa giữa các điểm: {max_distance_meters}m")
-    print("Nhấn Ctrl+C để dừng\n")
-    
-    # Lấy vị trí ban đầu
+def run_periodic_location_update(
+    firebase_client: FirebaseClient,
+    interval_seconds: int = 10,
+    max_distance_meters: float = 200.0,
+    initial_lat: Optional[float] = None,
+    initial_lon: Optional[float] = None,
+):
+    print(f"=== Start periodic robot location update (every {interval_seconds}s) ===")
+    print(f"Max distance between points: {max_distance_meters}m")
+    print("Press Ctrl+C to stop\n")
+
     if initial_lat is None or initial_lon is None:
         robot = firebase_client.get_robot_location()
         if robot:
-            current_lat = robot.lat
-            current_lon = robot.lon
-            print(f"Vị trí ban đầu từ Firebase: lat={current_lat}, lon={current_lon}")
+            current_lat, current_lon = robot.lat, robot.lon
         else:
-            # Vị trí mặc định ở trung tâm Hà Nội
-            current_lat = 21.0285
-            current_lon = 105.8542
-            print(f"Không lấy được vị trí từ Firebase, dùng vị trí mặc định: lat={current_lat}, lon={current_lon}")
+            current_lat, current_lon = 21.0285, 105.8542
             firebase_client.update_robot_location(current_lat, current_lon)
     else:
-        current_lat = initial_lat
-        current_lon = initial_lon
-        print(f"Vị trí ban đầu: lat={current_lat}, lon={current_lon}")
+        current_lat, current_lon = initial_lat, initial_lon
         firebase_client.update_robot_location(current_lat, current_lon)
-    
+
     try:
         update_count = 0
         while True:
-            # Tạo tọa độ mới
             new_lat, new_lon = generate_next_location(current_lat, current_lon, max_distance_meters)
             distance = calculate_distance(current_lat, current_lon, new_lat, new_lon)
-            
-            # Đẩy lên Firebase
+
             success = firebase_client.update_robot_location(new_lat, new_lon)
-            
             if success:
                 update_count += 1
-                print(f"[{update_count}] ✓ Đã cập nhật: lat={new_lat:.6f}, lon={new_lon:.6f} "
-                      f"(khoảng cách: {distance:.1f}m)")
+                print(
+                    f"[{update_count}] ok lat={new_lat:.6f}, lon={new_lon:.6f} "
+                    f"(distance={distance:.1f}m)"
+                )
             else:
-                print(f"[{update_count + 1}] ✗ Lỗi khi cập nhật vị trí")
-            
-            # Cập nhật vị trí hiện tại
-            current_lat = new_lat
-            current_lon = new_lon
-            
-            # Đợi interval_seconds giây
+                print(f"[{update_count + 1}] failed to update location")
+
+            current_lat, current_lon = new_lat, new_lon
             time.sleep(interval_seconds)
-    
+
     except KeyboardInterrupt:
-        print(f"\n\nĐã dừng. Tổng số lần cập nhật: {update_count}")
-        print(f"Vị trí cuối cùng: lat={current_lat:.6f}, lon={current_lon:.6f}")
-
-
-# ==================== EXAMPLE USAGE ====================
-
-if __name__ == "__main__":
-    # Khởi tạo Firebase Client
-    firebase = FirebaseClient("https://robot-delivery-cbdcf-default-rtdb.firebaseio.com")
-    
-    # Ví dụ 1: Cập nhật vị trí robot
-    print("=== Cập nhật vị trí robot ===")
-    success = firebase.update_robot_location(lat=20.982903, lon=105.836822)
-    if success:
-        print("✓ Đã cập nhật vị trí robot thành công")
-    else:
-        print("✗ Lỗi khi cập nhật vị trí robot")
-    
-    print()
-    
-    # Ví dụ 2: Lấy vị trí robot hiện tại
-    print("=== Lấy vị trí robot ===")
-    robot = firebase.get_robot_location()
-    if robot:
-        print(f"Robot tại: lat={robot.lat}, lon={robot.lon}")
-    else:
-        print("Không thể lấy vị trí robot")
-    
-    print()
-    
-    # Ví dụ 3: Lấy tất cả đơn hàng
-    print("=== Lấy tất cả đơn hàng ===")
-    orders = firebase.get_all_orders()
-    print(f"Tổng số đơn hàng: {len(orders)}")
-    for order_id, order in orders.items():
-        print(f"  - {order_id}: {order.receiverName} - {order.status} - {order.goods}")
-    
-    print()
-    
-    # Ví dụ 4: Lấy một đơn hàng cụ thể
-    print("=== Lấy đơn hàng cụ thể ===")
-    if orders:
-        first_order_id = list(orders.keys())[0]
-        order = firebase.get_order(first_order_id)
-        if order:
-            print(f"Đơn hàng {order.id}:")
-            print(f"  Người nhận: {order.receiverName}")
-            print(f"  Số điện thoại: {order.phoneNumber}")
-            print(f"  Hàng hóa: {order.goods}")
-            print(f"  Trọng lượng: {order.weight} kg")
-            print(f"  Trạng thái: {order.status}")
-            print(f"  Số điểm lộ trình: {len(order.routePoints)}")
-    
-    print()
-    
-    # Ví dụ 5: Lấy toàn bộ dữ liệu
-    print("=== Lấy toàn bộ dữ liệu ===")
-    db_data = firebase.get_all_data()
-    if db_data:
-        print(f"Robot: lat={db_data.robot.lat}, lon={db_data.robot.lon}")
-        print(f"Số đơn hàng: {len(db_data.orders)}")
-        for order_id, order in db_data.orders.items():
-            print(f"  - {order_id}: {order.receiverName} ({order.status})")
-    
-    print()
-    print("=" * 60)
-    print()
-    
-    # Ví dụ 6: Chạy định kỳ đẩy tọa độ robot lên Firebase (mỗi 10 giây)
-    # Uncomment dòng dưới để chạy chức năng này
-    # run_periodic_location_update(firebase, interval_seconds=10, max_distance_meters=200.0)
-
-    # Ví dụ 7: Lắng nghe đơn hàng theo thời gian thực
-    # def handle_change(orders, payload, event_type):
-    #     print(f"[{event_type}] Có {len(orders)} đơn hàng")
-    # firebase.listen_orders(handle_change)
+        print(f"\n\nStopped. Total updates: {update_count}")
+        print(f"Last location: lat={current_lat:.6f}, lon={current_lon:.6f}")
 
