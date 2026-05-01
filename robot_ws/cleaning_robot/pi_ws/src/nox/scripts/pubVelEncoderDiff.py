@@ -121,12 +121,36 @@ class MecanumRobot:
         self.rpm_to_cm_s=np.zeros(2)
         self.rate = rospy.Rate(self.rate_hz)  # 10 Hz
         rospy.Subscriber("/cmd_vel_timeout", Twist, self.cmdVelCb)  # Change to Twist message
+        
+        # Subscriber PID config: linear.x=KP, linear.y=KI, linear.z=KD
+        rospy.Subscriber("/pid_config", Twist, self.pidConfigCb)
+    
+    def pidConfigCb(self, msg):
+        """Nhan cau hinh PID tu topic.
+        linear.x = KP, linear.y = KI, linear.z = KD
+        """
+        kp = msg.linear.x
+        ki = msg.linear.y
+        kd = msg.linear.z
+        self.send_pid_config(kp, ki, kd)
     def cmdVelCb(self,msg):
         self.getCmdVel=True
         self.vx_run=msg.linear.x*100
         self.w_run=msg.angular.z
         self.calSpeed(self.vx_run,self.w_run)
         self.runRobot()
+    
+    def send_pid_config(self, kp, ki, kd):
+        """Gui cau hinh PID den Arduino.
+        Format: KP:KI#KD;
+        Vi du: 1.5:0.1#0.05;
+        """
+        pid_data = "{:.2f}:{:.2f}#{:.2f};".format(kp, ki, kd)
+        try:
+            self.serial_port.write(pid_data.encode())
+            rospy.loginfo("Sent PID config: KP={}, KI={}, KD={}".format(kp, ki, kd))
+        except Exception as e:
+            rospy.logerr("Error sending PID config: {}".format(e))
         
     # Chuẩn hóa sự cố tràn số của encoder
     def NormalizeOverflow(self,encoder_now,last_encod):
@@ -318,10 +342,10 @@ class MecanumRobot:
                 speed_wheel[i]=max_speed
             elif speed_wheel[i]<-max_speed:
                 speed_wheel[i]=-max_speed
-        serial_data = "{}/{};".format(speed_wheel[self.M_LEFT_UP],speed_wheel[self.M_RIGHT_UP])
+        # Format moi: LEFT/RIGHT; (dung so thuc, don vi Xung/Giay)
+        serial_data = "{:.1f}/{:.1f};".format(self.speed_desired[self.M_LEFT_UP], self.speed_desired[self.M_RIGHT_UP])
         self.moving=True
-        # Gửi dữ liệu xuống serial
-        # print(serial_data)
+        # Gui du lieu xuong serial
         self.serial_port.write(serial_data.encode())
         # print(speed_wheel)
         # self.motorUp.set_rpm(speed_wheel[self.M_RIGHT_UP],speed_wheel[self.M_LEFT_UP])
@@ -350,38 +374,36 @@ class MecanumRobot:
         while not rospy.is_shutdown():
             try:
                 if self.serial_port.in_waiting > 0:
-                    # Đọc một dòng dữ liệu từ STM32
+                    # Nhan format moi tu Arduino: LEFT/RIGHT;
                     data_line = self.serial_port.readline().decode('utf-8').strip()
-                    # Giả sử định dạng dữ liệu từ STM32: "x/y&z*w\r\n"
-                    # parts = data_line.split('/')
-                    parts = data_line.replace(";", "")
-
-                    # Tách lần lượt trái và phải
-                    # Trái: L_up / L_down
-                    # Phải: R_up * R_down
-                    left_right = parts.split("&")
-                    if len(left_right) == 2:
-
-                        left_ = left_right[0].split("/")      # [L_up, L_down]
-                        right_ = left_right[1].split("*")     # [R_up, R_down]
-                        # self.encoder_total[0] = int(parts[0])
-                        # self.encoder_total[1] = int(parts[1])
-                        if len(left_) == 2 and len(right_) == 2:
+                    
+                    # Xoa ky tu ';' o cuoi
+                    data_line = data_line.rstrip(';')
+                    
+                    # Tach LEFT va RIGHT
+                    parts = data_line.split('/')
+                    
+                    if len(parts) == 2:
+                        try:
+                            encoder_left = int(parts[0])
+                            encoder_right = int(parts[1])
                             
-                            self.encoder_total[0] = int(left_[0])     # L_up
-                            self.encoder_total[1] = int(left_[1])     # L_down
-                            self.encoder_total[2] = int(right_[0])    # R_up
-                            self.encoder_total[3] = int(right_[1])    # R_down
+                            # Cap nhat gia tri encoder cho 2 banh
+                            # Vi Arduino chi gui 2 banh, ta gan cho ca up/down
+                            self.encoder_total[self.M_LEFT_UP] = encoder_left
+                            self.encoder_total[self.M_LEFT_DOWN] = encoder_left
+                            self.encoder_total[self.M_RIGHT_UP] = encoder_right
+                            self.encoder_total[self.M_RIGHT_DOWN] = encoder_right
+                            
                             if not first_rec:
-                                for i in range(0,self.NMOTORS):
-                                    self.last_encod[i]=self.encoder_total[i]
-                                    if(self.encoder_total[i]!=0):
-                                        first_rec=1
+                                for i in range(0, self.NMOTORS):
+                                    self.last_encod[i] = self.encoder_total[i]
+                                    if self.encoder_total[i] != 0:
+                                        first_rec = 1
                             else:
-                                
-                        # self.dtheta=float(parts[2])/100.0
                                 self.updatePos()
-                            # rospy.loginfo(f"Encoders: {self.encoder_total}")
+                        except ValueError:
+                            rospy.logwarn(f"Invalid encoder data: {data_line}")
             except Exception as e:
                 rospy.logwarn(f"Error reading serial data: {e}")
             self.rate.sleep()

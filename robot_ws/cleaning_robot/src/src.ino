@@ -1,323 +1,250 @@
-#include "config.h"
-// #include <util/atomic.h>
-// #include "digitalWriteFast.h"
-double m_per_count_l = 0;
-double m_per_count_r = 0;
-double robot_width = 1;
+#include <Arduino.h>
+#include "soc/gpio_struct.h"
 
-// right ~ 85 count/ vong
-// left ~ 720
+// Đưa typedef lên đầu để tránh lỗi biên dịch của Arduino IDE
+typedef void (*CallbackFunction)();
+void callFunctionPeriodically(CallbackFunction functionToCall, unsigned long intervalTime, unsigned long &previousMillis);
 
-volatile int speed_desired[] = {0, 0, 0, 0};
-volatile int encoder_count[NMOTORS];
-long publish_encoder[NMOTORS];
-float last_encoder[NMOTORS];
-unsigned long publish_time = 0;
-volatile int pos[NMOTORS] = {0, 0, 0, 0};
+// ================= CẤU HÌNH CƠ BẢN =================
+#define NMOTORS 2
+#define M_L 0 // Động cơ Trái
+#define M_R 1 // Động cơ Phải
+
+#define LOOP_PUB 50     // Tần số gửi Odom (ms)
+#define ros_serial 1    // Bật giao tiếp ROS qua UART
+
+const float LOOP_FREQUENCY = 100.0; // Tần số vòng lặp PID (100 Hz)
+const float delta_time = 1.0 / LOOP_FREQUENCY; // 0.01s
+const float LOOP_MS = 1000.0 * delta_time; // 10ms
+
+// ================= CẤU HÌNH CHÂN (PINS) =================
+const int enca[NMOTORS] = {27, 5};
+const int encb[NMOTORS] = {26, 15}; 
+const int pwm[NMOTORS]  = {17, 22};  
+const int dir[NMOTORS]  = {18, 23};
+
+// ĐÃ SỬA: Đảo dấu bánh Phải từ -1 thành 1 để cùng tiến lên phía trước
+const int dir_encod[NMOTORS] = {1, 1}; 
+const int dir_motor[NMOTORS] = {1, 1};
+
+// ================= BIẾN TOÀN CỤC =================
+volatile float speed_desired[NMOTORS] = {0.0, 0.0}; // Đơn vị: Xung/10ms
+volatile int encoder_count[NMOTORS]   = {0, 0};
+long publish_encoder[NMOTORS]         = {0, 0};
+float speed_filtered[NMOTORS]         = {0.0, 0.0}; // Lưu giá trị sau lọc
+
+// Trả lại bộ thông số PID gốc của bạn
+float p_gain_default = 15.15; 
+float i_gain_default = 1.05;
+float d_gain_default = 1.0;
+
+// Spinlock bảo vệ ngắt (Tránh Race Condition)
+portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+
+// Macro đọc thanh ghi GPIO siêu tốc (~0.1µs) thay cho digitalRead (~1.5µs)
+#define FAST_READ(pin) ((pin < 32) ? ((GPIO.in >> pin) & 1) : ((GPIO.in1.val >> (pin - 32)) & 1))
+
+// ================= LỚP ĐIỀU KHIỂN PID (Dạng Vận Tốc - Incremental) =================
+class SimplePID {
+private:
+  float kp, kd, ki, umax;
+  float u, last_e_2, last_e;
+public:
+  SimplePID() : kp(1), kd(0), ki(0), umax(255), last_e(0.0), last_e_2(0.0), u(0) {}
+  
+  void reset_all() {
+    last_e_2 = 0;
+    last_e = 0;
+    u = 0;
+  }
+  
+  void setParams(float kpIn, float kiIn, float kdIn, float umaxIn) {
+    kp = kpIn;
+    ki = kiIn;
+    kd = kdIn;
+    umax = umaxIn;
+    reset_all();
+  }
+  
+  float compute(float value, float target) {
+    if (target == 0) {
+      reset_all(); // Cắt PID khi yều cầu dừng hẳn để tránh trôi
+      return 0;
+    }
+    float e = target - value;
+    // Phương trình Incremental PID
+    float delta_u = kp * (e - last_e) + ki * e + kd * (e - 2 * last_e + last_e_2);
+    
+    u += delta_u;
+    
+    // Output Clamp
+    if (u > umax) u = umax;
+    else if (u < -umax) u = -umax;
+    
+    last_e_2 = last_e;
+    last_e = e;
+    return u;
+  }
+};
+
 SimplePID pid[NMOTORS];
-int encod_state[NMOTORS];
-robot_pos robotGlobalPos;
-void control_motor(int motor, int speed)
-{
-  if (motor == M_L_UP)
-    speed = -speed;
+
+// ================= HÀM ĐIỀU KHIỂN PHẦN CỨNG =================
+void control_motor(int motor, int speed) {
+  speed = speed * dir_motor[motor]; 
   bool direct = speed > 0 ? 1 : 0;
   speed = constrain(speed, -255, 255);
 
-  if (speed == 0)
-  {
+  if (speed == 0) {
     analogWrite(pwm[motor], 0);
     digitalWrite(dir[motor], 0);
     return;
   }
-  // digitalWrite(dir[motor],direct);
-  if (direct)
-  {
+  
+  if (direct) {
     analogWrite(pwm[motor], 255 - abs(speed));
     digitalWrite(dir[motor], 1);
-  }
-  else
-  {
+  } else {
     analogWrite(pwm[motor], abs(speed));
     digitalWrite(dir[motor], 0);
   }
 }
-void IRAM_ATTR encoderLeftMotor2()
-{
-  static bool old_a = false;
-  bool newA = digitalRead(enca[M_L_DOWN]);
-  bool newB = digitalRead(encb[M_L_DOWN]);
-  int delta = 0;
-  if (newA && !old_a)
-  {
-    delta = newB > 0 ? dir_encod[M_L_DOWN] : -dir_encod[M_L_DOWN];
-  } // rising
-  else
-  {
-    delta = newB > 0 ? -dir_encod[M_L_DOWN] : dir_encod[M_L_DOWN];
-  }
-  encoder_count[M_L_DOWN] -= delta;
-  old_a = newA;
-}
-void IRAM_ATTR encoderRightMotor2()
-{
-  static bool old_a = false;
-  bool newA = digitalRead(enca[M_R_DOWN]);
-  bool newB = digitalRead(encb[M_R_DOWN]);
-  int delta = 0;
-  if (newA && !old_a)
-  {
-    delta = newB > 0 ? dir_encod[M_R_DOWN] : -dir_encod[M_R_DOWN];
-  } // rising
-  else
-  {
-    delta = newB > 0 ? -dir_encod[M_R_DOWN] : dir_encod[M_R_DOWN];
-  }
-  encoder_count[M_R_DOWN] -= delta;
-  old_a = newA;
-}
-void IRAM_ATTR encoderLeftMotor()
-{
-  static bool old_a = false;
-  bool newA = digitalRead(enca[M_L_UP]);
-  bool newB = digitalRead(encb[M_L_UP]);
-  int delta = 0;
 
-  if (newA && !old_a)
-  {
-    delta = newB > 0 ? dir_encod[M_L_UP] : -dir_encod[M_L_UP];
-  } // rising
-  else
-  {
-    delta = newB > 0 ? -dir_encod[M_L_UP] : dir_encod[M_L_UP];
-  }
-  encoder_count[M_L_UP] -= delta;
-  old_a = newA;
-}
-void IRAM_ATTR encoderRightMotor()
-{
+// ================= NGẮT (INTERRUPTS) ENCODER SIÊU TỐC =================
+void IRAM_ATTR encoderLeftMotor() {
   static bool old_a = false;
-  bool newA = digitalRead(enca[M_R_UP]);
-  bool newB = digitalRead(encb[M_R_UP]);
-  int delta = 0;
-  if (newA && !old_a)
-  {
-    delta = newB > 0 ? dir_encod[M_R_UP] : -dir_encod[M_R_UP];
-  } // rising
-  else
-  {
-    delta = newB > 0 ? -dir_encod[M_R_UP] : dir_encod[M_R_UP];
-  }
-  encoder_count[M_R_UP] -= delta;
+  bool newA = FAST_READ(enca[M_L]);
+  bool newB = FAST_READ(encb[M_L]);
+  
+  int delta = (newA && !old_a) ? (newB ? dir_encod[M_L] : -dir_encod[M_L]) 
+                               : (newB ? -dir_encod[M_L] : dir_encod[M_L]);
+  
+  portENTER_CRITICAL_ISR(&mux);
+  encoder_count[M_L] -= delta;
+  portEXIT_CRITICAL_ISR(&mux);
   old_a = newA;
 }
-// 15/15; --> speed_desired()
-// RESET; = reset odom
-// 0,1,2,3I0,1; --> IO on off
-// 1L2R3W; --> config odom param
-// 10:0.5#0; --> PID CONFIG
-bool receive_uart()
-{
-  if (Serial.available())
-  {
+
+void IRAM_ATTR encoderRightMotor() {
+  static bool old_a = false;
+  bool newA = FAST_READ(enca[M_R]);
+  bool newB = FAST_READ(encb[M_R]);
+  
+  int delta = (newA && !old_a) ? (newB ? dir_encod[M_R] : -dir_encod[M_R]) 
+                               : (newB ? -dir_encod[M_R] : dir_encod[M_R]);
+  
+  portENTER_CRITICAL_ISR(&mux);
+  encoder_count[M_R] -= delta;
+  portEXIT_CRITICAL_ISR(&mux);
+  old_a = newA;
+}
+
+// ================= GIAO TIẾP VÀ XỬ LÝ (UART) =================
+bool receive_uart() {
+  if (Serial.available()) {
     String c = Serial.readStringUntil(';');
     int index_now = c.indexOf("/");
-
     int index_kp_desired = c.indexOf(":");
-    if (index_now != -1)
-    {
-      // int index_now_2 = c.indexOf("*");
-      // speed_linear = c.substring(0, index_now).toFloat();
-      // angular_speed = (c.substring(index_now + 1).toFloat());
-
-      speed_desired[M_L_UP] = c.substring(0, index_now).toInt();
-      speed_desired[M_R_UP] = c.substring(index_now + 1).toInt();
-      speed_desired[M_R_DOWN] = speed_desired[M_R_UP];
-      speed_desired[M_L_DOWN] = speed_desired[M_L_UP];
-      // int left_sp = c.substring(0, index_now).toInt();
-      // int right_sp = c.substring(index_now + 1).toInt();
-      // control_motor(0, left_sp);
-      // control_motor(1, right_sp);
-      // Serial.print("speed:");
-
-      // Serial.print(left_sp);
-      // erial.print(",");
-      // Serial.println(right_sp);
+    
+    // Nhận Vận Tốc: Trái/Phải; (Gửi từ Pi xuống bằng đơn vị Xung/10ms)
+    if (index_now != -1) {
+      portENTER_CRITICAL(&mux); 
+      speed_desired[M_L] = c.substring(0, index_now).toFloat();
+      speed_desired[M_R] = c.substring(index_now + 1).toFloat();
+      portEXIT_CRITICAL(&mux);
       return 1;
-    }
-    else if (index_kp_desired != -1)
-    {
+    } 
+    // Nhận PID: P:I#D;
+    else if (index_kp_desired != -1) {
       int index_cal = c.indexOf("#");
-      if (index_cal != -1)
-      {
+      if (index_cal != -1) {
         float new_kp = c.substring(0, index_kp_desired).toFloat();
         float new_ki = c.substring(index_kp_desired + 1, index_cal).toFloat();
         float new_kd = c.substring(index_cal + 1).toFloat();
 
-        for(int i=0;i<NMOTORS;i++){
-          pid[i].setParams(new_kp,new_ki,new_kd,255);
+        for(int i = 0; i < NMOTORS; i++) {
+          pid[i].setParams(new_kp, new_ki, new_kd, 255);
         }
-
-        Serial.print(pid[M_R_UP].GetKp());
-        Serial.print(" ");
-        Serial.print(pid[M_R_UP].GetKi());
-        Serial.print(" ");
-        Serial.println(pid[M_R_UP].GetKd());
       }
+      return 1;
     }
   }
   return 0;
 }
-void control_speed()
-{
-  int delta_encoder[NMOTORS] = {0, 0, 0, 0};
-  /// lay so xung encoder
 
-  // cli();
-  for (int i = 0; i < NMOTORS; i++)
-  {
+void send_odom() {
+  Serial.print(publish_encoder[M_L]);
+  Serial.print("/");
+  Serial.print(publish_encoder[M_R]);
+  Serial.println(";");
+}
+
+void control_speed() {
+  int delta_encoder[NMOTORS] = {0, 0};
+  float target_speed_local[NMOTORS] = {0.0, 0.0};
+  
+  portENTER_CRITICAL(&mux);
+  for (int i = 0; i < NMOTORS; i++) {
     delta_encoder[i] = encoder_count[i];
     encoder_count[i] = 0;
+    target_speed_local[i] = speed_desired[i];
   }
-  // sei();
-  ////tinh van toc
-  int m_pwm[NMOTORS] = {0, 0, 0, 0};
-  float speed_filter[NMOTORS];
+  portEXIT_CRITICAL(&mux);
 
-  for (int i = 0; i < NMOTORS; i++)
-  {
+  int m_pwm[NMOTORS] = {0, 0};
 
-    publish_encoder[i] += delta_encoder[i]; // cong don encoder de tinh vi tri
-    speed_filter[i] = delta_encoder[i] * 0.23905722 + last_encoder[i] * 0.23905722 + speed_filter[i] * 0.52188555;
-    last_encoder[i] = delta_encoder[i];
-    m_pwm[i] = pid[i].compute(delta_encoder[i], speed_desired[i], delta_time); // speed >0 ->  delta must >0 pid
-  }
-  // m_pwm[LEFT] = -m_pwm[LEFT];
-  // Serial.print(publish_encoder[0]);
-  // Serial.print(",");
-  //   Serial.println(publish_encoder[1]);
-  if (ros_serial)
-  {
-    for (int i = 0; i < NMOTORS; i++)
-    {
+  for (int i = 0; i < NMOTORS; i++) {
+    publish_encoder[i] += delta_encoder[i];
+    
+    // Vận tốc tính trực tiếp bằng số xung/chu kỳ để khớp với lệnh từ Pi
+    float current_speed = (float)delta_encoder[i]; 
+    
+    // Bộ lọc Low-Pass (EMA) giảm nhiễu 
+    speed_filtered[i] = 0.7 * speed_filtered[i] + 0.3 * current_speed;
+
+    // Đưa vào PID
+    m_pwm[i] = pid[i].compute(speed_filtered[i], target_speed_local[i]);
+    
+    if (ros_serial) {
       control_motor(i, m_pwm[i]);
     }
   }
-  else
-  {
-    // delay(200);
-    static bool start_run_motor = 0;
-    if (receive_uart() && start_run_motor == 0)
-    {
-      start_run_motor = 1;
-      for (int i = 0; i < NMOTORS; i++)
-        pid[i].reset_all();
-    }
-    if (start_run_motor == 1)
-    {
-      static uint16_t count_print = 0;
-      count_print += 1;
-      Serial.print(delta_encoder[M_L_UP]);
-      Serial.print(",");
-      Serial.println(delta_encoder[M_R_UP]);
-      for (int i = 0; i < NMOTORS; i++)
-      {
-        control_motor(i, m_pwm[i]);
-      }
-      //  control_motor(LEFT, speed_desired[LEFT]);
-      // control_motor(RIGHT, speed_desired[RIGHT]);
-      if (count_print >= 200)
-      {
-        count_print = 0;
-        speed_desired[0] = 0;
-        speed_desired[1] = 0;
-        speed_desired[2] = 0;
-        speed_desired[3] = 0;
-        start_run_motor = 0;
-        for (int i = 0; i < NMOTORS; i++)
-          control_motor(i, 0);
-        Serial.println("done");
-      }
-    }
+}
+
+// Hàm Scheduler đơn giản
+void callFunctionPeriodically(CallbackFunction functionToCall, unsigned long intervalTime, unsigned long &previousMillis) {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= intervalTime) {
+    functionToCall();
+    previousMillis = currentMillis;
   }
 }
-void send_odom()
-{
 
-  String odom_data = String(publish_encoder[M_L_UP]) + "/" + String(publish_encoder[M_L_DOWN]) + "&" + String(publish_encoder[M_R_UP]) + "*" + String(publish_encoder[M_R_DOWN]) + ";";
-  Serial.println(odom_data);
-  // for(int i=0;i<NMOTORS;i++){
-  //   publish_encoder[i]=0;
-  // }
-}
-void setup()
-{
+// ================= HÀM MAIN =================
+void setup() {
   Serial.begin(57600);
-  for (int k = 0; k < NMOTORS; k++)
-  {
+  
+  for (int k = 0; k < NMOTORS; k++) {
     pinMode(enca[k], INPUT_PULLUP);
     pinMode(encb[k], INPUT_PULLUP);
     pinMode(pwm[k], OUTPUT);
     pinMode(dir[k], OUTPUT);
     pid[k].setParams(p_gain_default, i_gain_default, d_gain_default, 255);
-    // pinMode(dir2[k], OUTPUT);
-  }
-  dir_encod[M_L_UP] = dir_M_L_UP;
-  dir_encod[M_L_DOWN] = dir_M_L_DOWN;
-  dir_encod[M_R_UP] = dir_M_R_UP;
-  dir_encod[M_R_DOWN] = dir_M_R_DOWN;
-  for (int i = 0; i < 2; i++)
-  {
-    control_motor(i, 0);
+    control_motor(k, 0);
   }
 
-
-  attachInterrupt(digitalPinToInterrupt(enca[M_L_UP]), encoderLeftMotor, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(enca[M_R_UP]), encoderRightMotor, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(enca[M_L_DOWN]), encoderLeftMotor2, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(enca[M_R_DOWN]), encoderRightMotor2, CHANGE);
-  publish_time = micros();
+  attachInterrupt(digitalPinToInterrupt(enca[M_L]), encoderLeftMotor, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(enca[M_R]), encoderRightMotor, CHANGE);
 }
-void loop()
-{
+
+void loop() {
   static unsigned long time_loop_pid = millis();
   static unsigned long time_publish = millis();
-  static int last_a_left = 0;
-  static int last_a_right = 0;
-  static int last_b_left = 0;
-  static int last_b_right = 0;
-  int delta_now = 0;
-  // control_motor(0,-5u0);
-  if (ros_serial)
-    receive_uart();
-  // Serial.println("123");
-  // delay(500);
-  // bool encb_l_now = digitalRead(encb[LEFT]);
-  // bool encb_r_now = digitalRead(encb[RIGHT]);
-  // if (PinStateChanged(encb_l_now, &last_a_left, &last_b_left)) {
-  //   bool enca_now=digitalRead(enca[LEFT]);
-  //   if (last_b_left == 0) { // rising
-  //     delta_now = enca_now > 0 ? dir_encod_M0 : -dir_encod_M0;
-  //   } else { // faling
-  //     delta_now = enca_now > 0 ? -dir_encod_M0 : dir_encod_M0;
-  //   }
-  //   encoder_count[LEFT] += delta_now;
-  // }
-  // if (PinStateChanged(encb_r_now, &last_a_right, &last_b_right)) {
-  //    bool enca_now=digitalRead(enca[RIGHT]);
-  //   if (last_b_right == 0) {
-  //     delta_now = enca_now > 0 ? dir_encod_M1 : -dir_encod_M1;
-  //   } else {
-  //     delta_now = enca_now > 0 ? -dir_encod_M1 : dir_encod_M1;
-  //   }
-  //   encoder_count[RIGHT] += delta_now;
-  // }
-  // if (millis() - time_loop_pid >= LOOP_MS) {
-  //   control_speed();
-  //   // Serial.println("123");
 
-  //   time_loop_pid = millis();
-  // }
-  callFunctionPeriodically(control_speed, LOOP_MS, time_loop_pid); // tinh pid van toc va encoder
-  callFunctionPeriodically(send_odom, LOOP_PUB, time_publish);     // gui len pi neu dung ros serial
+  if (ros_serial) {
+    receive_uart();
+  }
+
+  callFunctionPeriodically(control_speed, LOOP_MS, time_loop_pid); // Chạy PID (100Hz)
+  callFunctionPeriodically(send_odom, LOOP_PUB, time_publish);     // Gửi Odometry (20Hz)
 }
