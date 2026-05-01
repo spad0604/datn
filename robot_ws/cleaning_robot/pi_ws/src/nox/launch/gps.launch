@@ -2,15 +2,15 @@
 	<arg name="set_base_frame" default="base_link"/>
   <arg name="set_odom_frame" default="odom"/>
   <arg name="set_map_frame"  default="map"/>
-    <arg name="node_start_delay" default="1.0" />
-     <arg name="port_gps" default="/dev/ttyUSB3" />
+  <arg name="node_start_delay" default="1.0" />
+  <arg name="port_gps" default="/dev/ttyUSB3" />
   <arg name="baud_gps" default="115200" />
   <arg name="frame_id_" default="gps" />
   <arg name="use_GNSS_time" default="False" />
   <arg name="time_ref_source" default="gps" />
   <arg name="useRMC" default="False" />
-    <rosparam command="load" file="$(find nox)/cfg/navsat_param.yaml" />   
-<node pkg="tf" type="static_transform_publisher" name="base_to_gps" args="0.15 0.0 0.25 0.0 0.0 0.0 /base_link /gps 30" />
+  <rosparam command="load" file="$(find nox)/cfg/navsat_param.yaml" />   
+  <node pkg="tf" type="static_transform_publisher" name="base_to_gps" args="0.15 0.0 0.25 0.0 0.0 0.0 /base_link /gps 30" />
       <rosparam command="load" file="$(find nox)/cfg/ekf_params.yaml" />
   
     

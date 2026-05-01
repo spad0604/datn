@@ -212,7 +212,7 @@ class OrderDetailView extends GetView<OrderDetailController> {
             const SizedBox(height: 12),
             _buildInfoRow(Icons.phone, AppTranslationKeys.recipientPhoneLabel.tr, order.recipientPhone),
             const SizedBox(height: 12),
-            _buildInfoRow(Icons.pin, AppTranslationKeys.pinCode.tr, order.pinCode),
+            _buildInfoRow(Icons.pin, AppTranslationKeys.pinCode.tr, _formatPinCode(order.pinCode)),
 
             const SizedBox(height: 32),
             if (controller.isSender &&
@@ -285,6 +285,14 @@ class OrderDetailView extends GetView<OrderDetailController> {
         ),
       ],
     );
+  }
+
+  String _formatPinCode(String rawPin) {
+    final pin = rawPin.trim();
+    if (RegExp(r'^\d+$').hasMatch(pin)) {
+      return pin.padLeft(8, '0');
+    }
+    return pin;
   }
 }
 

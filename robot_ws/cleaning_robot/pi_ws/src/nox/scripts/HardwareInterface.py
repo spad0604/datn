@@ -5,7 +5,6 @@ import serial
 import select
 from enum import Enum
 from std_msgs.msg import String
-import random
 class State(Enum):
     WAITING=1
     DOING =2
@@ -158,13 +157,7 @@ class DualSerialNode:
     def processDoing(self):
         if self.state == State.DOING and self.pending_action != "sent_doing":
             rospy.loginfo("DOING init")
-            if self.ser_ard.is_open:
-                random_code = f"{random.randint(0, 99999999):08d}"
-                command = f"UNLOCK {random_code}\n"
-                self.ser_ard.write(command.encode('utf-8'))
-                print(f"Đã gửi: {command.strip()}")
-            else:
-                rospy.logwarn("arduino not open")
+            rospy.loginfo("Đang chờ pin UNLOCK từ node socket trước khi Arduino trả OK")
             # self.pending_action = "sent_doing"
     def processSucess(self):
         if self.state == State.SUCCESS and self.pending_action != "sent_success":

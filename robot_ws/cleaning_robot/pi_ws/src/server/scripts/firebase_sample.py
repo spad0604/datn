@@ -43,6 +43,7 @@ class Order:
     destinationLat: float = 0.0
     destinationLng: float = 0.0
     goods: str = ""
+    pinCode: str = ""
     phoneNumber: str = ""
     receiverAge: int = 0
     receiverName: str = ""
@@ -304,6 +305,7 @@ class FirebaseClient:
 
         phone = data.get("phoneNumber") or data.get("recipientPhone") or ""
         goods = data.get("goods") or data.get("orderCode") or ""
+        pin_code = data.get("pinCode") or data.get("pin_code") or ""
 
         try:
             dest_lat_val = float(destination_lat) if destination_lat is not None else 0.0
@@ -318,6 +320,7 @@ class FirebaseClient:
             destinationLat=dest_lat_val,
             destinationLng=dest_lng_val,
             goods=str(goods),
+            pinCode=str(pin_code),
             phoneNumber=str(phone),
             receiverAge=int(data.get("receiverAge") or 0),
             receiverName=str(receiver_name),

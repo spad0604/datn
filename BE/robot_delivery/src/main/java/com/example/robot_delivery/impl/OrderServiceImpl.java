@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -339,9 +339,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     private String generatePinCode() {
-        Random random = new Random();
-        int pin = 100000 + random.nextInt(900000);
-        return String.valueOf(pin);
+        int pin = new SecureRandom().nextInt(100_000_000);
+        return String.format("%08d", pin);
     }
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         // Công thức Haversine đơn giản

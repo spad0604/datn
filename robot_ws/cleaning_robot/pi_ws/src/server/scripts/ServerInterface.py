@@ -26,8 +26,8 @@ class OrderListenerStateMachine:
         rospy.init_node('order_listener_sm', anonymous=False)
 
         # BE websocket client (robot_id is fixed to 1 per project requirement)
-        ws_url = rospy.get_param("~ws_url", "ws://127.0.0.1:8080/ws-delivery-native")
-        api_base_url = rospy.get_param("~api_base_url", "http://127.0.0.1:8080/api/v1/robot")
+        ws_url = rospy.get_param("~ws_url", "ws://192.168.31.205:8080/ws-delivery-native")
+        api_base_url = rospy.get_param("~api_base_url", "http://192.168.31.205:8080/api/v1/robot")
         secret_key = rospy.get_param("~secret_key", "DATN_2025_2_GIAP")
         self.firebase = FirebaseClient(
             ws_url=ws_url,
@@ -49,6 +49,8 @@ class OrderListenerStateMachine:
         # Subscriber điều khiển
         rospy.Subscriber("/Status_robot", String, self.start_listening_callback)
         self.waypoint_pub = rospy.Publisher('/waypoints', PoseArray, queue_size=10, latch=True)
+        self.serial_ard_pub = rospy.Publisher('serial_ard_tx', String, queue_size=1)
+        self.last_published_order_id = None
         # Bắt đầu lắng nghe ngay khi khởi động
         self.start_listen_thread()
         self.ref_lat = None
@@ -119,6 +121,23 @@ class OrderListenerStateMachine:
 
         self.waypoint_pub.publish(pose_array)
         rospy.loginfo(f"ĐÃ PUBLISH {len(pose_array.poses)} WAYPOINT trong frame map")
+
+    def publish_unlock_pin(self, order: Order):
+        pin = str(getattr(order, 'pinCode', '') or '').strip()
+        if not pin:
+            rospy.logwarn(f"Đơn {order.id} không có pinCode, bỏ qua gửi UNLOCK")
+            return
+
+        if pin.isdigit():
+            pin = pin.zfill(8)
+
+        if self.last_published_order_id == order.id:
+            return
+
+        command = f"UNLOCK {pin}"
+        self.serial_ard_pub.publish(command)
+        self.last_published_order_id = order.id
+        rospy.loginfo(f"Đã đẩy pin xuống Arduino: {command}")
     def switch_to_waiting(self):
         if self.state == "LISTENING":
             rospy.loginfo("Có đơn hàng mới → Chuyển sang WAITING (dừng lắng nghe)")
@@ -185,6 +204,7 @@ class OrderListenerStateMachine:
         if pending_orders:
             latest = pending_orders[0]  # Lấy đơn mới nhất (hoặc bạn có thể chọn theo ý)
             rospy.logwarn(f"✅ NHẬN ĐƯỢC ĐƠN HÀNG MỚI: {latest.id} - {latest.receiverName}")
+            self.publish_unlock_pin(latest)
 
             route_points = getattr(latest, 'routePoints', None)
             if route_points and len(route_points) > 0:

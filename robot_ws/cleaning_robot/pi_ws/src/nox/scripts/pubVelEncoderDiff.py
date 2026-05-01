@@ -127,6 +127,8 @@ class MecanumRobot:
         self.w_run=msg.angular.z
         self.calSpeed(self.vx_run,self.w_run)
         self.runRobot()
+        
+    # Chuẩn hóa sự cố tràn số của encoder
     def NormalizeOverflow(self,encoder_now,last_encod):
         new_delta=encoder_now-last_encod
         if new_delta>10000: # last_encod = -32760 --> motor quay nguoc encoder_now = 32760 --> quay nguoc -16 xung
@@ -134,41 +136,58 @@ class MecanumRobot:
         elif new_delta<-10000: #last_encod=32760 --> motor quay thuan encoder_now=-32760 --> xung = +16
             new_delta=(32768+encoder_now)+(32768-last_encod)
         return new_delta
+    
+    # Tính toán sự khác biệt của encoder giữa lần đọc hiện tại và lần đọc trước đó
     def CaldiffEncoder(self,motor_left, motor_right):
         delta_encod_l=self.NormalizeOverflow(self.encoder_total[motor_left],self.last_encod[motor_left])
         delta_encod_r=self.NormalizeOverflow(self.encoder_total[motor_right],self.last_encod[motor_right])          
         self.last_encod[motor_left]=self.encoder_total[motor_left]
         self.last_encod[motor_right]=self.encoder_total[motor_right]
         return delta_encod_l,delta_encod_r
+    
+    
     def CylinderCB(self,msg):
         self.xylanh=msg.data
+        
+    # Tính toán vị trí và vận tốc dựa trên encoder
     def updatePos(self):
         encoderTick=[0,0]
         delta_tick=[0,0,0,0]
         delta=[0,0]
+        # Bước 1 - 2: Đọc & normalize encoder counts
         delta_l_u,delta_r_u=self.CaldiffEncoder(self.M_LEFT_UP,self.M_RIGHT_UP)
         delta_l,delta_r=self.CaldiffEncoder(self.M_LEFT_DOWN,self.M_RIGHT_DOWN)
         encoderTick=[delta_l_u,delta_l,delta_r_u,delta_r]
+        
         for i in range(self.NMOTORS):
+            # Bước 3: Chuyển đổi xung encoder thành khoảng cách di chuyển (cm)
             delta_tick[i] =  encoderTick[i] *self.cmPerCount  # 0.14260
         # delta[self.M_LEFT]= (delta_tick[self.M_LEFT_UP]+delta_tick[self.M_LEFT_DOWN])
         # delta[self.M_RIGHT]= (delta_tick[self.M_RIGHT_UP]+delta_tick[self.M_RIGHT_DOWN])
         delta[self.M_LEFT]= delta_tick[self.M_LEFT_DOWN]
         delta[self.M_RIGHT]= delta_tick[self.M_RIGHT_DOWN]
+        
+        # vxy = (delta(Left) + delta(Right))/2.0
         dxy = (delta[self.M_LEFT]+delta[self.M_RIGHT])/2.0
+        
+        # dtheta = (delta(Right) - delta(Left))/total_length (total_length = distance between the two wheels)
         dtheta = ((delta[self.M_LEFT]-delta[self.M_RIGHT]))/self.total_length
+        
         # dtheta=self.dtheta
-   
         dx = math.cos(self.robot_pose[2]+(dtheta/2.0)) * dxy
         dy = math.sin(self.robot_pose[2]+(dtheta/2.0)) * dxy
+        
         self.vx_now=0
         self.vy_now=0
         self.theta_now=0
         current_time = rospy.Time.now()
+        
+        # Tính toán khoảng thời gian giữa lần cập nhật hiện tại và lần cập nhật trước đó
         dt = (current_time - self.last_time_encod).to_sec()
         dxy=dxy/100.0
         dx=dx/100.0
         dy=dy/100.0
+        
         # print(dt)
         #encoder chay lau troi --> 
         #gps sai so tinh 1-2m 
@@ -180,13 +199,17 @@ class MecanumRobot:
             self.vy_now=0
             self.theta_now=dtheta/dt
 
+            # Cập nhật vị trí của robot dựa trên sự khác biệt đã tính toán
             self.robot_pose[0] +=dx 
             self.robot_pose[1] += dy 
             self.robot_pose[2] += dtheta 
+            
+            # Chuẩn hóa góc theta để nằm trong khoảng [-pi, pi]
             if(self.robot_pose[2])>=math.pi:
                 self.robot_pose[2]-=2.0*math.pi
             elif(self.robot_pose[2]<=-math.pi):
                 self.robot_pose[2]+=2.0*math.pi
+                
         # print(f"x:{self.theta_now} ; y:{self.robot_pose[2]}")
             odom = Odometry()
             odom.header.stamp = rospy.Time.now()
@@ -208,6 +231,9 @@ class MecanumRobot:
             odom_twist_yaw=0.35
             if(dtheta==0):
                 odom_twist_yaw=1e-4
+                
+            # Hàng 1: X, Hàng 2: Y, Hàng 3: Z, Hàng 4: Roll, Hàng 5: Pitch, Hàng 6: Yaw
+            # Tin tưởng vào x, y, hoàn toàn không tin tưởng vào z, roll, pitch
             odom.pose.covariance = [
             0.1, 0,    0,    0,    0,    0,
             0,    0.1, 0,    0,    0,    0,
@@ -217,7 +243,6 @@ class MecanumRobot:
             0,    0,    0,    0,    0,   odom_twist_yaw
             ]
             
-          
             odom.twist.covariance = [
             0.05, 0,    0,    0,    0,    0,
             0,    0.05, 0,    0,    0,    0,
