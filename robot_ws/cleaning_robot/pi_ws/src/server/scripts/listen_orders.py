@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Script theo doi danh sach don hang qua BE WebSocket theo thoi gian thuc.
 Chay: python Embedded/listen_orders.py
@@ -5,7 +7,8 @@ Chay: python Embedded/listen_orders.py
 
 from typing import List
 
-from firebase_sample import FirebaseClient, Order
+from ws_client import ServerService, Order
+from config_ws import DEFAULT_WS_URL, DEFAULT_API_BASE_URL, DEFAULT_SECRET, DEFAULT_ROBOT_ID
 
 
 def print_orders(orders: List[Order], payload: dict, event_type: str) -> None:
@@ -25,12 +28,12 @@ def log_error(exc: Exception) -> None:
 
 
 if __name__ == "__main__":
-    firebase = FirebaseClient(
-        ws_url="ws://127.0.0.1:8080/ws-delivery-native",
-        api_base_url="http://127.0.0.1:8080/api/v1/robot",
-        robot_id=1,
+    ws_client = ServerService(
+        ws_url=DEFAULT_WS_URL,
+        api_base_url=DEFAULT_API_BASE_URL,
+        robot_id=DEFAULT_ROBOT_ID,
     )
-    firebase.listen_orders(
+    ws_client.listen_orders(
         on_change=print_orders,
         on_error=log_error,
         retry_delay_seconds=5.0,

@@ -1,0 +1,25 @@
+<launch>
+  <!-- Minimal LiDAR bringup: publish /scan only -->
+  <arg name="port" default="/dev/ttyUSB1"/>
+  <arg name="baud_rate" default="115200"/>
+  <arg name="frame_id" default="laser"/>
+  <arg name="firmware_version" default="2"/>
+
+  <!-- Adjust this if the laser is mounted above the base_link -->
+  <arg name="laser_x" default="0.0"/>
+  <arg name="laser_y" default="0.0"/>
+  <arg name="laser_z" default="0.2"/>
+  <arg name="laser_roll" default="0.0"/>
+  <arg name="laser_pitch" default="0.0"/>
+  <arg name="laser_yaw" default="0.0"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="base_to_laser"
+        args="$(arg laser_x) $(arg laser_y) $(arg laser_z) $(arg laser_roll) $(arg laser_pitch) $(arg laser_yaw) base_link $(arg frame_id) 50"/>
+
+  <node pkg="xv_11_laser_driver" type="neato_laser_publisher" name="xv11_lidar" output="screen">
+    <param name="port" value="$(arg port)"/>
+    <param name="baud_rate" value="$(arg baud_rate)"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
+    <param name="firmware_version" value="$(arg firmware_version)"/>
+  </node>
+</launch>

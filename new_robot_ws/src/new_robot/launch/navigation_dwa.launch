@@ -1,0 +1,20 @@
+<launch>
+  <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS"/>
+
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <param name="base_local_planner" value="$(arg base_local_planner)"/>
+
+    <rosparam file="$(find new_robot)/cfg/move_base_params.yaml" command="load"/>
+
+    <!-- Costmaps -->
+    <rosparam file="$(find new_robot)/cfg/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find new_robot)/cfg/local_costmap_params.yaml" command="load"/>
+
+    <!-- Shared costmap settings must be loaded into each namespace -->
+    <rosparam ns="global_costmap" file="$(find new_robot)/cfg/costmap_common_params.yaml" command="load"/>
+    <rosparam ns="local_costmap" file="$(find new_robot)/cfg/costmap_common_params.yaml" command="load"/>
+
+    <!-- Local planner params -->
+    <rosparam file="$(find new_robot)/cfg/dwa_local_planner_params.yaml" command="load"/>
+  </node>
+</launch>

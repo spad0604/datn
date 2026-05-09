@@ -1,0 +1,19 @@
+<launch>
+  <!-- Robot geometry: length=1m, width=0.2m, LiDAR at front 0.1m from nose -->
+  
+  <!-- TF: LiDAR position relative to base_link (center of robot) -->
+  <!-- LiDAR: 0.4m forward, centered, 0.15m high -->
+  <node pkg="tf" type="static_transform_publisher" name="base_to_laser"
+        args="0.4 0.0 0.15 0.0 0.0 0.0 base_link laser 50"/>
+  
+  <!-- LDS-007 LiDAR reader with Python wrapper (no_checksum enabled) -->
+  <node pkg="new_robot" type="lidar_lds007_node.py" name="lidar_lds007" output="screen">
+    <param name="port" value="/dev/ttyUSB1"/>
+    <param name="baud_rate" value="115200"/>
+    <param name="frame_id" value="laser"/>
+    <param name="no_checksum" value="true"/>
+  </node>
+  
+  <!-- Custom LiDAR processor node -->
+  <node pkg="new_robot" type="lidar_processor.py" name="lidar_processor" output="screen"/>
+</launch>

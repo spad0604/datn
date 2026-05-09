@@ -4,8 +4,10 @@ import com.example.robot_delivery.model.Robot;
 import com.example.robot_delivery.model.enums.RobotStatusEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,6 +15,8 @@ import java.util.List;
 public interface RobotRepository extends JpaRepository<Robot, Long> {
     List<Robot> findByStatus(RobotStatusEnum status);
 
+    @Modifying
+    @Transactional
     @Query("UPDATE Robot r SET r.latitude = :latitude, r.longitude = :longitude WHERE r.id = :robotId")
     void updateRobotLocation(
             @Param("robotId") Long robotId,

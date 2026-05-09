@@ -46,4 +46,10 @@
 
 	 <!-- <include file="/home/gps_robot/robot_ws/cleaning_robot/pi_ws/src/ros-imu-bno055/launch/imu.launch"/> -->
 	<!-- node name="rviz" pkg="rviz" type="rviz" args="-d $(find nox_description)/urdf.rviz" required="true" / -->
+  
+  <!-- Server nodes: order listener, GPS updater, helpers -->
+  <include file="$(find server)/launch/order_listener.launch" />
+  <include file="$(find server)/launch/update_location.launch" />
+  <include file="$(find server)/launch/listen_orders.launch" />
+  <include file="$(find server)/launch/run_periodic_update.launch" />
 </launch>

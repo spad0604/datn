@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="server" type="listen_orders.py" name="listen_orders" output="screen"/>
+</launch>

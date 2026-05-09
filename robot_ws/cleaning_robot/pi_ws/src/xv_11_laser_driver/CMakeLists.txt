@@ -71,19 +71,20 @@ include_directories(include
 
 ## Declare a cpp executable
 # add_executable(xv_11_laser_driver_node src/xv_11_laser_driver_node.cpp)
-# LIDAR DISABLED: keep source code, disable build target.
-# add_executable(neato_laser_publisher 
-# 	src/neato_laser_publisher.cpp
-# 	src/xv11_laser.cpp
-# )
+# Build lidar publisher node
+add_executable(neato_laser_publisher 
+  src/neato_laser_publisher.cpp
+  src/xv11_laser.cpp
+)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(neato_laser_publisher xv_11_laser_driver_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(neato_laser_publisher
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(neato_laser_publisher
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
 
 #############
 ## Install ##

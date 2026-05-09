@@ -1,0 +1,8 @@
+# Python dependencies for new_robot BE client scripts
+requests
+websocket-client
+utm
+
+# Serial + math deps for base robot control
+numpy
+pyserial

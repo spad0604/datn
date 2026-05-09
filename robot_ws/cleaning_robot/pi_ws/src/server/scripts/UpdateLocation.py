@@ -4,7 +4,9 @@
 import rospy
 from sensor_msgs.msg import NavSatFix
 import math
-from firebase_sample import FirebaseClient 
+from ws_client import ServerService
+from config_ws import DEFAULT_WS_URL, DEFAULT_API_BASE_URL, DEFAULT_SECRET, DEFAULT_ROBOT_ID
+
 def calculate_distance(lat1, lon1, lat2, lon2):
     R = 6371000
     phi1 = math.radians(lat1)
@@ -16,19 +18,19 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 
-class SimpleGPSFirebase:
+class GPSLocationUpdater:
     def __init__(self):
-        rospy.init_node('simple_gps_firebase', anonymous=False)
+        rospy.init_node('gps_location_updater', anonymous=False)
 
         # GPS mới nhất
         self.latest_lat = None
         self.latest_lon = None
 
         # BE websocket client (robot_id fixed to 1)
-        ws_url = rospy.get_param("~ws_url", "ws://127.0.0.1:8080/ws-delivery-native")
-        api_base_url = rospy.get_param("~api_base_url", "http://127.0.0.1:8080/api/v1/robot")
-        secret_key = rospy.get_param("~secret_key", "DATN_2025_2_GIAP")
-        self.firebase = FirebaseClient(
+        ws_url = rospy.get_param("~ws_url", DEFAULT_WS_URL)
+        api_base_url = rospy.get_param("~api_base_url", DEFAULT_API_BASE_URL)
+        secret_key = rospy.get_param("~secret_key", DEFAULT_SECRET)
+        self.ws_client = ServerService(
             ws_url=ws_url,
             api_base_url=api_base_url,
             robot_id=1,
@@ -52,18 +54,18 @@ class SimpleGPSFirebase:
         else:
             rospy.logwarn_throttle(60, "GPS chưa có fix hợp lệ")
 
-    def update_firebase_if_needed(self):
+    def update_location_if_needed(self):
         if self.latest_lat is None or self.latest_lon is None:
             return  # Chưa có dữ liệu GPS
 
         # Lay vi tri gan nhat da gui len BE (lam vi tri "cu")
-        robot = self.firebase.get_robot_location()
+        robot = self.ws_client.get_robot_location()
         if robot and robot.lat is not None and robot.lon is not None:
             prev_lat = robot.lat
             prev_lon = robot.lon
         else:
             # Neu chua co vi tri truoc do -> gui ngay lan dau
-            success = self.firebase.update_robot_location(self.latest_lat, self.latest_lon)
+            success = self.ws_client.update_robot_location(self.latest_lat, self.latest_lon)
             if success:
                 rospy.loginfo(f"Lần đầu gửi vị trí: {self.latest_lat:.6f}, {self.latest_lon:.6f}")
             return
@@ -72,7 +74,7 @@ class SimpleGPSFirebase:
         distance = calculate_distance(prev_lat, prev_lon, self.latest_lat, self.latest_lon)
 
         if distance >= self.min_distance:
-            success = self.firebase.update_robot_location(self.latest_lat, self.latest_lon)
+            success = self.ws_client.update_robot_location(self.latest_lat, self.latest_lon)
             if success:
                 rospy.loginfo(f"✓ Cap nhat BE WebSocket: {self.latest_lat:.6f}, {self.latest_lon:.6f} "
                               f"(di chuyển {distance:.1f}m)")
@@ -83,13 +85,13 @@ class SimpleGPSFirebase:
     def run(self):
         rate = rospy.Rate(1.0 / self.interval)  # 10 giây/lần
         while not rospy.is_shutdown():
-            self.update_firebase_if_needed()
+            self.update_location_if_needed()
             rate.sleep()
 
 
 if __name__ == "__main__":
     try:
-        node = SimpleGPSFirebase()
+        node = GPSLocationUpdater()
         node.run()
     except rospy.ROSInterruptException:
         rospy.loginfo("Node dừng.")

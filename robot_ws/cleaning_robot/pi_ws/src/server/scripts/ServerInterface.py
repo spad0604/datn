@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8__ 
+# -*- coding: utf-8 -*-
 
 """
 ROS Node: Theo doi don hang tu BE WebSocket voi State Machine
@@ -18,7 +18,8 @@ import tf.transformations
 import math
 import tf2_ros
 import tf2_geometry_msgs
-from firebase_sample import FirebaseClient, Order
+from ws_client import ServerService, Order
+from config_ws import DEFAULT_WS_URL, DEFAULT_API_BASE_URL, DEFAULT_SECRET, DEFAULT_ROBOT_ID
 
 
 class OrderListenerStateMachine:
@@ -26,10 +27,10 @@ class OrderListenerStateMachine:
         rospy.init_node('order_listener_sm', anonymous=False)
 
         # BE websocket client (robot_id is fixed to 1 per project requirement)
-        ws_url = rospy.get_param("~ws_url", "ws://192.168.31.205:8080/ws-delivery-native")
-        api_base_url = rospy.get_param("~api_base_url", "http://192.168.31.205:8080/api/v1/robot")
-        secret_key = rospy.get_param("~secret_key", "DATN_2025_2_GIAP")
-        self.firebase = FirebaseClient(
+        ws_url = rospy.get_param("~ws_url", DEFAULT_WS_URL)
+        api_base_url = rospy.get_param("~api_base_url", DEFAULT_API_BASE_URL)
+        secret_key = rospy.get_param("~secret_key", DEFAULT_SECRET)
+        self.ws_client = ServerService(
             ws_url=ws_url,
             api_base_url=api_base_url,
             robot_id=1,
@@ -232,7 +233,7 @@ class OrderListenerStateMachine:
             return (not self.is_listening) or rospy.is_shutdown()
 
         rospy.loginfo("Bắt đầu lắng nghe đơn hàng real-time từ BE WebSocket...")
-        self.firebase.listen_orders(
+        self.ws_client.listen_orders(
             on_change=self.handle_order_change,
             on_error=on_error,
             retry_delay_seconds=5.0,

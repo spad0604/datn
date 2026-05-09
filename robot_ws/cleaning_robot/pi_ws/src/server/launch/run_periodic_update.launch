@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="server" type="run_periodic_update.py" name="run_periodic_update" output="screen"/>
+</launch>

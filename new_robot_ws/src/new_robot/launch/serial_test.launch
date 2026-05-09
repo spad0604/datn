@@ -1,0 +1,24 @@
+<launch>
+  <arg name="esp32_baud" default="57600"/>
+  <arg name="arduino_baud" default="9600"/>
+
+  <arg name="wheel_diameter" default="9.5"/>
+  <arg name="encoder_total" default="1798"/>
+
+  <!-- cmd_vel -> cmd_vel_timeout (safety timeout + turn signals) -->
+  <node pkg="new_robot" type="cmd_vel_fake.py" name="cmd_vel_timeout" output="screen"/>
+
+  <!-- ESP32: subscribe /cmd_vel_timeout, publish /odom -->
+  <node pkg="new_robot" type="pubVelEncoderDiff.py" name="esp32_odom" output="screen">
+    <param name="port" value="/dev/esp32"/>
+    <param name="baud" value="$(arg esp32_baud)"/>
+    <param name="wheel_diameter" value="$(arg wheel_diameter)"/>
+    <param name="encoder_total" value="$(arg encoder_total)"/>
+  </node>
+
+  <!-- Arduino Nano bridge/state-machine -->
+  <node pkg="new_robot" type="HardwareInterface.py" name="arduino_interface" output="screen">
+    <param name="port_arduino" value="/dev/arduino"/>
+    <param name="baudrate_ard" value="$(arg arduino_baud)"/>
+  </node>
+</launch>

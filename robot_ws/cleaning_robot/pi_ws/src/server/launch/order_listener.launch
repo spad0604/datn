@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="server" type="ServerInterface.py" name="order_listener_sm" output="screen">
+    <param name="ws_url" value="ws://192.168.31.205:8080/ws-delivery-native"/>
+    <param name="api_base_url" value="http://192.168.31.205:8080/api/v1/robot"/>
+    <param name="secret_key" value="DATN_2025_2_GIAP"/>
+  </node>
+</launch>
