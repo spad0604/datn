@@ -11,14 +11,15 @@ catkin_package()
 
 # Make Python nodes discoverable by rosrun/roslaunch (generated into devel/lib/new_robot)
 catkin_install_python(PROGRAMS
-  src/new_robot/system/cmd_vel_fake.py
-  src/new_robot/system/pubVelEncoderDiff.py
-  src/new_robot/system/HardwareInterface.py
-  src/new_robot/system/ServerInterface.py
-  src/new_robot/system/UpdateLocation.py
-  src/new_robot/system/listen_orders.py
-  src/new_robot/system/lidar/lidar_processor.py
-  src/new_robot/system/lidar/lidar_lds007_node.py
+  src/system/cmd_vel_fake.py
+  src/system/pubVelEncoderDiff.py
+  src/system/HardwareInterface.py
+  src/system/ServerInterface.py
+  src/system/UpdateLocation.py
+  src/system/listen_orders.py
+  src/system/gps_publisher.py
+  src/system/lidar/lidar_processor.py
+  src/system/lidar/lidar_lds007_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

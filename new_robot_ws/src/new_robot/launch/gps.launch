@@ -1,0 +1,14 @@
+<launch>
+  <!-- GPS publisher: read NMEA from SIM7600 ttyUSB3 and publish /fix. -->
+  <arg name="port" default="/dev/ttyUSB3"/>
+  <arg name="baud" default="115200"/>
+  <arg name="frame_id" default="gps"/>
+  <arg name="rate_hz" default="1.0"/>
+
+  <node pkg="new_robot" type="gps_publisher.py" name="gps_publisher" output="screen">
+    <param name="port" value="$(arg port)"/>
+    <param name="baud" value="$(arg baud)"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
+    <param name="rate_hz" value="$(arg rate_hz)"/>
+  </node>
+</launch>

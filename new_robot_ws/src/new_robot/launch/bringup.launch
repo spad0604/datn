@@ -1,6 +1,7 @@
 <launch>
   <arg name="enable_server" default="true"/>
   <arg name="enable_lidar" default="false"/>
+  <arg name="enable_gps" default="true"/>
 
   <arg name="ws_url" default="ws://192.168.31.205:8080/ws-delivery-native"/>
   <arg name="api_base_url" default="http://192.168.31.205:8080/api/v1/robot"/>
@@ -13,10 +14,20 @@
   <arg name="esp32_baud" default="57600"/>
   <arg name="arduino_baud" default="9600"/>
 
+  <arg name="gps_port" default="/dev/ttyUSB3"/>
+  <arg name="gps_baud" default="115200"/>
+
   <include file="$(find new_robot)/launch/serial_test.launch">
     <arg name="esp32_baud" value="$(arg esp32_baud)"/>
     <arg name="arduino_baud" value="$(arg arduino_baud)"/>
   </include>
+
+  <group if="$(arg enable_gps)">
+    <include file="$(find new_robot)/launch/gps.launch">
+      <arg name="port" value="$(arg gps_port)"/>
+      <arg name="baud" value="$(arg gps_baud)"/>
+    </include>
+  </group>
 
   <group if="$(arg enable_server)">
     <include file="$(find new_robot)/launch/server.launch">

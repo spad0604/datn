@@ -11,7 +11,9 @@
  *
  * Serial protocol with Raspberry Pi (9600 baud, '\n' terminated):
  *   Pi -> Arduino:
- *     "UNLOCK <8-digit-pin>"  Set expected PIN, prompt user on LCD
+ *     "UNLOCK <8-digit-pin>"  Arm the PIN. LCD is *not* touched; the PIN
+ *                             entry screen opens only when the user
+ *                             presses a digit on the keypad.
  *     "LCD|<line1>|<line2>"   Push 2x16 text to the idle LCD screen
  *                             (e.g. "LCD|DI LAY DON|#42")
  *                             Fields truncated to 16 chars. Ignored while
@@ -21,6 +23,12 @@
  *   Arduino -> Pi:
  *     "OK"                    Sent after the user enters the correct PIN
  *                             and the compartment has been unlocked.
+ *
+ * Keypad conventions during PIN entry:
+ *   0..9  append digit
+ *   *     backspace
+ *   #     clear all
+ *   D     cancel (back to idle, PIN stays armed for another attempt)
  *
  * Pin map (from schematic MCU_CONTROL_ACCESS):
  *   D2  -> LOCK_DC  (active-LOW optocoupler/relay -> DC lock)
@@ -174,12 +182,23 @@ void resetSession() {
 
 // ---------------- Command handlers ----------------
 void handleUnlockCmd(const String &pin) {
+  // The Pi pushes the PIN as soon as an order is assigned, but we don't
+  // want to take over the LCD yet - the robot still has to drive to the
+  // pickup location. So we only *arm* the PIN here; the PIN-entry UI is
+  // triggered when the user actually presses a digit on the keypad.
   if (pin.length() == 0) return;
-  expectedPin  = pin;
-  enteredPin   = "";
+  expectedPin = pin;
+  enteredPin  = "";
+  // Stay in whatever state we were in (usually IDLE_STATE showing the
+  // "DI LAY DON" banner). Do NOT touch the LCD here.
+}
+
+void enterPinEntry() {
+  // Open the PIN-entry UI. Called when the user presses the first digit
+  // on the keypad while a PIN is armed.
   state        = WAIT_PIN;
+  enteredPin   = "";
   pinStartedAt = millis();
-  beep(BUZZ_SHORT_MS);
   showPinPrompt();
   renderMaskedPin();
 }
@@ -261,6 +280,19 @@ void readSerial() {
 
 // ---------------- Keypad handling ----------------
 void handleKey(char k) {
+  // If we're idle but the Pi has already armed a PIN, open the PIN entry
+  // UI as soon as the user presses the first digit. This lets the LCD
+  // keep showing the order info ("DI LAY DON / Nguyen Giap") while the
+  // robot is driving, and only switches to "Enter PIN:" on first touch.
+  if (state == IDLE_STATE) {
+    if (expectedPin.length() > 0 && k >= '0' && k <= '9') {
+      enterPinEntry();
+      // fall through so the pressed digit is counted as the first input
+    } else {
+      return;
+    }
+  }
+
   if (state != WAIT_PIN) return;
 
   if (k >= '0' && k <= '9') {
@@ -299,8 +331,13 @@ void handleKey(char k) {
     enteredPin = "";
     beep(30);
     renderMaskedPin();
+  } else if (k == 'D') {
+    // cancel: back to idle screen, keep PIN armed for next attempt
+    enteredPin = "";
+    state = IDLE_STATE;
+    showIdleScreen();
   }
-  // A/B/C/D ignored
+  // A/B/C ignored
 }
 
 // ---------------- Periodic housekeeping ----------------
@@ -341,10 +378,13 @@ void tickTimers() {
     }
   }
 
-  // PIN entry timeout
+  // PIN entry timeout - go back to idle (keeping expectedPin so the user
+  // can try again just by pressing a digit).
   if (state == WAIT_PIN && (now - pinStartedAt) > PIN_TIMEOUT_MS) {
     showMessage("PIN timeout", "Cancelled", 1000);
-    resetSession();
+    enteredPin = "";
+    state = IDLE_STATE;
+    showIdleScreen();
   }
 }
 

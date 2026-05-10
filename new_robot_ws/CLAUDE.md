@@ -29,7 +29,7 @@ src/new_robot/
 │   ├── global_costmap_params.yaml
 │   ├── local_costmap_params.yaml
 │   └── move_base_params.yaml
-├── src/new_robot/
+├── src/
 │   ├── system/
 │   │   ├── ServerInterface.py       # Order listener state machine (WS + TF)
 │   │   ├── UpdateLocation.py        # Periodic GPS->BE location updates

@@ -16,7 +16,7 @@ lidar_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, lidar_dir)
 
 try:
-    from lds007_uart_reader import Lds007Stream
+    from new_robot_ws.src.new_robot.src.system.lidar.lds007_uart_reader import Lds007Stream
 except ImportError as e:
     rospy.logerr(f"Failed to import lds007_uart_reader: {e}")
     sys.exit(1)

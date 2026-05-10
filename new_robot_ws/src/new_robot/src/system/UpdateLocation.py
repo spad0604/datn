@@ -5,8 +5,8 @@ import math
 import rospy
 from sensor_msgs.msg import NavSatFix
 
-from new_robot.server.ws_client import ServerService
-from new_robot.server.config_ws import DEFAULT_API_BASE_URL, DEFAULT_SECRET, DEFAULT_WS_URL
+from server.ws_client import ServerService
+from server.config_ws import DEFAULT_API_BASE_URL, DEFAULT_SECRET, DEFAULT_WS_URL
 
 
 def calculate_distance(lat1, lon1, lat2, lon2):

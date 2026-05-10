@@ -7,8 +7,8 @@ Migrate from server/scripts/listen_orders.py.
 
 from typing import List
 
-from new_robot.server.ws_client import Order, ServerService
-from new_robot.server.config_ws import (
+from server.ws_client import Order, ServerService
+from server.config_ws import (
     DEFAULT_API_BASE_URL,
     DEFAULT_ROBOT_ID,
     DEFAULT_SECRET,
