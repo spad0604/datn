@@ -1,19 +1,73 @@
 <launch>
   <!-- Robot geometry: length=1m, width=0.2m, LiDAR at front 0.1m from nose -->
-  
+  <arg name="port" default="/dev/ttyUSB0"/>
+  <arg name="baud_rate" default="115200"/>
+  <arg name="frame_id" default="laser"/>
+  <arg name="send_start_command" default="true"/>
+  <arg name="start_command" default="startlds$"/>
+  <arg name="plot" default="false"/>
+  <arg name="olot" default="$(arg plot)"/>
+  <arg name="enable_dwa_test" default="false"/>
+  <arg name="cmd_topic" default="/cmd_vel"/>
+  <arg name="esp32_baud" default="57600"/>
+  <arg name="arduino_baud" default="9600"/>
+  <arg name="wheel_diameter" default="9.5"/>
+  <arg name="encoder_total" default="1798"/>
+  <arg name="robot_radius" default="0.22"/>
+  <arg name="safety_margin" default="0.08"/>
+  <arg name="self_filter_x_min" default="-0.30"/>
+  <arg name="self_filter_x_max" default="0.52"/>
+  <arg name="self_filter_y_min" default="-0.22"/>
+  <arg name="self_filter_y_max" default="0.22"/>
+  <arg name="cruise_linear_speed" default="0.12"/>
+  <arg name="max_linear_speed" default="0.18"/>
+  <arg name="max_angular_speed" default="1.2"/>
+  <arg name="prediction_time" default="1.5"/>
+  <arg name="sim_dt" default="0.15"/>
+
   <!-- TF: LiDAR position relative to base_link (center of robot) -->
   <!-- LiDAR: 0.4m forward, centered, 0.15m high -->
   <node pkg="tf" type="static_transform_publisher" name="base_to_laser"
         args="0.4 0.0 0.15 0.0 0.0 0.0 base_link laser 50"/>
-  
+
+  <group if="$(arg enable_dwa_test)">
+    <include file="$(find new_robot)/launch/serial_test.launch">
+      <arg name="esp32_baud" value="$(arg esp32_baud)"/>
+      <arg name="arduino_baud" value="$(arg arduino_baud)"/>
+      <arg name="wheel_diameter" value="$(arg wheel_diameter)"/>
+      <arg name="encoder_total" value="$(arg encoder_total)"/>
+    </include>
+  </group>
+
   <!-- LDS-007 LiDAR reader with Python wrapper (no_checksum enabled) -->
   <node pkg="new_robot" type="lidar_lds007_node.py" name="lidar_lds007" output="screen">
-    <param name="port" value="/dev/ttyUSB1"/>
-    <param name="baud_rate" value="115200"/>
-    <param name="frame_id" value="laser"/>
+    <param name="port" value="$(arg port)"/>
+    <param name="baud_rate" value="$(arg baud_rate)"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
     <param name="no_checksum" value="true"/>
+    <param name="send_start_command" value="$(arg send_start_command)"/>
+    <param name="start_command" value="$(arg start_command)"/>
   </node>
-  
-  <!-- Custom LiDAR processor node -->
-  <node pkg="new_robot" type="lidar_processor.py" name="lidar_processor" output="screen"/>
+
+  <!-- Custom LiDAR processor node with optional XY plot and DWA test drive -->
+  <node pkg="new_robot" type="lidar_processor.py" name="lidar_processor" output="screen">
+    <param name="scan_topic" value="/scan"/>
+    <param name="cmd_topic" value="$(arg cmd_topic)"/>
+    <param name="plot" value="$(arg plot)"/>
+    <param name="olot" value="$(arg olot)"/>
+    <param name="enable_dwa_test" value="$(arg enable_dwa_test)"/>
+    <param name="robot_radius" value="$(arg robot_radius)"/>
+    <param name="safety_margin" value="$(arg safety_margin)"/>
+    <param name="self_filter_x_min" value="$(arg self_filter_x_min)"/>
+    <param name="self_filter_x_max" value="$(arg self_filter_x_max)"/>
+    <param name="self_filter_y_min" value="$(arg self_filter_y_min)"/>
+    <param name="self_filter_y_max" value="$(arg self_filter_y_max)"/>
+    <param name="cruise_linear_speed" value="$(arg cruise_linear_speed)"/>
+    <param name="max_linear_speed" value="$(arg max_linear_speed)"/>
+    <param name="max_angular_speed" value="$(arg max_angular_speed)"/>
+    <param name="prediction_time" value="$(arg prediction_time)"/>
+    <param name="sim_dt" value="$(arg sim_dt)"/>
+    <param name="laser_offset_x" value="0.4"/>
+    <param name="laser_offset_y" value="0.0"/>
+  </node>
 </launch>

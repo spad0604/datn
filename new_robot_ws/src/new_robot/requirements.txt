@@ -6,3 +6,4 @@ utm
 # Serial + math deps for base robot control
 numpy
 pyserial
+matplotlib

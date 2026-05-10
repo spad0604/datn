@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls *)",
+      "mcp__ccs-websearch__WebSearch",
+      "Bash(cp 'C:\\\\Users\\\\LENOVO\\\\OneDrive - Hanoi University of Science and Technology\\\\Documents\\\\Arduino\\\\libraries\\\\Keypad\\\\src\\\\Key.h' 'D:\\\\DATN\\\\MCU\\\\Arduino\\\\src\\\\Key.h')",
+      "Bash(cp 'C:\\\\Users\\\\LENOVO\\\\OneDrive - Hanoi University of Science and Technology\\\\Documents\\\\Arduino\\\\libraries\\\\Keypad\\\\src\\\\Key.cpp' 'D:\\\\DATN\\\\MCU\\\\Arduino\\\\src\\\\Key.cpp')",
+      "Bash(cp 'C:\\\\Users\\\\LENOVO\\\\OneDrive - Hanoi University of Science and Technology\\\\Documents\\\\Arduino\\\\libraries\\\\Keypad\\\\src\\\\Keypad.h' 'D:\\\\DATN\\\\MCU\\\\Arduino\\\\src\\\\Keypad.h')",
+      "Bash(cp 'C:\\\\Users\\\\LENOVO\\\\OneDrive - Hanoi University of Science and Technology\\\\Documents\\\\Arduino\\\\libraries\\\\Keypad\\\\src\\\\Keypad.cpp' 'D:\\\\DATN\\\\MCU\\\\Arduino\\\\src\\\\Keypad.cpp')"
+    ]
+  }
+}

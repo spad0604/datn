@@ -31,18 +31,23 @@ class LidarLDS007Node:
         baud = rospy.get_param('~baud_rate', 115200)
         frame_id = rospy.get_param('~frame_id', 'laser')
         no_checksum = rospy.get_param('~no_checksum', True)
+        send_start_command = rospy.get_param('~send_start_command', True)
+        start_command = rospy.get_param('~start_command', 'startlds$')
         
         rospy.loginfo(f"LDS-007 LiDAR node starting...")
         rospy.loginfo(f"  Port: {port}")
         rospy.loginfo(f"  Baud rate: {baud}")
         rospy.loginfo(f"  Frame ID: {frame_id}")
         rospy.loginfo(f"  Checksum validation: {not no_checksum}")
+        rospy.loginfo(f"  Send start command: {send_start_command}")
         
         # Create LDS007 stream reader
         try:
+            start_command_bytes = start_command.encode('ascii') if send_start_command else None
             self.stream = Lds007Stream(
                 port=port,
                 baud=baud,
+                start_command=start_command_bytes,
                 validate_checksum=not no_checksum
             )
         except Exception as e:

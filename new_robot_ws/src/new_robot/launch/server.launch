@@ -1,11 +1,19 @@
 <launch>
-  <arg name="ws_url" default="ws://192.168.31.205:8080/ws-delivery-native"/>
-  <arg name="api_base_url" default="http://192.168.31.205:8080/api/v1/robot"/>
+  <arg name="ws_url" default="ws://192.168.100.153:8080/ws-delivery-native"/>
+  <arg name="api_base_url" default="http://192.168.100.153:8080/api/v1/robot"/>
   <arg name="secret_key" default="DATN_2025_2_GIAP"/>
 
   <arg name="enable_order_listener" default="true"/>
   <arg name="enable_update_location" default="true"/>
   <arg name="enable_listen_orders" default="false"/>
+
+  <!-- Bridge serial_ard_tx / RX to the Arduino Nano over USB serial.
+       Needed for the LCD + UNLOCK commands published by order_listener_sm
+       to actually reach the Arduino. Disable if you're running
+       serial_test.launch / bringup.launch separately (avoids double-open). -->
+  <arg name="enable_arduino_bridge" default="true"/>
+  <arg name="arduino_port" default="/dev/arduino"/>
+  <arg name="arduino_baud" default="9600"/>
 
   <group if="$(arg enable_order_listener)">
     <node pkg="new_robot" type="ServerInterface.py" name="order_listener_sm" output="screen">
@@ -27,5 +35,12 @@
 
   <group if="$(arg enable_listen_orders)">
     <node pkg="new_robot" type="listen_orders.py" name="listen_orders" output="screen"/>
+  </group>
+
+  <group if="$(arg enable_arduino_bridge)">
+    <node pkg="new_robot" type="HardwareInterface.py" name="arduino_interface" output="screen">
+      <param name="port_arduino" value="$(arg arduino_port)"/>
+      <param name="baudrate_ard" value="$(arg arduino_baud)"/>
+    </node>
   </group>
 </launch>

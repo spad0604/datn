@@ -42,16 +42,21 @@ class OrderListenerStateMachine:
         self.tf_buffer = tf2_ros.Buffer(rospy.Duration(60.0))
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
         self.map_to_utm_transform = None
-        self._wait_and_get_static_transform()
 
         rospy.Subscriber("/Status_robot", String, self.start_listening_callback)
         self.waypoint_pub = rospy.Publisher('/waypoints', PoseArray, queue_size=10, latch=True)
         self.serial_ard_pub = rospy.Publisher('serial_ard_tx', String, queue_size=1)
         self.last_published_order_id = None
+        self.last_lcd_key = None  # (order_id, status) -> dedupe LCD sends
 
+        # Start WebSocket listener immediately (don't block on TF)
         self.start_listen_thread()
         self.ref_lat = None
         self.ref_lon = None
+
+        # Wait for TF in background so WebSocket is not blocked
+        self._tf_thread = threading.Thread(target=self._wait_and_get_static_transform, daemon=True)
+        self._tf_thread.start()
 
         rospy.loginfo("Order Listener State Machine khoi dong (LISTENING)")
 
@@ -124,6 +129,59 @@ class OrderListenerStateMachine:
         self.last_published_order_id = order.id
         rospy.loginfo(f"Da day pin xuong Arduino: {command}")
 
+    @staticmethod
+    def _ascii16(text: str) -> str:
+        """Fit a string into 16 LCD columns, stripping non-ASCII."""
+        if text is None:
+            return ""
+        s = str(text)
+        # Strip Vietnamese diacritics to keep the protocol ASCII-only.
+        try:
+            import unicodedata
+            s = unicodedata.normalize("NFKD", s)
+            s = "".join(ch for ch in s if not unicodedata.combining(ch))
+        except Exception:
+            pass
+        # Replace stray pipes (reserved as LCD field separator) and control chars.
+        s = s.replace("|", "/").replace("\r", " ").replace("\n", " ")
+        s = "".join(ch if 32 <= ord(ch) < 127 else "?" for ch in s)
+        return s[:16]
+
+    def publish_lcd_status(self, order: Order):
+        """Push a 2-line status message to the Arduino LCD via serial_ard_tx.
+
+        Line 1: phase (picking up vs delivering).
+        Line 2: short identifier (receiver name, falling back to order id).
+
+        Sent as "LCD|<line1>|<line2>" so the Arduino sketch can parse it
+        without ambiguity.
+        """
+        status = (getattr(order, "status", "") or "").lower()
+
+        if status in ("pending", "picking_up", "waiting_pickup", "assigned"):
+            line1 = "DI LAY DON"
+        elif status in ("delivering", "on_delivery", "in_transit"):
+            line1 = "DI GIAO DON"
+        elif status in ("delivered", "done", "completed"):
+            line1 = "DA GIAO XONG"
+        else:
+            line1 = "DANG XU LY"
+
+        # Prefer receiver name, fall back to order id so the operator always
+        # sees *something* identifiable on the second line.
+        recipient = getattr(order, "receiverName", "") or ""
+        if recipient and recipient.lower() != "unknown":
+            line2 = recipient
+        else:
+            line2 = f"#{order.id}"
+
+        line1 = self._ascii16(line1)
+        line2 = self._ascii16(line2)
+
+        command = f"LCD|{line1}|{line2}"
+        self.serial_ard_pub.publish(command)
+        rospy.loginfo(f"Da day LCD xuong Arduino: {command}")
+
     def switch_to_waiting(self):
         if self.state == "LISTENING":
             rospy.loginfo("Co don hang moi -> WAITING")
@@ -139,11 +197,17 @@ class OrderListenerStateMachine:
     def handle_order_change(self, orders: List[Order], payload: Dict[str, Any], event_type: str):
         pending_orders = [o for o in orders if o.status == "pending"]
         if not pending_orders:
+            # Even without a pending order we may have a status update on an
+            # existing order (delivering / delivered). Update the LCD so the
+            # user sees the current phase.
+            if orders:
+                self._maybe_publish_lcd(orders[0])
             return
 
         latest = pending_orders[0]
         rospy.logwarn(f"Nhan don hang moi: {latest.id}")
         self.publish_unlock_pin(latest)
+        self._maybe_publish_lcd(latest)
 
         route_points = getattr(latest, 'routePoints', None)
         if route_points and len(route_points) > 0:
@@ -154,6 +218,13 @@ class OrderListenerStateMachine:
             rospy.logwarn("Don hang moi nhung khong co routePoints")
 
         self.switch_to_waiting()
+
+    def _maybe_publish_lcd(self, order: Order):
+        key = (order.id, (order.status or "").lower())
+        if key == self.last_lcd_key:
+            return
+        self.last_lcd_key = key
+        self.publish_lcd_status(order)
 
     def _listen_worker(self):
         def on_error(exc: Exception):
