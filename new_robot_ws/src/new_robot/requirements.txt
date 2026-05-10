@@ -7,3 +7,6 @@ utm
 numpy
 pyserial
 matplotlib
+
+# IMU (BNO055) over I2C
+smbus2

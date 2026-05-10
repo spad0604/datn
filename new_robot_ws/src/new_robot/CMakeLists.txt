@@ -18,6 +18,7 @@ catkin_install_python(PROGRAMS
   src/system/UpdateLocation.py
   src/system/listen_orders.py
   src/system/gps_publisher.py
+  src/system/imu_publisher.py
   src/system/lidar/lidar_processor.py
   src/system/lidar/lidar_lds007_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

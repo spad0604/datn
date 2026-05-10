@@ -7,6 +7,11 @@
   <arg name="enable_update_location" default="true"/>
   <arg name="enable_listen_orders" default="false"/>
 
+  <!-- GPS node đi kèm: update_location cần /fix để đẩy vị trí robot lên BE. -->
+  <arg name="enable_gps" default="true"/>
+  <arg name="gps_port" default="/dev/ttyUSB3"/>
+  <arg name="gps_baud" default="115200"/>
+
   <!-- Bridge serial_ard_tx / RX to the Arduino Nano over USB serial.
        Needed for the LCD + UNLOCK commands published by order_listener_sm
        to actually reach the Arduino. Disable if you're running
@@ -14,6 +19,13 @@
   <arg name="enable_arduino_bridge" default="true"/>
   <arg name="arduino_port" default="/dev/arduino"/>
   <arg name="arduino_baud" default="9600"/>
+
+  <group if="$(arg enable_gps)">
+    <include file="$(find new_robot)/launch/gps.launch">
+      <arg name="port" value="$(arg gps_port)"/>
+      <arg name="baud" value="$(arg gps_baud)"/>
+    </include>
+  </group>
 
   <group if="$(arg enable_order_listener)">
     <node pkg="new_robot" type="ServerInterface.py" name="order_listener_sm" output="screen">

@@ -2,6 +2,7 @@
   <arg name="enable_server" default="true"/>
   <arg name="enable_lidar" default="false"/>
   <arg name="enable_gps" default="true"/>
+  <arg name="enable_imu" default="true"/>
 
   <arg name="ws_url" default="ws://192.168.31.205:8080/ws-delivery-native"/>
   <arg name="api_base_url" default="http://192.168.31.205:8080/api/v1/robot"/>
@@ -17,6 +18,10 @@
   <arg name="gps_port" default="/dev/ttyUSB3"/>
   <arg name="gps_baud" default="115200"/>
 
+  <arg name="imu_bus" default="1"/>
+  <arg name="imu_address" default="0x29"/>
+  <arg name="imu_rate_hz" default="100.0"/>
+
   <include file="$(find new_robot)/launch/serial_test.launch">
     <arg name="esp32_baud" value="$(arg esp32_baud)"/>
     <arg name="arduino_baud" value="$(arg arduino_baud)"/>
@@ -29,6 +34,14 @@
     </include>
   </group>
 
+  <group if="$(arg enable_imu)">
+    <include file="$(find new_robot)/launch/imu.launch">
+      <arg name="bus" value="$(arg imu_bus)"/>
+      <arg name="address" value="$(arg imu_address)"/>
+      <arg name="rate_hz" value="$(arg imu_rate_hz)"/>
+    </include>
+  </group>
+
   <group if="$(arg enable_server)">
     <include file="$(find new_robot)/launch/server.launch">
       <arg name="ws_url" value="$(arg ws_url)"/>
@@ -38,6 +51,11 @@
       <arg name="enable_order_listener" value="$(arg enable_order_listener)"/>
       <arg name="enable_update_location" value="$(arg enable_update_location)"/>
       <arg name="enable_listen_orders" value="$(arg enable_listen_orders)"/>
+
+      <!-- GPS already started above from bringup; don't double-launch it. -->
+      <arg name="enable_gps" value="false"/>
+      <!-- Arduino bridge also started via serial_test.launch above. -->
+      <arg name="enable_arduino_bridge" value="false"/>
     </include>
   </group>
 

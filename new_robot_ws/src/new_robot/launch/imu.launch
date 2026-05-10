@@ -1,0 +1,14 @@
+<launch>
+  <!-- BNO055 IMU publisher. Reads I2C directly via smbus2, publishes /imu/data. -->
+  <arg name="bus" default="1"/>
+  <arg name="address" default="0x29"/>
+  <arg name="frame_id" default="imu_link"/>
+  <arg name="rate_hz" default="100.0"/>
+
+  <node pkg="new_robot" type="imu_publisher.py" name="imu_publisher" output="screen">
+    <param name="bus" value="$(arg bus)"/>
+    <param name="address" value="$(arg address)"/>
+    <param name="frame_id" value="$(arg frame_id)"/>
+    <param name="rate_hz" value="$(arg rate_hz)"/>
+  </node>
+</launch>

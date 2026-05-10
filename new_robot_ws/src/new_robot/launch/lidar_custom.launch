@@ -1,6 +1,6 @@
 <launch>
   <!-- Robot geometry: length=1m, width=0.2m, LiDAR at front 0.1m from nose -->
-  <arg name="port" default="/dev/ttyUSB0"/>
+  <arg name="port" default="/dev/lds_007"/>
   <arg name="baud_rate" default="115200"/>
   <arg name="frame_id" default="laser"/>
   <arg name="send_start_command" default="true"/>
@@ -46,7 +46,8 @@
     <param name="frame_id" value="$(arg frame_id)"/>
     <param name="no_checksum" value="true"/>
     <param name="send_start_command" value="$(arg send_start_command)"/>
-    <param name="start_command" value="$(arg start_command)"/>
+    <!-- type=str prevents ROS from auto-coercing "true"/"false" strings to bool. -->
+    <param name="start_command" type="str" value="$(arg start_command)"/>
   </node>
 
   <!-- Custom LiDAR processor node with optional XY plot and DWA test drive -->

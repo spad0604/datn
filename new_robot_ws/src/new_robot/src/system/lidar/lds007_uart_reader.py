@@ -131,28 +131,72 @@ class Lds007Stream:
         start_command: Optional[bytes] = b"startlds$",
         validate_checksum: bool = True,
         read_timeout_s: float = 0.2,
+        boot_wait_s: float = 1.5,
+        start_retry_count: int = 3,
+        start_retry_interval_s: float = 1.0,
     ) -> None:
-        self._ser = serial.Serial(
-            port=port,
-            baudrate=baud,
-            bytesize=serial.EIGHTBITS,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            timeout=read_timeout_s,
-        )
-        self._validate_checksum = validate_checksum
+        # Opening a CP210x toggles DTR/RTS, which on some LDS-007 boards
+        # resets the MCU. Build the Serial object without opening, clear
+        # those lines, then open — so the MCU doesn't reboot under us.
+        self._ser = serial.Serial()
+        self._ser.port = port
+        self._ser.baudrate = baud
+        self._ser.bytesize = serial.EIGHTBITS
+        self._ser.parity = serial.PARITY_NONE
+        self._ser.stopbits = serial.STOPBITS_ONE
+        self._ser.timeout = read_timeout_s
+        try:
+            self._ser.dtr = False
+            self._ser.rts = False
+        except Exception:
+            pass
+        self._ser.open()
 
-        # Some adapters buffer old bytes.
+        self._validate_checksum = validate_checksum
+        self._start_command = start_command
+
         try:
             self._ser.reset_input_buffer()
         except Exception:
             pass
 
         if start_command:
-            # Give the MCU / sensor time to boot.
-            time.sleep(0.2)
-            self._ser.write(start_command)
-            self._ser.flush()
+            # Give the MCU time to finish booting before it will accept the
+            # start command. The LDS-007 ignores bytes sent during boot.
+            time.sleep(boot_wait_s)
+            for attempt in range(max(1, start_retry_count)):
+                try:
+                    self._ser.reset_input_buffer()
+                except Exception:
+                    pass
+                self._ser.write(start_command)
+                self._ser.flush()
+                # Wait briefly and peek at input: if the MCU started
+                # streaming we'll see at least a few bytes appear.
+                deadline = time.time() + start_retry_interval_s
+                saw_data = False
+                while time.time() < deadline:
+                    if self._ser.in_waiting > 0:
+                        saw_data = True
+                        break
+                    time.sleep(0.05)
+                if saw_data:
+                    break
+
+    def send_start_command(self) -> None:
+        """Re-send the configured start command (if any) to the MCU.
+
+        Useful when the node detects no packets are arriving and wants to
+        kick the sensor back into streaming mode.
+        """
+        if not self._start_command:
+            return
+        try:
+            self._ser.reset_input_buffer()
+        except Exception:
+            pass
+        self._ser.write(self._start_command)
+        self._ser.flush()
 
     def close(self) -> None:
         try:
@@ -160,15 +204,21 @@ class Lds007Stream:
         except Exception:
             pass
 
-    def packets(self) -> Iterable[Lds007Packet]:
-        """Yield decoded packets, resyncing on 0xFA."""
+    def packets(self, idle_yield_s: float = 1.0) -> Iterable[Optional[Lds007Packet]]:
+        """Yield decoded packets, resyncing on 0xFA.
+
+        Yields ``None`` every ``idle_yield_s`` seconds when no packet is
+        produced, so a consumer loop can implement a watchdog without blocking
+        indefinitely on serial reads.
+        """
         buf = bytearray()
+        last_yield_ts = time.time()
         while True:
             chunk = self._ser.read(256)
-            if not chunk:
-                continue
-            buf.extend(chunk)
+            if chunk:
+                buf.extend(chunk)
 
+            produced = False
             while True:
                 try:
                     start = buf.index(FRAME_HEADER)
@@ -193,3 +243,9 @@ class Lds007Stream:
                     continue
 
                 yield parsed
+                last_yield_ts = time.time()
+                produced = True
+
+            if not produced and (time.time() - last_yield_ts) >= idle_yield_s:
+                yield None
+                last_yield_ts = time.time()
